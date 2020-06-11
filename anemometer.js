@@ -4,7 +4,7 @@
 // ren@waldura.org, June 2020
 // 
 
-const DEBUG = process.env.DEBUG ? true : false;
+const DEBUG = process.env.DEBUG ? true : false
 
 // The formula, given by the wind sensor manufacturer, is:
 // V = 9P / 4T (V = speed in mph, P = no. of pulses per sample period
