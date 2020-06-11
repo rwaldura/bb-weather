@@ -1,5 +1,5 @@
-const b = require('bonescript');
-const GPIO7 = 'P9_42';
+const b = require('bonescript')
+const GPIO7 = 'P9_42'
 
 b.pinMode(
 	GPIO7, 
@@ -9,7 +9,7 @@ b.pinMode(
 	'fast', 
 	function f(err, x) {
 		if (err) {
-			console.log('pin mode error: ' + err)
+			console.log('pin mode error = ' + err)
 		} else {
 			b.attachInterrupt(
 				GPIO7, 
@@ -17,14 +17,14 @@ b.pinMode(
 				b.CHANGE, 
 				printStatus)
 		}
-	});
+	})
 	
 function printStatus(err, x)
 {
 	if (err) {
 		console.log("handler error: " + err)
 	} else if (x.attached) {
-		console.log("handler attached");
+		console.log("handler attached")
 	} else if (x.value == 1) {
 		console.log("switch is now open!");
 	} else {
