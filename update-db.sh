@@ -1,5 +1,8 @@
 #!/bin/sh
-# Every minute, update aggregates, and insert into db
+#
+# Every minute, compute time-based aggregates, and write them to database.
+# Note we always *overwrite* any existing data. I.e. the input is source of
+# truth.
 #
 
 WEATHER_DB=/var/weather/weather.db
