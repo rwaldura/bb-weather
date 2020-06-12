@@ -14,7 +14,7 @@ June 2020: wind only, speed and direction.
 what | version
 ------------ | -------------
 OS | beaglebone 4.19.94-ti-r43 #1buster SMP PREEMPT Wed Apr 22 06:11:16 UTC 2020 armv7l GNU/Linux
-Distro | Debian GNU/Linux 10.4; BeagleBoard.org Debian Buster IoT Image 2020-04-06
+Distro | Debian GNU/Linux 10.4 ; BeagleBoard.org Debian Buster IoT Image 2020-04-06
 python | Python 2.7.16 ; Python 3.7.3
 gcc | gcc (Debian 8.3.0-6) 8.3.0
 node | 10.19.0
