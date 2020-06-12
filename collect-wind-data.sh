@@ -9,13 +9,11 @@ WIND_DB=/var/log/weather/weather.db
 # where the wind data is continuously stored
 WIND_LOG=/var/log/weather/wind
 
-# program to split wind data log by day
-ROTATE_LOGS=/usr/bin/rotatelogs
-LOG_ROTATION_FREQ=86400
+ROTATION_PERIOD=86400
 
 # tag with timestamp
 exec node $WIND_DATA_SOURCE |
-    $ROTATE_LOGS -e -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $LOG_ROTATION_FREQ |
+    rotatelogs -e -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD |
     	zsh $POP_DB |
 			sqlite3 $WIND_DB
 
