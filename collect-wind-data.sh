@@ -1,22 +1,16 @@
 #!/bin/sh
 
 WIND_DATA_SOURCE=$HOME/bb-weather/anemometer.js
-POP_DB=$HOME/bb-weather/populate-wind-db.zsh
-
-# weather database
-WIND_DB=/var/log/weather/weather.db
 
 # where the wind data is continuously stored
-WIND_LOG=/var/log/weather/wind
+WIND_LOG=/var/weather/log/wind
 
 ROTATION_PERIOD=86400
 
 # tag with timestamp
 exec node $WIND_DATA_SOURCE |
-    rotatelogs -e -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD |
-    	zsh $POP_DB |
-			sqlite3 $WIND_DB
-
+    rotatelogs -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD
+	
 # rotatelogs
 #  -v       Verbose operation. Messages are written to stderr.
 #  -l       Base rotation on local time instead of UTC.
@@ -27,4 +21,3 @@ exec node $WIND_DATA_SOURCE |
 #  -t       Truncate logfile instead of rotating, tail friendly.
 #  -e       Echo log to stdout for further processing.
 #  -c       Create log even if it is empty.
-
