@@ -1,19 +1,20 @@
 #!/bin/sh
 
-# the serial port where wind data is read from
-WIND_DATA_SOURCE=/dev/ttyO1
+WIND_DATA_SOURCE=$HOME/bb-weather/anemometer.js
+
+WIND_DB=$HOME/bb-weather/populate-wind-db.sh
 
 # where the wind data is continuously stored
-WIND_LOG=/var/log/wind
+WIND_LOG=/var/log/weather/wind
 
 # program to split wind data log by day
-ROTATE_LOGS=/usr/sbin/rotatelogs
+ROTATE_LOGS=/usr/bin/rotatelogs
 LOG_ROTATION_FREQ=86400
 
 # tag with timestamp
-perl -ne 'print time() . "\t" . $_' < $WIND_DATA_SOURCE |
-    $ROTATE_LOGS -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $LOG_ROTATION_FREQ
-
+exec node $WIND_DATA_SOURCE |
+    $ROTATE_LOGS -e -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $LOG_ROTATION_FREQ |
+    	$WIND_DB
 
 #  -v       Verbose operation. Messages are written to stderr.
 #  -l       Base rotation on local time instead of UTC.
