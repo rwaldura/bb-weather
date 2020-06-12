@@ -1,8 +1,10 @@
 #!/bin/sh
 
 WIND_DATA_SOURCE=$HOME/bb-weather/anemometer.js
+POP_DB=$HOME/bb-weather/populate-wind-db.zsh
 
-WIND_DB=$HOME/bb-weather/populate-wind-db.sh
+# weather database
+WIND_DB=/var/log/weather/weather.db
 
 # where the wind data is continuously stored
 WIND_LOG=/var/log/weather/wind
@@ -14,8 +16,10 @@ LOG_ROTATION_FREQ=86400
 # tag with timestamp
 exec node $WIND_DATA_SOURCE |
     $ROTATE_LOGS -e -l -f -L $WIND_LOG $WIND_LOG.%Y-%m-%d $LOG_ROTATION_FREQ |
-    	$WIND_DB
+    	zsh $POP_DB |
+			sqlite3 $WIND_DB
 
+# rotatelogs
 #  -v       Verbose operation. Messages are written to stderr.
 #  -l       Base rotation on local time instead of UTC.
 #  -L path  Create hard link from current log to specified path.
