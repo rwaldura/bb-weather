@@ -10,8 +10,8 @@ WIND_LOG=/var/weather/log/wind
 source=${2:-$WIND_LOG}
 
 # a sample is collected every 3 seconds, or 20 per minute
-# look back the last 5 minutes, to make sure we don't miss any
-NUM_SAMPLES=100
+# look back the last 10 minutes, to make sure we don't miss any
+NUM_SAMPLES=222
 
 buffer=/tmp/$(basename $0).$$
 tail -$NUM_SAMPLES $source > $buffer
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS wind_1min  (tstamp INTEGER UNIQUE, direction INTEGER,
 CREATE TABLE IF NOT EXISTS wind_10min (tstamp INTEGER UNIQUE, direction INTEGER, speed INTEGER);
 CREATE TABLE IF NOT EXISTS wind_1hr   (tstamp INTEGER UNIQUE, direction INTEGER, speed INTEGER);
 
-CREATE TEMP TABLE raw_wind_data (tstamp TIMESTAMP, direction INTEGER, speed INTEGER, revs INTEGER);
+CREATE TEMPORARY TABLE raw_wind_data (tstamp INTEGER, direction INTEGER, speed INTEGER, revs INTEGER);
 .mode tabs
 .import $buffer raw_wind_data
 
@@ -39,7 +39,7 @@ INSERT OR REPLACE INTO wind_1min
 -- compute per-10 minute averages
 INSERT OR REPLACE INTO wind_10min 
 	SELECT 
-		60 * 10 * (tstamp / (60 * 10)), -- round to the lowest 10 minutes
+		(10 * 60) * (tstamp / (10 * 60)), -- round to the lowest 10 minutes
 		ROUND(AVG(direction)),
 		AVG(speed)
 	FROM raw_wind_data
@@ -48,4 +48,4 @@ INSERT OR REPLACE INTO wind_10min
 COMMIT;
 _SQL_
 
-# 	ON CONFLICT(tstamp) DO UPDATE SET direction = EXCLUDED.direction, speed = EXCLUDED.speed;
+rm $buffer
