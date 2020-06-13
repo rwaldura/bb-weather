@@ -17,8 +17,8 @@ log=${2:-$WIND_LOG}
 NUM_SAMPLES=222
 n=${3:-$NUM_SAMPLES}
 
-buffer=/tmp/$(basename $0).$$
-tail -$n $log > $buffer
+temp_log=/tmp/$(basename $0).$$
+tail -$n $log > $temp_log
 
 sqlite3 $db <<_SQL_
 CREATE TABLE IF NOT EXISTS wind_1m  (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS wind_1h  (tstamp INTEGER NOT NULL UNIQUE, direction I
 
 CREATE TEMPORARY TABLE wind_log (tstamp INTEGER, direction INTEGER, speed INTEGER, revs INTEGER);
 .mode tabs
-.import $buffer wind_log
+.import $temp_log wind_log
 
 BEGIN;
 
@@ -75,4 +75,4 @@ INSERT OR REPLACE INTO wind_1h
 COMMIT;
 _SQL_
 
-rm $buffer
+rm $temp_log
