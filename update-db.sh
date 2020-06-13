@@ -45,7 +45,8 @@ INSERT OR REPLACE INTO wind_10min
 		(10 * 60) * (tstamp / (10 * 60)), -- round to the lowest 10 minutes
 		ROUND(AVG(direction)),
 		AVG(speed)
-	FROM raw_wind_data
+	FROM wind_1min
+	WHERE tstamp > (SELECT MIN(tstamp) FROM raw_wind_data)
 	GROUP BY 1;
 	
 COMMIT;
