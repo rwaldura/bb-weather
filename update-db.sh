@@ -16,8 +16,9 @@ log=${2:-$WIND_LOG}
 NUM_SAMPLES=222
 n=${3:-$NUM_SAMPLES}
 
-# on Debian, XDG_RUNTIME_DIR is a memory filesystem 
-# use it if possible -- it's much faster
+# Beaglebone storage is flash memory: slow, and prone to blocking.
+# XDG_RUNTIME_DIR is a memory filesystem: use it if possible,
+# it may help prevent I/O issues
 temp_dir=/tmp
 test -d "$XDG_RUNTIME_DIR" && temp_dir=$XDG_RUNTIME_DIR
 temp_log=$temp_dir/$(basename $0).$$
@@ -25,13 +26,13 @@ temp_log=$temp_dir/$(basename $0).$$
 tail -$n $log > $temp_log
 
 sqlite3 $db <<_SQL_
-CREATE TABLE IF NOT EXISTS wind_1m  (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
-CREATE TABLE IF NOT EXISTS wind_3m  (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
-CREATE TABLE IF NOT EXISTS wind_10m (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
-CREATE TABLE IF NOT EXISTS wind_1h  (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
+CREATE TABLE IF NOT EXISTS wind_1m (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
+CREATE TABLE IF NOT EXISTS wind_3m (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
+CREATE TABLE IF NOT EXISTS wind_10m(tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
+CREATE TABLE IF NOT EXISTS wind_1h (tstamp INTEGER NOT NULL UNIQUE, direction INTEGER, speed INTEGER);
 -- CREATE UNIQUE INDEX IF NOT EXISTS tstamp_aggr ON wind(tstamp, aggr);
 
-CREATE TEMPORARY TABLE wind_log (tstamp INTEGER, direction INTEGER, speed INTEGER, revs INTEGER);
+CREATE TEMPORARY TABLE wind_log(tstamp INTEGER, direction INTEGER, speed INTEGER, revs INTEGER);
 .mode tabs
 .import $temp_log wind_log
 
