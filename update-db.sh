@@ -17,7 +17,7 @@ log=${2:-$WIND_LOG}
 NUM_SAMPLES=222
 n=${3:-$NUM_SAMPLES}
 
-temp_log=/tmp/$(basename $0).$$
+temp_log=${XDG_RUNTIME_DIR:-/tmp}/$(basename $0).$$
 tail -$n $log > $temp_log
 
 sqlite3 $db <<_SQL_
