@@ -38,7 +38,7 @@ INSERT OR REPLACE INTO wind_1m
 	SELECT 
 		(1 * 60) * (tstamp / (1 * 60)), -- round to the lowest minute
 		ROUND(AVG(direction)),
-		AVG(speed)
+		ROUND(AVG(speed))
 	FROM wind_log
 	GROUP BY 1;
 
@@ -47,7 +47,7 @@ INSERT OR REPLACE INTO wind_3m
 	SELECT 
 		(3 * 60) * (tstamp / (3 * 60)), -- round to the lowest 3 minutes
 		ROUND(AVG(direction)),
-		AVG(speed)
+		ROUND(AVG(speed))
 	FROM wind_1m
 	WHERE tstamp > (SELECT MIN(tstamp) FROM wind_log)
 	GROUP BY 1;
@@ -57,7 +57,7 @@ INSERT OR REPLACE INTO wind_10m
 	SELECT 
 		(10 * 60) * (tstamp / (10 * 60)), -- round to the lowest 10 minutes
 		ROUND(AVG(direction)),
-		AVG(speed)
+		ROUND(AVG(speed))
 	FROM wind_1m
 	WHERE tstamp > (SELECT MIN(tstamp) FROM wind_log)
 	GROUP BY 1;
@@ -67,7 +67,7 @@ INSERT OR REPLACE INTO wind_1h
 	SELECT 
 		(60 * 60) * (tstamp / (60 * 60)), -- round to the lowest hour
 		ROUND(AVG(direction)),
-		AVG(speed)
+		ROUND(AVG(speed))
 	FROM wind_1m
 	WHERE tstamp > (SELECT MIN(tstamp) FROM wind_log)
 	GROUP BY 1;
