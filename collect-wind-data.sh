@@ -6,11 +6,18 @@ MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
 # where the wind data is continuously stored
 WIND_LOG=/var/weather/log/wind
 
+# temporary database for ongoing wind data
+temp_dir=/tmp
+test -d "$XDG_RUNTIME_DIR" && temp_dir=$XDG_RUNTIME_DIR
+WIND_DB=$temp_dir/wind.db
+
 ROTATION_PERIOD=86400
 
 # tag with timestamp
 exec $WIND_DATA_SOURCE |
-    rotatelogs -D -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD
+    rotatelogs -e -D -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD |
+		$HOME/bb-weather/populate-wind-db.sh |
+			sqlite3 $WIND_DB
 	
 # rotatelogs
 #  -v       Verbose operation. Messages are written to stderr.
