@@ -1,9 +1,9 @@
 #!/bin/sh
 
-WEATHER_DB=/var/weather/weather.db
-db=${1:-$WEATHER_DB}
+limit=${1:-10}
 
-limit=${2:-10}
+WEATHER_DB=/var/weather/weather.db
+db=${2:-$WEATHER_DB}
 
 for period in 1m 3m 10m 1h 
 do
