@@ -1,6 +1,6 @@
 #!/bin/sh
 
-WIND_DATA_SOURCE=$HOME/bb-weather/anemometer.js
+WIND_DATA_SOURCE=${1:-$HOME/bb-weather/anemometer.js}
 MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
 
 # where the wind data is continuously stored
@@ -9,8 +9,8 @@ WIND_LOG=/var/weather/log/wind
 ROTATION_PERIOD=86400
 
 # tag with timestamp
-exec node $WIND_DATA_SOURCE |
-    rotatelogs -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD
+exec $WIND_DATA_SOURCE |
+    rotatelogs -D -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD
 	
 # rotatelogs
 #  -v       Verbose operation. Messages are written to stderr.

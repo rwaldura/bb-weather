@@ -11,8 +11,8 @@
 # environment.
 #
 
-$NEW_LOG="$1"
-$OLD_LOG="$2"
+NEW_LOG="$1"
+OLD_LOG="$2"
 
 if test -f "$OLD_LOG"
 then
