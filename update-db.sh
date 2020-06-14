@@ -8,7 +8,6 @@
 WEATHER_DB=/var/weather/weather.db
 db=${1:-$WEATHER_DB}
 
-# where the wind data is continuously stored
 WIND_LOG=/var/weather/log/wind
 log=${2:-$WIND_LOG}
 
@@ -17,7 +16,12 @@ log=${2:-$WIND_LOG}
 NUM_SAMPLES=222
 n=${3:-$NUM_SAMPLES}
 
-temp_log=${XDG_RUNTIME_DIR:-/tmp}/$(basename $0).$$
+# on Debian, XDG_RUNTIME_DIR is a memory filesystem 
+# use it if possible -- it's much faster
+temp_dir=/tmp
+test -d "$XDG_RUNTIME_DIR" && temp_dir=$XDG_RUNTIME_DIR
+temp_log=$temp_dir/$(basename $0).$$
+
 tail -$n $log > $temp_log
 
 sqlite3 $db <<_SQL_
