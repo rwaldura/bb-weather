@@ -1,7 +1,7 @@
 #!/bin/sh
 
 WIND_DATA_SOURCE=$HOME/bb-weather/anemometer.js
-MANAGE_LOG=$HOME/bb-weather/manage-log.sh
+MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
 
 # where the wind data is continuously stored
 WIND_LOG=/var/weather/log/wind
