@@ -28,23 +28,22 @@ FROM
 WHERE
 	tstamp BETWEEN $start AND $end"
 
-print_json_row()
+json_row()
 {
-	cat <<_JSON_
-		{ "c": [
-			{ "v": "$1", "f": "$2" },
-			{ "v": "$3" },
-			{ "v": "$4" },
-			{ "v": "$5" }
-		] },
-_JSON_
+	echo '
+{ "c": [
+	{ "v": "$1", "f": "$2" },
+	{ "v": "$3" },
+	{ "v": "$4" },
+	{ "v": "$5" }
+] },'
 }
 
 # output rows as JSON objects
 IFS="|"
 json_rows=$( sqlite3 $db "$sql" | while read row
 do
-	print_json_row $row
+	json_row $row
 done )
 
 # output entire document
@@ -74,9 +73,6 @@ Context-type: text/plain
 			"type": "number"
 		}
 	],
-	"rows": [
-$json_rows
-		{}
-	]
+	"rows": [ $json_rows {} ]
 }
 _JSON_
