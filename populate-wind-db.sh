@@ -12,7 +12,7 @@ n=0
 
 while read line
 do
-	n=$( expr \( $n + 1 \) % 3 )
+	n=$(( ($n + 1) % 3 ))
 	if [ $n -eq 0 ]
 	then
 #		echo "COMMIT; BEGIN;"
