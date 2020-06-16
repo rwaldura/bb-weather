@@ -23,7 +23,7 @@ ouput_json_rows()
 	sql="
 		SELECT 
 			tstamp, 
-			strftime('Date(%Y, %m, %d, %H, %M)', tstamp, 'unixepoch', 'localtime'),
+			strftime('Date(%Y,%m,%d,%H,%M)', tstamp, 'unixepoch', 'localtime'),
 			period,
 			direction,
 			CASE
@@ -46,13 +46,13 @@ ouput_json_rows()
 		WHERE
 			tstamp BETWEEN $1 AND $2"
 
-	IFS="|"
+	IFS="|" # SQLite default column separator
 	sqlite3 "$db" "$sql" | while read ts dt per d h v_mph v_kmh v_ms
 	do
 		echo '
 			{ "c": [
 				{ "v": "'$dt'" },
-				{ "v": "'$per'",   "f": "per '$per' minutes" },
+				{ "v": "'$per'" },
 				{ "v": "'$d'",     "f": "'$d' degrees" },
 				{ "v": "'$h'" },
 				{ "v": "'$v_mph'", "f": "'$v_mph' mph" },
@@ -66,8 +66,7 @@ ouput_json_rows()
 # main
 
 # output entire document
-cat <<_JSON_
-Context-type: text/plain
+echo 'Context-type: text/plain
 
 {
 	"cols": [ 
@@ -107,18 +106,18 @@ Context-type: text/plain
 			"type": "number"
 		}
 	],
-	"rows": [ 
-_JSON_
+	"rows": [ '
 
 # parse query string to get time boundaries
 # e.g. "start=12345&end=60899"
 IFS="&="
 read start start end end <<< "$QUERY_STRING"
+
 ouput_json_rows ${start:-0} ${end:-$(date +%s)}
 
 # conclude
-cat <<_JSON_	
+echo '	
 		{} 
 	]
 }
-_JSON_
+'
