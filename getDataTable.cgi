@@ -2,9 +2,13 @@
 #
 # Produce JSON data used to initialize a DataTable.
 # Format defined at
-# https://developers.google.com/chart/interactive/docs/reference#DataTable_toJSON#
-# Takes 2 parameters on the query string: "start" and "end". "End" is
-# optional. Both must be a Unix epoch time value.
+# https://developers.google.com/chart/interactive/docs/reference#DataTable_toJSON
+#
+# This program takes 2 parameters on the query string: "start" and "end". 
+# "End"is optional. Both must be a Unix epoch time value.
+#
+# Mapping of an angle to heading (compass point) copied from:
+# http://cactus.io/hookups/weather/anemometer/davis/hookup-arduino-to-davis-anemometer
 #
 
 readonly MPH_KMH=1.609 # convert miles per hour to kilometers per hour
@@ -22,6 +26,18 @@ ouput_json_rows()
 			strftime('%Y-%m-%d %H:%M', tstamp, 'unixepoch', 'localtime'),
 			period,
 			direction,
+			CASE
+				WHEN direction IS NULL THEN NULL
+			    WHEN direction < 22  THEN 'N'
+			    WHEN direction < 67  THEN 'NE'
+			    WHEN direction < 112 THEN 'E'
+			    WHEN direction < 157 THEN 'SE'
+			    WHEN direction < 212 THEN 'S'
+			    WHEN direction < 247 THEN 'SW'
+			    WHEN direction < 292 THEN 'W'
+			    WHEN direction < 337 THEN 'NW'
+			    ELSE 'N'
+			END AS heading,
 			speed AS speed_mph,
 			CAST(ROUND(speed * $MPH_KMH) AS INTEGER) AS speed_kmh,
 			CAST(ROUND(speed / $MPH_MS ) AS INTEGER) AS speed_ms
@@ -31,16 +47,20 @@ ouput_json_rows()
 			tstamp BETWEEN $1 AND $2"
 
 	IFS="|"
-	sqlite3 "$db" "$sql" | while read ts dt per dir v_mph v_kmh v_ms
+	sqlite3 "$db" "$sql" | while read ts dt per d h v_mph v_kmh v_ms
 	do
+		# @todo grrr I hate forking a new process for every row
+		# but I don't know how to create a string that contains both double quotes
+		# AND variables
 		cat <<-_JSON_
 			{ "c": [
-				{ "v": "$ts", "f": "$dt" },
-				{ "v": "$per", "f": "per $per minutes" },
-				{ "v": "$dir", "f": "$dir degrees" },
+				{ "v": "$ts",    "f": "$dt" },
+				{ "v": "$per",   "f": "per $per minutes" },
+				{ "v": "$d",     "f": "$d degrees" },
+				{ "v": "$h" },
 				{ "v": "$v_mph", "f": "$v_mph mph" },
 				{ "v": "$v_kmh", "f": "$v_kmh km/h" },
-				{ "v": "$v_ms", "f": "$v_ms m/s" }
+				{ "v": "$v_ms",  "f": "$v_ms m/s" }
 			] },
 		_JSON_
 	done
