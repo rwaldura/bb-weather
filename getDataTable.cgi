@@ -23,7 +23,7 @@ ouput_json_rows()
 	sql="
 		SELECT 
 			tstamp, 
-			strftime('%Y-%m-%d %H:%M', tstamp, 'unixepoch', 'localtime'),
+			strftime('Date(%Y, %m, %d, %H, %M)', tstamp, 'unixepoch', 'localtime'),
 			period,
 			direction,
 			CASE
@@ -49,20 +49,16 @@ ouput_json_rows()
 	IFS="|"
 	sqlite3 "$db" "$sql" | while read ts dt per d h v_mph v_kmh v_ms
 	do
-		# @todo grrr I hate forking a new process for every row
-		# but I don't know how to create a string that contains both double quotes
-		# AND variables
-		cat <<-_JSON_
+		echo '
 			{ "c": [
-				{ "v": "$ts",    "f": "$dt" },
-				{ "v": "$per",   "f": "per $per minutes" },
-				{ "v": "$d",     "f": "$d degrees" },
-				{ "v": "$h" },
-				{ "v": "$v_mph", "f": "$v_mph mph" },
-				{ "v": "$v_kmh", "f": "$v_kmh km/h" },
-				{ "v": "$v_ms",  "f": "$v_ms m/s" }
-			] },
-		_JSON_
+				{ "v": "'$dt'" },
+				{ "v": "'$per'",   "f": "per '$per' minutes" },
+				{ "v": "'$d'",     "f": "'$d' degrees" },
+				{ "v": "'$h'" },
+				{ "v": "'$v_mph'", "f": "'$v_mph' mph" },
+				{ "v": "'$v_kmh'", "f": "'$v_kmh' km/h" },
+				{ "v": "'$v_ms'",  "f": "'$v_ms' m/s" }
+			] },'
 	done
 }
 
@@ -78,7 +74,7 @@ Context-type: text/plain
 		{
 			"id": "tstamp",
 			"label": "Timestamp",
-			"type": "number"
+			"type": "date"
 		},
 		{
 			"id": "period",
@@ -89,6 +85,11 @@ Context-type: text/plain
 			"id": "direction",
 			"label": "Wind Direction (degrees)",
 			"type": "number"
+		},		
+		{
+			"id": "heading",
+			"label": "Heading",
+			"type": "string"
 		},		
 		{
 			"id": "speed_mph",
