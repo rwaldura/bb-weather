@@ -16,12 +16,13 @@ const K = 9 / 12
 var P = 0 // count of pulses
 
 // pins used
-const GPIO7 = 'P9_42'
-const AIN0 = 'P9_39'
+const GPIO7 = 'P9_42'	// pulse for wind speed
+const AIN0 = 'P9_39'	// for analog reads 
 
-// our circuit uses a voltage divider to deliver max 1.65V to the ADC (analog reader)
+// our circuit uses a voltage divider to deliver max 3.3 / 2 = 1.65V to the 
+// ADC (analog reader)
 // the analog values, however, describe 100% as 1.8V; so we must remap them, see below
-const MAX_VOLTAGE_PERCENT = 1.65 / 1.8
+const MAX_VOLTAGE_PERCENT = (3.3 / 2) / 1.8
 	
 const b = require('bonescript')
 
@@ -84,7 +85,7 @@ function countRevolutions(err, x)
 function getWindDirection()
 {
 	var value = b.analogRead(AIN0)
-	debug("getWindDirection: analog read = " + value.toFixed(2))
+	debug("getWindDirection: analog read %val = " + value.toFixed(2))
 	
 	// we just read a percentile value; map it to a direction in degrees
 	var dir = b.map(value, 0, MAX_VOLTAGE_PERCENT, 0, 359)
