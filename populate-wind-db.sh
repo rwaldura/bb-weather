@@ -1,25 +1,19 @@
 #!/bin/sh
 
-insert_row()
-{
-	echo "INSERT INTO wind_log(tstamp, direction, speed) VALUES($1, $2, $3);"
-}
-
 echo "CREATE TABLE IF NOT EXISTS wind_log(tstamp TIMESTAMP NOT NULL UNIQUE, direction INTEGER, speed INTEGER);"
 
-#echo "BEGIN;"
+echo "BEGIN;"
 n=0
 
-while read line
+while read tstamp dir speed pulses
 do
-	n=$(( ($n + 1) % 3 ))
+	n=$(( ($n + 1) % 10 ))
 	if [ $n -eq 0 ]
 	then
-#		echo "COMMIT; BEGIN;"
-		:
+		echo "COMMIT; BEGIN;"
 	fi
-	insert_row $line
+	echo "INSERT INTO wind_log(tstamp, direction, speed) VALUES($tstamp, $dir, $speed);"
 done
 
-#echo "COMMIT;"
+echo "COMMIT;"
 

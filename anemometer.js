@@ -29,7 +29,7 @@ const b = require('bonescript')
 // install a timer triggered every 3 seconds
 setInterval(printWindData, T)
 
-// to get the wind speed, use setup an interrupt handler to count current drops on GPIO7
+// to get the wind speed, use an interrupt handler to count current drops on GPIO7
 b.pinMode(
 	GPIO7, 
 	b.INPUT, 
