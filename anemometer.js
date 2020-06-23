@@ -34,7 +34,7 @@ b.pinMode(
 	GPIO7, 
 	b.INPUT, 
 	7, // magic mux mode
-	'pullup', // cups open a switch (current drops) when revolving
+	'pullup', // spinning cups open a switch (current drops) when revolving
 	'fast', 
 	function (err, x) {
 		if (err)
