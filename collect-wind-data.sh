@@ -9,8 +9,7 @@ WIND_LOG=/var/weather/log/wind
 # temporary database for ongoing wind data
 temp_dir=/tmp
 test -d "$XDG_RUNTIME_DIR" && temp_dir=$XDG_RUNTIME_DIR
-#WIND_DB=$temp_dir/wind.db
-WIND_DB=/var/weather/weather.db
+WIND_DB=$temp_dir/wind.db
 
 ROTATION_PERIOD=86400
 
