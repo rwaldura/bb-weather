@@ -19,7 +19,7 @@ var P = 0 // count of pulses
 const GPIO7 = 'P9_42'	// pulse for wind speed
 const AIN0 = 'P9_39'	// for analog reads 
 
-// our circuit uses a voltage divider to deliver max 3.3 / 2 = 1.65V to the 
+// our circuit uses a voltage divider to deliver half of 3.3V (max) to the 
 // ADC (analog reader)
 // the analog values, however, describe 100% as 1.8V; so we must remap them, see below
 const MAX_VOLTAGE_PERCENT = (3.3 / 2) / 1.8
@@ -29,12 +29,12 @@ const b = require('bonescript')
 // install a timer triggered every 3 seconds
 setInterval(printWindData, T)
 
-// setup an interrupt handler that counts revolutions of the cups: this gives us the wind speed
+// to get the wind speed, use setup an interrupt handler to count current drops on GPIO7
 b.pinMode(
 	GPIO7, 
 	b.INPUT, 
 	7, // magic mux mode
-	'pulldown', // reed switch is open by default: use magnet to close it
+	'pullup', // cups open a switch (current drops) when revolving
 	'fast', 
 	function (err, x) {
 		if (err)
