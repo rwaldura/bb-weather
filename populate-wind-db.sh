@@ -7,7 +7,7 @@ n=0
 
 while read tstamp dir speed pulses
 do
-	n=$(( ($n + 1) % 10 ))	 # commit every 10 rows at 3 rows/sec = 30 secs
+	n=$(( ($n + 1) % 10 ))	 # commit every 30 secs (10 rows, s1 row every 3 seconds)
 	if [ $n -eq 0 ]
 	then
 		echo "COMMIT; BEGIN;"

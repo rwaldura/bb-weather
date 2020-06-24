@@ -13,10 +13,8 @@ test -d "$XDG_RUNTIME_DIR" && temp_dir=$XDG_RUNTIME_DIR
 temp_db=$temp_dir/wind.db
 
 sqlite3 $db <<_SQL_
-CREATE TABLE IF NOT EXISTS wind(tstamp INTEGER NOT NULL, period INTEGER NOT NULL, direction INTEGER, speed INTEGER);
+CREATE TABLE IF NOT EXISTS wind(tstamp TIMESTAMP NOT NULL, period INTEGER NOT NULL, direction INTEGER, speed INTEGER);
 CREATE UNIQUE INDEX IF NOT EXISTS wind_tstamp_period ON wind(tstamp, period);
-
-ATTACH DATABASE "$temp_db" AS t;
 
 BEGIN;
 
@@ -28,14 +26,14 @@ INSERT OR REPLACE INTO wind
 		ROUND(AVG(direction)),
 		ROUND(AVG(speed))
 	FROM 
-		t.wind_log
+		wind_log
 	WHERE
-		tstamp >= (SELECT MAX(tstamp) FROM wind WHERE period = 1) - 1 * 2 * 60
+		true
 	GROUP BY 1;
 
 -- only keep last 2 minutes in the log
-DELETE FROM t.wind_log 
-	WHERE tstamp < (SELECT MAX(tstamp) FROM wind WHERE period = 1) - 1 * 2 * 60;
+-- DELETE FROM t.wind_log 
+--	WHERE tstamp < (SELECT MAX(tstamp) FROM wind WHERE period = 1) - 1 * 2 * 60;
 	
 -- compute per-3 minute averages
 INSERT OR REPLACE INTO wind
@@ -48,7 +46,7 @@ INSERT OR REPLACE INTO wind
 		wind
 	WHERE
 		period = 1
-		AND tstamp >= (SELECT MAX(tstamp) FROM wind WHERE period = 3) - 3 * 2 * 60
+		AND true
 	GROUP BY 1;
 	
 COMMIT;
