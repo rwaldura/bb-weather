@@ -1,12 +1,28 @@
 <html>
   <head>
 	<meta charset="UTF-8" />
+	
+	<!-- for testing: load TEST_DATA -->
+    <script type="text/javascript" src="t.json"></script>	
+	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
 // readonly MPH_KMH=1.609 # convert miles per hour to kilometers per hour
 // readonly MPH_MS=2.2352 # convert miles per hour to meters per second
 // CAST(ROUND(speed * $MPH_KMH) AS INTEGER) AS speed_kmh,
 // CAST(ROUND(speed / $MPH_MS ) AS INTEGER) AS speed_ms
+			// CASE
+			// 	WHEN direction IS NULL THEN NULL
+			//     WHEN direction < 22  THEN 'N'
+			//     WHEN direction < 67  THEN 'NE'
+			//     WHEN direction < 112 THEN 'E'
+			//     WHEN direction < 157 THEN 'SE'
+			//     WHEN direction < 212 THEN 'S'
+			//     WHEN direction < 247 THEN 'SW'
+			//     WHEN direction < 292 THEN 'W'
+			//     WHEN direction < 337 THEN 'NW'
+			//     ELSE 'N'
+			// END AS heading,
 		
 		function _getData(f_drawChart) 
 		{
@@ -30,80 +46,7 @@
 		
 		function getData_fixed()
 		{
-			return new google.visualization.DataTable(
-			{
-				"cols": [ 
-					{
-						"id": "period",
-						"label": "Aggregation Period",
-						"type": "number"
-					},
-					{
-						"id": "tstamp",
-						"label": "Timestamp",
-						"type": "date"
-					},
-					{
-						"id": "direction",
-						"label": "Wind Direction (degrees)",
-						"type": "number"
-					},		
-					{
-						"id": "heading",
-						"label": "Heading",
-						"type": "string"
-					},		
-					{
-						"id": "speed_mph",
-						"label": "Wind Speed (mph)",
-						"type": "number"
-					},
-				],
-				"rows": [ 
-						{ "c": [
-							{ "v": "1" },
-							{ "v": new Date(2020,06,23,15,30) },
-							{ "v": "106",     "f": "106 degrees" },
-							{ "v": "E" },
-							{ "v": "9", "f": "9 mph" },
-						] },
-						{ "c": [
-							{ "v": "1" },
-							{ "v": new Date(2020,06,23,15,31) },
-							{ "v": "100",     "f": "100 degrees" },
-							{ "v": "E" },
-							{ "v": "3", "f": "3 mph" },
-						] },
-						{ "c": [
-							{ "v": "3" },
-							{ "v": new Date(2020,06,23,15,30) },
-							{ "v": "103",     "f": "103 degrees" },
-							{ "v": "E" },
-							{ "v": "6", "f": "6 mph" },
-						] },
-						{ "c": [
-							{ "v": "3" },
-							{ "v": new Date(2020,06,23,15,33) },
-							{ "v": "66",     "f": "66 degrees" },
-							{ "v": "N" },
-							{ "v": "66", "f": "66 mph" },
-						] }, // DANGLINGI COMMA
-				]
-			});			
-		}
-		
-		function drawChart(id, data) 
-		{			
-			var options = {
-				chart: {
-					title: 'Over the last 30 minutes, by minute',
-					subtitle: 'Sales, Expenses, and Profit: 2014-2017',
-				},
-				bars: 'vertical' // Required for Material Bar Charts.
-			};
-
-			var chart = new google.charts.Bar(document.getElementById(id));
-			chart.draw(data, google.charts.Bar.convertOptions(options));			
+			return new google.visualization.DataTable(TEST_DATA);			
 		}
 		
 		function debug(data)
@@ -112,42 +55,58 @@
 			t.draw(data, {showRowNumber: true});							
 		}
 		
-	    google.charts.load('current', {'packages':['bar','table']});
+		function chartLastHour(data)
+		{
+			var view = new google.visualization.DataView(data);
+			
+			// display wind speed for the last hour, minute by minute
+			view.setRows(view.getFilteredRows( [
+				{ column: 2, value: 1 }, // WHERE period = 1
+				{ column: 0, minValue: view.getColumnRange(0).max - 60 * 60 } // AND tstamp > 1 hour ago
+			]));
+			view.setColumns([1, 4]); // keep timestamp, wind speed
+			
+			var chart = new google.visualization.AreaChart(document.getElementById('chart_speed_last_hour'));
+			chart.draw(view, {
+				title: 'Over the last hour, by minute',
+			});						
+		}
+		
+	    google.charts.load('current', {'packages':['corechart','table']});
 	    google.charts.setOnLoadCallback(
 			function () {
 				var data = getData_fixed();
-
-				for (var period of [1,3,10,60]) 
-				{
-					console.log("prerio = " + period)
-					var v = new google.visualization.DataView(data);
-					v.setRows(v.getFilteredRows([{column: 0, value: period}]));
-					drawChart(period, 'chart_' + period + 'min', v);
-				}
-		    });
+				chartLastHour(data);
+		    });			
     </script>
   </head>
   <body>
 	<div id="chart_errors"></div>
+	<!-- sized to fit on 720p screen: 1280x720 -->
+	<div id="all_charts">
+		<table>
+			<tr>
+				<td>
+				    <div id="chart_speed_last_hour" style="width: 640; height: 360;"></div>				
+				</td>
+				<td>
+					<div id="chart_3min" style="width: 640; height: 360;"></div>				
+				</td>
+			</tr>
+			<tr>
+				<td>
+				    <div id="chart_10min" style="width: 640; height: 360;"></div>				
+				</td>
+				<td>
+					<div id="chart_60min" style="width: 640; height: 360;"></div>				
+				</td>
+			</tr>
+		</table>
+	</div>
+	<p>Timeperiod ending <span id="current_datim"></span></p>
 	<div id="data_debug"></div>
-	<table>
-		<tr>
-			<td>
-			    <div id="chart_1min" style="width: 512; height: 256;"></div>				
-			</td>
-			<td>
-				<div id="chart_3min" style="width: 512; height: 256;"></div>				
-			</td>
-		</tr>
-		<tr>
-			<td>
-			    <div id="chart_10min" style="width: 512; height: 256;"></div>				
-			</td>
-			<td>
-				<div id="chart_60min" style="width: 512; height: 256;"></div>				
-			</td>
-		</tr>
-	</table>
-	<p>OK</p>
   </body>
+  <script type="text/javascript">
+	document.getElementById('current_datim').textContent = new Date();  	
+  </script>
 </html>

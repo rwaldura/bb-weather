@@ -20,7 +20,7 @@ ouput_json_rows()
 	sql="
 		SELECT 
 			tstamp, 
-			strftime('Date(%Y,%m,%d,%H,%M)', tstamp, 'unixepoch', 'localtime'),
+			strftime('new Date(%Y,%m,%d,%H,%M)', tstamp, 'unixepoch', 'localtime'),
 			period,
 			direction,
 			speed AS speed_mph
@@ -30,14 +30,15 @@ ouput_json_rows()
 			tstamp BETWEEN $1 AND $2"
 
 	IFS="|" # SQLite default column separator
-	sqlite3 "$db" "$sql" | while read ts dt per dir mph
+	sqlite3 "$db" "$sql" | while read ts dt per deg mph
 	do
 		echo '
 			{ "c": [
+				{ "v": "'$ts'" },
+				{ "v": '$dt' },
 				{ "v": "'$per'" },
-				{ "v": "'$dt'" },
-				{ "v": "'$dir'", "f": "'$dir' degrees" },
-				{ "v": "'$mph'", "f": "'$mph' mph" }
+				{ "v": "'$deg'" },
+				{ "v": "'$mph'" }
 			] },'
 	done
 }
@@ -50,24 +51,26 @@ echo 'Context-type: text/plain
 
 {
 	"cols": [ 
-		{
-			"id": "period",
-			"label": "Aggregation Period",
+		{	// column 0
+			"id": "tstamp",
 			"type": "number"
 		},
-		{
-			"id": "tstamp",
-			"label": "Timestamp",
+		{	// column 1
+			"id": "datim",
 			"type": "date"
 		},
-		{
+		{	// column 2
+			"id": "period",
+			"type": "number"
+		},
+		{	// column 3
 			"id": "direction",
 			"label": "Wind Direction (degrees)",
 			"type": "number"
 		},		
-		{
+		{	// column 4
 			"id": "speed_mph",
-			"label": "Wind Speed (mph)",
+			"label": "Wind Speed (miles per hour)",
 			"type": "number"
 		}
 	],
