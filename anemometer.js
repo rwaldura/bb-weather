@@ -8,16 +8,17 @@
 const DEBUG = process.env.DEBUG ? true : false
 
 // The formula, given by the wind sensor manufacturer, is:
-// V = 9P / 4T (V = speed in mph, P = no. of pulses per sample period
+// V = 9P / 4T (V = speed in mph, P = number of pulses per sample period
 // T = sample period in seconds)
-// Here we pick T = 3 hence V = KP with K = 9/12
-const T = 3 * 1000 // sample period in ms
-const K = 9 / 12
+const T = 3
+const K = 9 / (4 * T)
 var P = 0 // count of pulses
 
+const MS = 1000 // milliseconds 
+	
 // pins used
 const GPIO7 = 'P9_42'	// pulse for wind speed
-const AIN0 = 'P9_39'	// for analog reads 
+const AIN0 = 'P9_39'	// analog read of wind direction
 
 // our circuit uses a voltage divider to deliver half of 3.3V (max) to the 
 // ADC (analog reader)
@@ -27,7 +28,7 @@ const MAX_VOLTAGE_PERCENT = (3.3 / 2) / 1.8
 const b = require('bonescript')
 
 // install a timer triggered every 3 seconds
-setInterval(printWindData, T)
+setInterval(printWindData, T * MS)
 
 // to get the wind speed, use an interrupt handler to count current drops on GPIO7
 b.pinMode(
@@ -51,7 +52,7 @@ b.pinMode(
 function printWindData()
 {
 	// timestamp in seconds
-	var ts = Math.floor(Date.now() / 1000)
+	var ts = Math.floor(Date.now() / MS)
 	
 	// sample wind direction
 	var dir = getWindDirection()
