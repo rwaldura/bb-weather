@@ -44,7 +44,7 @@ b.pinMode(
 			b.attachInterrupt(
 				GPIO7, 
 				true, // always call handler upon interrupt event
-				b.CHANGE, 
+				b.FALLING, 
 				countRevolutions)
 	})
 
@@ -74,11 +74,9 @@ function countRevolutions(err, x)
 		debug("countRevolutions: failed " + err)
 	} else if (x.attached) {
 		debug("countRevolutions: interrupt handler attached")
-	} else if (x.value == 1) {
-		debug("countRevolutions: switch is now closed, incrementing revs")
-		P += 1
 	} else {
-		debug("countRevolutions: switch is now open")
+		debug("countRevolutions: value == " + x.value)
+		P += 1
 	}
 }
 
