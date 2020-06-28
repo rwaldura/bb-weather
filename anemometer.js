@@ -61,7 +61,8 @@ function printWindData()
 	var V = Math.round(K * P)
 	
 	// output the lot
-	process.stdout.write(`${ts}\t${dir}\t${V}\t${P}\n`)
+	var data = [ts, dir, V, P]
+	process.stdout.write(data.join("\t") + "\n")
 	
 	P = 0 // reset revolution counter
 }
