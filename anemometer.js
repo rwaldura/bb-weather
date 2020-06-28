@@ -18,7 +18,7 @@ const MS = 1000 // milliseconds
 	
 // pins used
 const GPIO7 = 'P9_42'	// pulse for wind speed
-const AIN0 = 'P9_39'	// analog read of wind direction
+const AIN1 = 'P9_40'	// analog read of wind direction
 
 // our circuit uses a voltage divider to deliver half of 3.3V (max) to the 
 // ADC (analog reader)
@@ -61,7 +61,7 @@ function printWindData()
 	var V = Math.round(K * P)
 	
 	// output the lot
-	process.stdout.write(`${ts}\t${dir}\t${V}${P}\n`)
+	process.stdout.write(`${ts}\t${dir}\t${V}\t${P}\n`)
 	
 	P = 0 // reset revolution counter
 }
@@ -74,7 +74,7 @@ function countRevolutions(err, x)
 	} else if (x.attached) {
 		debug("countRevolutions: interrupt handler attached")
 	} else {
-		debug("countRevolutions: value == " + x.value)
+		debug("countRevolutions: pulse detected!")
 		P += 1
 	}
 }
@@ -82,7 +82,7 @@ function countRevolutions(err, x)
 // ***************************************************************************
 function getWindDirection()
 {
-	var value = b.analogRead(AIN0)
+	var value = b.analogRead(AIN1)
 	debug("getWindDirection: analog read %val = " + value.toFixed(2))
 	
 	// we just read a percentile value; map it to a direction in degrees
