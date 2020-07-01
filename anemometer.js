@@ -7,11 +7,13 @@
 
 const DEBUG = process.env.DEBUG ? true : false
 
-// The formula, given by the wind sensor manufacturer, is:
-// V = 9P / 4T (V = speed in mph, P = number of pulses per sample period
-// T = sample period in seconds)
+// The wind speed formula, given by the sensor manufacturer, is:
+// V = 9P / 4T
+// with:
+// V = speed in mph
+// P = number of pulses per sample period
+// T = sample period in seconds
 const T = 3
-const K = 9 / (4 * T)
 var P = 0 // count of pulses
 
 const MS = 1000 // milliseconds 
@@ -52,16 +54,17 @@ b.pinMode(
 function printWindData()
 {
 	// timestamp in seconds
-	var ts = Math.floor(Date.now() / MS)
+	let ts = Math.floor(Date.now() / MS)
 	
 	// sample wind direction
-	var dir = getWindDirection()
+	let dir = getWindDirection()
 	
-	// calculate wind speed
-	var V = Math.round(K * P)
+	// client will calculate wind speed according to:
+	// const K = 9 / (4 * T)
+	// var V = K * P
 	
 	// output the lot
-	var data = [ts, dir, V, P]
+	var data = [ts, dir, P]
 	process.stdout.write(data.join("\t") + "\n")
 	
 	P = 0 // reset revolution counter
@@ -90,7 +93,7 @@ function getWindDirection()
 	var dir = b.map(value, 0, MAX_VOLTAGE_PERCENT, 0, 359)
 	debug("getWindDirection: dir = " + dir.toFixed(2))
 	
-	return Math.round(dir)
+	return Math.round(dir) % 360
 }
 
 // ***************************************************************************
