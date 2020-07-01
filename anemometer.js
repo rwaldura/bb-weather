@@ -59,7 +59,7 @@ function printWindData()
 	// sample wind direction
 	let dir = getWindDirection()
 	
-	// client will calculate wind speed according to:
+	// client will calculate wind speed in miles per hour according to:
 	// const K = 9 / (4 * T)
 	// var V = K * P
 	

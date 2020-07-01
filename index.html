@@ -52,19 +52,67 @@
 		function debug(data)
 		{
 			var t = new google.visualization.Table(document.getElementById('data_debug'));
-			t.draw(data, {showRowNumber: true});							
+			t.draw(data, {showRowNumber: true});			
+		}
+
+		function floor10min(tstamp)
+		{
+			return Math.floor(tstamp / (10 * 60));
 		}
 		
-		function chartLastHour(data)
+		function chartWindSpeedLastDay(data)
+		{
+			let view = new google.visualization.DataView(data);
+			
+			// display wind speed for the last day, every 10 minutes
+			view.setRows(view.getFilteredRows( [
+				{ column: 2, value: 1 }, // WHERE period = 1
+				{ column: 0, minValue: view.getColumnRange(0).max - 24 * 60 * 60 } ])); // AND tstamp > 1 day ago
+			
+			// quantize into 10-min windows
+			let view1 = google.visualization.data.group(
+				view, 
+				[0, { column: 0,  // keep column 0 as the start of 10-min window
+					modifier: floor10min, 
+					type: 'number' }],
+				[{ column: 1, 
+					aggregation: google.visualization.data.min, 
+					type:'Date' },
+				{ column: 4, 
+					aggregation: google.visualization.data.avg, 
+					type:'number' }]);
+			
+			debug(view1);
+					
+			var chart = new google.visualization.AreaChart(document.getElementById('chart_speed_last_day'));
+			chart.draw(view1, {
+				title: 'Over the last bay, by 10 minutes',
+			});						
+		}
+
+		// compute wind speed in MPH
+		// calculate wind speed in miles per hour according to:
+		// const K = 9 / (4 * T)
+		// var V = K * P		
+		function to_mph(data, rowNum)
+		{
+			var revs = data.getValue(rowNum, 4); // revs is column #4 in this data table
+			return (9 * revs) / (4 * 60);
+		}
+		
+		function chartWindSpeedLastHour(data)
 		{
 			var view = new google.visualization.DataView(data);
 			
 			// display wind speed for the last hour, minute by minute
 			view.setRows(view.getFilteredRows( [
 				{ column: 2, value: 1 }, // WHERE period = 1
-				{ column: 0, minValue: view.getColumnRange(0).max - 60 * 60 } // AND tstamp > 1 hour ago
+				{ column: 0, minValue: view.getColumnRange(0).max 
+					- 1 * 60 * 60 } // AND tstamp > 1 hour ago
 			]));
-			view.setColumns([1, 4]); // keep timestamp, wind speed
+			view.setColumns([1,  // timestamp from table
+				{ id:'speed_mph', calc:to_mph, type:'number', label:"Wind Speed (MPH)" }
+			]);
 			
 			var chart = new google.visualization.AreaChart(document.getElementById('chart_speed_last_hour'));
 			chart.draw(view, {
@@ -76,7 +124,8 @@
 	    google.charts.setOnLoadCallback(
 			function () {
 				var data = getData_fixed();
-				chartLastHour(data);
+				chartWindSpeedLastHour(data);
+				// chartWindSpeedLastDay(data);
 		    });			
     </script>
   </head>
@@ -90,12 +139,12 @@
 				    <div id="chart_speed_last_hour" style="width: 640; height: 360;"></div>				
 				</td>
 				<td>
-					<div id="chart_3min" style="width: 640; height: 360;"></div>				
+					<div id="chart_dir_last_hour" style="width: 640; height: 360;"></div>				
 				</td>
 			</tr>
 			<tr>
 				<td>
-				    <div id="chart_10min" style="width: 640; height: 360;"></div>				
+				    <div id="chart_speed_last_day" style="width: 640; height: 360;"></div>				
 				</td>
 				<td>
 					<div id="chart_60min" style="width: 640; height: 360;"></div>				
