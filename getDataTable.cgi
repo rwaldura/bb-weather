@@ -23,22 +23,22 @@ ouput_json_rows()
 			strftime('new Date(%Y,%m,%d,%H,%M)', tstamp, 'unixepoch', 'localtime'),
 			period,
 			direction,
-			speed AS speed_mph
+			revolutions
 		FROM 
 			wind
 		WHERE
 			tstamp BETWEEN $1 AND $2"
 
 	IFS="|" # SQLite default column separator
-	sqlite3 "$db" "$sql" | while read ts dt per deg mph
+	sqlite3 "$db" "$sql" | while read ts dt per dir rpp
 	do
 		echo '
 			{ "c": [
 				{ "v": "'$ts'" },
 				{ "v": '$dt' },
 				{ "v": "'$per'" },
-				{ "v": "'$deg'" },
-				{ "v": "'$mph'" }
+				{ "v": "'$dir'" },
+				{ "v": "'$rpp'" }
 			] },'
 	done
 }
@@ -69,8 +69,8 @@ echo 'Context-type: text/plain
 			"type": "number"
 		},		
 		{	// column 4
-			"id": "speed_mph",
-			"label": "Wind Speed (miles per hour)",
+			"id": "revs",
+			"label": "Wind Speed (revolutions per period)",
 			"type": "number"
 		}
 	],
