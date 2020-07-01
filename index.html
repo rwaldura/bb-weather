@@ -78,21 +78,21 @@
 				{ column: 2, value: 1 }, // WHERE period = 1 (always)
 				{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
 
-			var revs_column_index = 4; // "revolutions count" column
+			var revs_column_index = 4; // column index for count of revolutions
 
 			if (period > 1 * 60) // further grouping is necessary
 			{
 				// quantize into time windows of "period" seconds
 				var grouped = google.visualization.data.group(
 					view,
-					// group by 10-min timestamp
+					// group by timestamp over the period given
 					[{ column: 0,
 						modifier: function(t) { return period * Math.floor(t / period) }, 
 						type: 'number' }],
 					// aggregate columns: MIN(datim), SUM(revs)
 					[{ column: 1,
 						aggregation: google.visualization.data.min, 
-						type: 'date' },
+						type: 'datetime' },
 					{ column: 4, 
 						aggregation: google.visualization.data.sum, 
 						type: 'number' } ]);
@@ -132,8 +132,8 @@
 			var chart3 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_week'));
 			chart3.draw(
-				groupWindSpeedData(data, 7 * 24 * 60, 3 * 60), {
-					title: 'Over the last week, every half-hour' });
+				groupWindSpeedData(data, 7 * 24 * 60, 1 * 60), {
+					title: 'Over the last week, every hour' });
 		});			
     </script>
   </head>

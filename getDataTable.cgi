@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Produce JSON data used to initialize a DataTable.
+# Produce Javascript data used to initialize a DataTable.
 # Format defined at
 # https://developers.google.com/chart/interactive/docs/reference#DataTable_toJSON
 #
@@ -14,13 +14,19 @@
 readonly WEATHER_DB=/var/weather/weather.db
 db="${1:-$WEATHER_DB}"
 
+### BUG
+### For JSON, must use:
+### "Date(Year, Month, Day, Hours, Minutes, Seconds, Milliseconds)"
+### When using this Date String Representation, months are indexed 
+### starting at zero (January is month 0, December is month 11). 
+
 ##############################################################################
 ouput_json_rows()
 {
 	sql="
 		SELECT 
 			tstamp, 
-			strftime('new Date(%Y,%m,%d,%H,%M)', tstamp, 'unixepoch', 'localtime'),
+			'new Date(' || (1000 * tstamp) || ')',
 			period,
 			direction,
 			revolutions
@@ -34,10 +40,10 @@ ouput_json_rows()
 	do
 		echo '
 			{ "c": [
-				{ "v": "'$ts'" },
+				{ "v": '$ts' },
 				{ "v": '$dt' },
-				{ "v": "'$per'" },
-				{ "v": "'$dir'" },
+				{ "v": '$per' },
+				{ "v": '$dir' },
 				{ "v": '$rpp' }
 			] },'
 	done
@@ -57,7 +63,7 @@ echo 'Context-type: text/plain
 		},
 		{	// column 1
 			"id": "datim",
-			"type": "date"
+			"type": "datetime"
 		},
 		{	// column 2
 			"id": "period",
