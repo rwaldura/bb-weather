@@ -38,7 +38,7 @@ ouput_json_rows()
 				{ "v": '$dt' },
 				{ "v": "'$per'" },
 				{ "v": "'$dir'" },
-				{ "v": "'$rpp'" }
+				{ "v": '$rpp' }
 			] },'
 	done
 }

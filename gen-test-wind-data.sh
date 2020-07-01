@@ -7,6 +7,6 @@ t=$start
 repeat $limit
 do
 	read hour min sec <<< $( date -r $t +"%H %M %S" )
-	echo "$t\t$min\t$sec"
+	echo "$t\t$min\t$min"
 	(( t += 3 ))
 done
