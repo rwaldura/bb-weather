@@ -16,9 +16,9 @@ sqlite3 $db <<_SQL_
 CREATE TABLE IF NOT EXISTS wind(tstamp TIMESTAMP NOT NULL, period INTEGER NOT NULL, direction INTEGER, revolutions INTEGER);
 CREATE UNIQUE INDEX IF NOT EXISTS wind_tstamp_period ON wind(tstamp, period);
 
-ATTACH DATABASE "$temp_db" AS tmp;
+ATTACH DATABASE "$temp_db" AS t;
 
-BEGIN;
+BEGIN TRANSACTION;
 
 -- compute per-minute averages
 INSERT OR REPLACE INTO wind
@@ -28,14 +28,14 @@ INSERT OR REPLACE INTO wind
 		ROUND(AVG(direction)),
 		SUM(revolutions)
 	FROM 
-		tmp.wind_log
-	WHERE
-		true
+		t.wind_log
 	GROUP BY 1;
 
 -- only keep last 2 minutes in the log
--- DELETE FROM t.wind_log 
---	WHERE tstamp < (SELECT MAX(tstamp) FROM wind WHERE period = 1) - 1 * 2 * 60;
+DELETE FROM t.wind_log 
+	WHERE tstamp < (SELECT MAX(tstamp) FROM wind) - 1 * 2 * 60;
 	
 COMMIT;
+
+DETACH DATABASE t;
 _SQL_
