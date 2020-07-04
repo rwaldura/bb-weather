@@ -26,7 +26,7 @@ ouput_json_rows()
 	sql="
 		SELECT 
 			tstamp, 
-			'new Date(' || (1000 * tstamp) || ')',
+			'new Date(' || (tstamp * 1000) || ')',
 			period,
 			direction,
 			revolutions
@@ -47,6 +47,16 @@ ouput_json_rows()
 				{ "v": '$rpp' }
 			] },'
 	done
+}
+
+##############################################################################
+output_datatable()
+{
+	start=$2
+	end=$4
+	now=$( date +%s )
+
+	ouput_json_rows ${start:-0} ${end:-$now}
 }
 
 ##############################################################################
@@ -73,7 +83,7 @@ echo 'Context-type: text/plain
 			"id": "direction",
 			"label": "Wind Direction (degrees)",
 			"type": "number"
-		},		
+		},
 		{	// column 4
 			"id": "revs",
 			"label": "Wind Speed (revolutions per period)",
@@ -85,12 +95,15 @@ echo 'Context-type: text/plain
 # parse query string to get time boundaries
 # e.g. "start=12345&end=60899"
 IFS="&="
-read start start end end <<< "$QUERY_STRING"
-
-ouput_json_rows ${start:-0} ${end:-$(date +%s)}
+# SECURITY BUG ALERT: I'm interpolating unsafe data, off the network
+output_datatable $QUERY_STRING
+# better (but unsupported, alas)
+#read start start end end <<< "$QUERY_STRING"
 
 # conclude
 echo '	
 	]
 }
 '
+
+exit 0

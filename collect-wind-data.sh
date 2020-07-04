@@ -17,6 +17,7 @@ test -w $( dirname $WIND_LOG ) || {
 
 # temporary database for ongoing wind data
 WIND_DB=/run/weather/wind_log.db
+mkdir /run/weather
 test -w $( dirname $WIND_DB ) || {
 	echo "$WIND_DB: parent directory must be writable"
 	exit 1
