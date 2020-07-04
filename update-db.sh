@@ -56,4 +56,4 @@ COMMIT;
 DETACH DATABASE t;
 _SQL_
 
-exit 0
+exit $?
