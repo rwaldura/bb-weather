@@ -3,7 +3,7 @@
 	<meta charset="UTF-8" />
 	
 	<!-- for testing: load TEST_DATA -->
-    <script type="text/javascript" src="t.json"></script>	
+    <script type="text/javascript" src="http://beaglebone.lan:8888/getDataTable.cgi"></script>	
 	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -46,7 +46,7 @@
 		
 		function getData_fixed()
 		{
-			return new google.visualization.DataTable(TEST_DATA);			
+			return new google.visualization.DataTable(DATA_TABLE);			
 		}
 		
 		function debug(data)
@@ -121,27 +121,37 @@
 				document.getElementById('chart_speed_last_hour'));
 			chart1.draw(
 				groupWindSpeedData(data, 1 * 60, 1), {
-					title: 'Over the last hour, every minute' });						
+					title: 'Over the last hour, every minute',
+					legend: 'none' });						
 
 			var chart2 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_day'));
 			chart2.draw(
 				groupWindSpeedData(data, 24 * 60, 10), {
-					title: 'Over the last day, every 10 minutes' });						
+					title: 'Over the last day, every 10 minutes',
+					legend: 'none' });						
 			
 			var chart3 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_week'));
 			chart3.draw(
 				groupWindSpeedData(data, 7 * 24 * 60, 1 * 60), {
-					title: 'Over the last week, every hour' });
+					title: 'Over the last week, every hour',
+					legend: 'none' });											
 		});			
     </script>
+	<style>
+	    body, table, div, td {
+			border: 0;
+	        margin: 0;
+			padding: 0;
+	    }
+	</style>
   </head>
   <body>
 	<div id="chart_errors"></div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
 	<div id="all_charts">
-		<table>
+		<table cellpadding="0" ce>
 			<tr>
 				<td>
 				    <div id="chart_speed_last_hour" style="width: 640; height: 360;"></div>				
@@ -168,10 +178,6 @@
 			</tr>
 		</table>
 	</div>
-	<p>Timeperiod ending <span id="current_datim"></span></p>
 	<div id="data_debug"></div>
   </body>
-  <script type="text/javascript">
-	document.getElementById('current_datim').textContent = new Date();  	
-  </script>
 </html>
