@@ -66,10 +66,19 @@
 			return V
 		}
 
+		function dir2color(dir)
+		{
+			return "#ff0000"
+		}
+		
 		// return styling for the point, to indicate direction
 		function dir2style(data, row, col, period)
 		{
-			return 'point { size: 18; shape-type: star; fill-color: #a52714; }';
+			var dir = data.getValue(row, col)
+			return 'point { size: 6; visible: true; shape-type: triangle;' +
+				' shape-rotation: ' + dir +
+				' ; fill-color: ' + dir2color(dir) +
+				' }';
 		}
 		
 		// data is defined as:
@@ -127,27 +136,28 @@
 					{ column: 4, 
 						aggregation: google.visualization.data.sum, 
 						type: 'number' }]);
-			
-				// debug(grouped);
 					
 				view = new google.visualization.DataView(grouped);
 				revs_col_idx = 2;
 				dir_col_idx = 3;
 			}
-			
+
 			view.setColumns([
 				1,  // timestamp, as a Date object
 				{ id: 'speed_mph', 
 					type: 'number', 
 					calc: function(d, row) { return to_mph(d, row, revs_col_idx, period) }, 
 					label: "Wind Speed (MPH)" },
-				{ role: 'style', 
+				{ id: 'point_style', 
 					type: 'string',
 					calc: function(d, row) { return dir2style(d, row, dir_col_idx, period) }}]);
 			
-			debug(view)
-					
-			return view;			
+			var styledView = new google.visualization.DataView(view);
+			styledView.setColumns([
+				0, 1, 
+				{ sourceColumn: 2, role: 'style' }]);
+								
+			return styledView;			
 		}
 
 	    google.charts.load('current', {'packages':['corechart','table']});
@@ -162,21 +172,21 @@
 					legend: 'none',
 					vAxis: { minValue: 0 }});
 
-			// var chart2 = new google.visualization.AreaChart(
-	// 			document.getElementById('chart_speed_last_day'));
-	// 		chart2.draw(
-	// 			groupWindData(data, 24 * 60, 10), {
-	// 				title: 'Over the last day, every 10 minutes',
-	// 				legend: 'none',
-	// 				vAxis: { minValue: 0 }});
-	//
-	// 		var chart3 = new google.visualization.AreaChart(
-	// 			document.getElementById('chart_speed_last_week'));
-	// 		chart3.draw(
-	// 			groupWindData(data, 7 * 24 * 60, 1 * 60), {
-	// 				title: 'Over the last week, every hour',
-	// 				legend: 'none',
-	// 				vAxis: { minValue: 0 }});
+			var chart2 = new google.visualization.AreaChart(
+				document.getElementById('chart_speed_last_day'));
+			chart2.draw(
+				groupWindData(data, 24 * 60, 20), {
+					title: 'Over the last day, every 20 minutes',
+					legend: 'none',
+					vAxis: { minValue: 0 }});
+
+			var chart3 = new google.visualization.AreaChart(
+				document.getElementById('chart_speed_last_week'));
+			chart3.draw(
+				groupWindData(data, 7 * 24 * 60, 1 * 60), {
+					title: 'Over the last week, every hour',
+					legend: 'none',
+					vAxis: { minValue: 0 }});
 		});			
     </script>
 	<style>
