@@ -63,8 +63,9 @@ output_datatable()
 # main
 
 # output entire document
-echo 'Context-type: text/plain
+echo 'Context-type: text/javascript
 
+DATA_TABLE =
 {
 	"cols": [ 
 		{	// column 0
