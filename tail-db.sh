@@ -2,7 +2,7 @@
 
 limit=${1:-10}
 
-WEATHER_DB=/var/weather/weather.db
+readonly WEATHER_DB=/var/weather/weather.db
 db=${2:-$WEATHER_DB}
 
 for period in 1 3 10 60

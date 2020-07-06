@@ -4,7 +4,7 @@
 # the aggregator update-db.sh. This database may get therefore quite busy.
 # If a lock is encountered when trying to write, keep on re-trying for ~1 sec.
 # See https://www.sqlite.org/c3ref/busy_timeout.html
-BUSY_TIMEOUT=1111
+readonly BUSY_TIMEOUT=1111
 
 echo "CREATE TABLE IF NOT EXISTS wind_log(tstamp TIMESTAMP NOT NULL UNIQUE, direction INTEGER, revolutions INTEGER);"
 

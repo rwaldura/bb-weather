@@ -1,29 +1,29 @@
 #!/bin/sh
 
-WIND_DATA_SOURCE=${1:-$HOME/bb-weather/anemometer.js}
+readonly WIND_DATA_SOURCE=${1:-$HOME/bb-weather/anemometer.js}
 test -x $WIND_DATA_SOURCE || {
 	echo "$WIND_DATA_SOURCE: must be executable"
 	exit 1
 }
 
-MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
+readonly MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
 
 # where the wind data is continuously stored
-WIND_LOG=/var/weather/log/wind
+readonly WIND_LOG=/var/weather/log/wind
 test -w $( dirname $WIND_LOG ) || {
         echo "$WIND_LOG: parent directory must be writable"
         exit 1
 }
 
 # temporary database for ongoing wind data
-WIND_DB=/run/weather/wind_log.db
+readonly WIND_DB=/run/weather/wind_log.db
 mkdir /run/weather
 test -w $( dirname $WIND_DB ) || {
 	echo "$WIND_DB: parent directory must be writable"
 	exit 1
 }
 
-ROTATION_PERIOD=86400
+readonly ROTATION_PERIOD=86400
 
 exec $WIND_DATA_SOURCE |
 	rotatelogs -e -D -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD |

@@ -14,7 +14,6 @@
 readonly WEATHER_DB=/var/weather/weather.db
 db="${1:-$WEATHER_DB}"
 
-### BUG
 ### For JSON, must use:
 ### "Date(Year, Month, Day, Hours, Minutes, Seconds, Milliseconds)"
 ### When using this Date String Representation, months are indexed 
@@ -65,7 +64,7 @@ output_datatable()
 # output entire document
 echo 'Context-type: text/javascript
 
-DATA_TABLE =
+const DATA_TABLE =
 {
 	"cols": [ 
 		{	// column 0
@@ -96,9 +95,9 @@ DATA_TABLE =
 # parse query string to get time boundaries
 # e.g. "start=12345&end=60899"
 IFS="&="
-# SECURITY BUG ALERT: I'm interpolating unsafe data, off the network
+# SECURITY BUG ALERT: I'm interpolating unsafe data, that's come off the network
 output_datatable $QUERY_STRING
-# better (but unsupported, alas)
+# better (but unsupported, alas) would be:
 #read start start end end <<< "$QUERY_STRING"
 
 # conclude

@@ -5,20 +5,20 @@
 # truth.
 #
 
-SQLITE_FUNCS=/usr/lib/libsqlitefunctions.so
+readonly SQLITE_FUNCS=/usr/lib/libsqlitefunctions.so
 test -r $SQLITE_FUNCS || {
 	echo "$SQLITE_FUNCS: does not exist, or not readable"
 	exit 1
 }
 
-WEATHER_DB=/var/weather/weather.db
+readonly WEATHER_DB=/var/weather/weather.db
 db=${1:-$WEATHER_DB}
 test -w "$db" || {
 	echo "$db: does not exist, or is not writable"
 	exit 1
 }
 
-LOG_DB=/run/weather/wind_log.db
+readonly LOG_DB=/run/weather/wind_log.db
 log_db=${2:-$LOG_DB}
 test -w "$log_db" || {
 	echo "$log_db: does not exist, or is not writable"
