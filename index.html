@@ -7,6 +7,7 @@
 	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+
 // readonly MPH_KMH=1.609 # convert miles per hour to kilometers per hour
 // readonly MPH_MS=2.2352 # convert miles per hour to meters per second
 // CAST(ROUND(speed * $MPH_KMH) AS INTEGER) AS speed_kmh,
@@ -77,6 +78,7 @@
 			else // < 360
 				quadrant = 3;
 			
+			// y = ax + b
 			return Math.round(x * COLOR_COEF_MAP[dim][quadrant].a 
 				+ COLOR_COEF_MAP[dim][quadrant].b);
 		}
@@ -243,27 +245,37 @@
 		<table cellpadding="0" ce>
 			<tr>
 				<td>
-				    <div id="chart_speed_last_hour" style="width: 640; height: 360;"></div>				
-				</td>
-				<td>
-					<div id="chart_dir_last_hour" style="width: 640; height: 360;"></div>				
+				    <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
 				</td>
 			</tr>
 			<tr>
 				<td>
-				    <div id="chart_speed_last_day" style="width: 640; height: 360;"></div>				
-				</td>
-				<td>
-					<div id="chart_60min" style="width: 640; height: 360;"></div>				
+				    <div id="chart_speed_last_day" style="width: 1280; height: 360;"></div>				
 				</td>
 			</tr>
 			<tr>
 				<td>
-				    <div id="chart_speed_last_week" style="width: 640; height: 360;"></div>				
+				    <div id="chart_speed_last_week" style="width: 1280; height: 360;"></div>				
 				</td>
-				<td>
-					<div id="chart_60min" style="width: 640; height: 360;"></div>				
-				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="legend">
+		<table>
+			<tr>
+				<td></td>
+				<td style="background-color: #ff0000">North</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td style="background-color: #0000ff">West</td>
+				<td></td>
+				<td style="background-color: #ffff00">East</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="background-color: #00ff00">South</td>
+				<td></td>
 			</tr>
 		</table>
 	</div>
