@@ -6,10 +6,13 @@
 # See https://www.sqlite.org/c3ref/busy_timeout.html
 readonly BUSY_TIMEOUT=1111
 
-echo "CREATE TABLE IF NOT EXISTS wind_log(tstamp TIMESTAMP NOT NULL UNIQUE, direction INTEGER, revolutions INTEGER);"
-
 # deal with concurrency issues by re-trying
 echo "PRAGMA busy_timeout = $BUSY_TIMEOUT;"
+
+# this database is written to, and deleted, a lot
+echo "PRAGMA auto_vacuum = 'full';"
+
+echo "CREATE TABLE IF NOT EXISTS wind_log(tstamp TIMESTAMP NOT NULL UNIQUE, direction INTEGER, revolutions INTEGER);"
 
 while read tstamp dir revs
 do

@@ -62,7 +62,7 @@ output_datatable()
 # main
 
 # output entire document
-echo 'Context-type: text/javascript
+echo 'Content-type: text/javascript
 
 const DATA_TABLE =
 {

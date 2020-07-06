@@ -10,5 +10,5 @@ do
 	echo ".mode columns"
 	echo "select '------ $period mins ------';"
 	echo "select strftime('%Y-%m-%d %H:%M', tstamp, 'unixepoch', 'localtime'), direction, revolutions from wind where period=$period order by tstamp desc limit $limit;"
-done | sqlite3 $db
+done | sqlite3 "$db"
 

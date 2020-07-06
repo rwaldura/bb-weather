@@ -60,7 +60,7 @@
 
 		// y = ax + b
 		const K = 255 / 90;
-		const COLOR_COEF_MAP = {
+		const COLOR_COEFS = {
 			r: [ { a:0, b:255 }, { a:-K, b:510 }, { a:0 , b:0    }, { a:+K, b:-765  } ],
 			g: [ { a:K, b:0   }, { a:0 , b:255 }, { a:-K, b:765  }, { a:0 , b:0    } ],
 			b: [ { a:0, b:0   }, { a:0 , b:0   }, { a:+K, b:-510 }, { a:-K, b:1020 } ]
@@ -79,8 +79,8 @@
 				quadrant = 3;
 			
 			// y = ax + b
-			return Math.round(x * COLOR_COEF_MAP[dim][quadrant].a 
-				+ COLOR_COEF_MAP[dim][quadrant].b);
+			return Math.round(x * COLOR_COEFS[dim][quadrant].a 
+				+ COLOR_COEFS[dim][quadrant].b);
 		}
 		
 		/*
@@ -103,6 +103,7 @@
 					hex_color = "0" + hex_color;
 				rgb_color += hex_color;
 			}
+			console.log(dir + " => " + rgb_color);
 			return rgb_color;
 		}
 		
@@ -195,12 +196,9 @@
 			return styledView;			
 		}
 
-		console.log("0=" + dir2color(0));
-		console.log("90=" + dir2color(90));
-		console.log("180=" + dir2color(180));
-		console.log("270=" + dir2color(270));
-		console.log("360=" + dir2color(360));
-		
+		/*
+		 * main()
+		 */
 	    google.charts.load('current', {'packages':['corechart','table']});
 	    google.charts.setOnLoadCallback(function () {
 			var data = getData_fixed();
