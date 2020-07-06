@@ -58,12 +58,11 @@
 			return V
 		}
 
-		// y = ax + b
 		const K = 255 / 90;
-		const COLOR_COEFS = {
-			r: [ { a:0, b:255 }, { a:-K, b:510 }, { a:0 , b:0    }, { a:+K, b:-765  } ],
-			g: [ { a:K, b:0   }, { a:0 , b:255 }, { a:-K, b:765  }, { a:0 , b:0    } ],
-			b: [ { a:0, b:0   }, { a:0 , b:0   }, { a:+K, b:-510 }, { a:-K, b:1020 } ]
+		const F_COLOR_PARAMS = {
+			r: [ [0, 255], [-K, 510], [0,     0], [+K, -765] ],
+			g: [ [K,   0], [0,  255], [-K,  765], [0,     0] ],
+			b: [ [0,   0], [0,    0], [+K, -510], [-K, 1020] ]
 		};
 		
 		function angle2color(x, dim)
@@ -79,8 +78,8 @@
 				quadrant = 3;
 			
 			// y = ax + b
-			return Math.round(x * COLOR_COEFS[dim][quadrant].a 
-				+ COLOR_COEFS[dim][quadrant].b);
+			return Math.round(x * F_COLOR_PARAMS[dim][quadrant][0]
+				+ F_COLOR_PARAMS[dim][quadrant][1]);
 		}
 		
 		/*
@@ -111,7 +110,7 @@
 		function dir2style(data, row, col, period)
 		{
 			var dir = data.getValue(row, col)
-			return 'point { size: 6; visible: true; shape-type: triangle;' +
+			return 'point { size: 9; visible: true; shape-type: triangle;' +
 				' shape-rotation: ' + dir +
 				' ; fill-color: ' + dir2color(dir) +
 				' }';
@@ -174,8 +173,8 @@
 						type: 'number' }]);
 					
 				view = new google.visualization.DataView(grouped);
-				revs_col_idx = 2;
-				dir_col_idx = 3;
+				dir_col_idx = 2;
+				revs_col_idx = 3;
 			}
 
 			view.setColumns([
