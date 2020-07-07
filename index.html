@@ -121,21 +121,43 @@
 		// style the datapoint to indicate direction
 		function dir2style(data, row, col, period)
 		{
-			const dir = data.getValue(row, col)
+			const dir = data.getValue(row, col);
 			return 'point { shape-type: triangle; ' 
 				+ 'shape-rotation: ' + dir
 				+ ' ; fill-color: ' + dir2color(dir) 
 				+ ' }';
 		}
 		
+		function format_timestamp(ts /* Date */, period /* seconds */)
+		{
+			if (!(ts instanceof Date)) {
+				console.log("ignoring !Date: " + ts);
+				return;
+			}
+			
+			var format;
+			if (period == 60 * 60) 
+				// show hours only, no minutes
+				format = "MMM d, h aa";
+			else if (period == 60)
+				format = "h aa";
+			else 
+				format = "h:mm aa";
+
+			const f = new google.visualization.DateFormat({ pattern: format });
+			return f.formatValue(ts);
+		}
+		
 		function tooltip(data, row, col, period)
 		{
+			const t = format_timestamp(data.getValue(row, 1), period);
 			const s = wind_speed(data.getValue(row, col), period);
-			return '<div style="padding: 5px 5px 5px 5px;">' 
-				+ Math.round(s.mph) + ' mph '
-				+ s.kmh + ' km/h ' 
-				+ s.ms.toFixed(1) + ' m/s '
-				+ s.knots + ' knots '
+			return '<div class="tooltip">' 
+				+ '<b>' + t + '</b> <br>'
+				+ Math.round(s.mph) + ' mph <br>'
+				+ s.kmh + ' km/h <br>' 
+				+ s.ms.toFixed(1) + ' m/s <br>'
+				+ s.knots + ' knots'
 				+ '</div>';
 		}
 		// data is defined as:
@@ -261,18 +283,23 @@
 		});	
     </script>
 	<style>
-	    body, table, div, td {
+	    body, table, div, tr, td {
 			border: 0;
 	        margin: 0;
 			padding: 0;
 	    }
+		.tooltip {
+			padding: 5px 5px 5px 5px;
+			font-size: 9;
+			font-family: "Google Sans";
+		}
 	</style>
   </head>
   <body>
 	<div id="chart_errors"></div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
 	<div id="all_charts">
-		<table cellpadding="0" ce>
+		<table>
 			<tr>
 				<td>
 				    <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
