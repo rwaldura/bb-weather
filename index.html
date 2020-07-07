@@ -2,20 +2,15 @@
   <head>
 	<meta charset="UTF-8" />
 	
-	<!-- for testing: load TEST_DATA -->
     <script type="text/javascript" src="http://beaglebone.lan:8888/getDataTable.cgi"></script>	
 	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
 
-// readonly MPH_KMH=1.609 # convert miles per hour to kilometers per hour
-// readonly MPH_MS=2.2352 # convert miles per hour to meters per second
-// CAST(ROUND(speed * $MPH_KMH) AS INTEGER) AS speed_kmh,
-// CAST(ROUND(speed / $MPH_MS ) AS INTEGER) AS speed_ms
+    <script type="text/javascript">
 
 		function _getData(f_drawChart) 
 		{
-			var q = google.visualization.Query("getDataTable.cgi"); // same host
+			const q = google.visualization.Query("getDataTable.cgi"); // same host
 			q.send(
 				function (response) { // google.visualization.QueryResponse
 					if (response.isError()) 
@@ -40,30 +35,47 @@
 		
 		function debug(data)
 		{
-			var t = new google.visualization.Table(document.getElementById('data_debug'));
+			const t = new google.visualization.Table(document.getElementById('data_debug'));
 			t.draw(data, {showRowNumber: true});			
 		}
 
+		const MPH_KMH = 1.609344;	// convert miles per hour to kilometers per hour
+		const MPH_MS = 2.2352;		// ... to meters per second
+		const MPH_KNOTS = 0.868976;	// ... to knots
+		
 		/*
-		 * compute wind speed in MPH
+		 * compute wind speed from a number of revolutions per time period
 		 * calculate wind speed in miles per hour according to:
 		 * V = 9P / 4T
 		 * per wind sensor manufacturer
 		 */
+		function wind_speed(P, T)
+		{
+			const V = (9 * P) / (4 * T);
+			
+			return {
+				mph: V,
+				kmh: Math.round(V * MPH_KMH),
+				ms: V / MPH_MS,
+				knots: Math.round(V * MPH_KNOTS) };
+		}
+		
 		function to_mph(data, row, col, T)
 		{
-			var P = data.getValue(row, col)
-			var V = (9 * P) / (4 * T)
-			// console.log("r=" + row + " c=" + col + " P=" + P + " V=" + V)
-			return V
+			const P = data.getValue(row, col);
+			const ws = wind_speed(P, T);
+			return ws.mph;
 		}
 
+		/*
+		 * This table defines linear functions between the 4 colors of the
+		 * compass: red (N), yellow (E), green (S), blue (W).
+		 */
 		const K = 255 / 90;
 		const F_COLOR_PARAMS = {
 			r: [ [0, 255], [-K, 510], [0,     0], [+K, -765] ],
 			g: [ [K,   0], [0,  255], [-K,  765], [0,     0] ],
-			b: [ [0,   0], [0,    0], [+K, -510], [-K, 1020] ]
-		};
+			b: [ [0,   0], [0,    0], [+K, -510], [-K, 1020] ] };
 		
 		function angle2color(x, dim)
 		{
@@ -95,27 +107,37 @@
 			var rgb_color = '#';
 			for (var dim of ['r', 'g', 'b'])
 			{
-				var n = angle2color(dir, dim);
+				const n = angle2color(dir, dim);
 				// console.log("n=" + n + " dim=" + dim + " dir=" + dir);
 				var hex_color = n.toString(16);
 				if (hex_color.length < 2) // pad with zero
 					hex_color = "0" + hex_color;
 				rgb_color += hex_color;
 			}
-			console.log(dir + " => " + rgb_color);
+			// console.log(dir + " => " + rgb_color);
 			return rgb_color;
 		}
 		
 		// style the datapoint to indicate direction
 		function dir2style(data, row, col, period)
 		{
-			var dir = data.getValue(row, col)
+			const dir = data.getValue(row, col)
 			return 'point { shape-type: triangle; ' 
 				+ 'shape-rotation: ' + dir
 				+ ' ; fill-color: ' + dir2color(dir) 
 				+ ' }';
 		}
 		
+		function tooltip(data, row, col, period)
+		{
+			const s = wind_speed(data.getValue(row, col), period);
+			return '<div style="padding: 5px 5px 5px 5px;">' 
+				+ Math.round(s.mph) + ' mph '
+				+ s.kmh + ' km/h ' 
+				+ s.ms.toFixed(1) + ' m/s '
+				+ s.knots + ' knots '
+				+ '</div>';
+		}
 		// data is defined as:
 		// column index 0
 		// id: "tstamp",
@@ -155,7 +177,7 @@
 			if (period > 1 * 60) // further grouping is necessary
 			{
 				// quantize into time windows of "period" seconds
-				var grouped = google.visualization.data.group(
+				const grouped = google.visualization.data.group(
 					view,
 					// group by timestamp over the period given
 					[{ column: 0,
@@ -180,21 +202,21 @@
 			view.setColumns([
 				1,  // timestamp, as a Date object
 				{ id: 'speed_mph', 
-					label: "Wind Speed (MPH)",
+					label: "Wind Speed",
 					type: 'number', 
 					calc: function(d, row) { return to_mph(d, row, revs_col_idx, period) }}, 
 				{ id: 'point_style', 
 					type: 'string',
 					calc: function(d, row) { return dir2style(d, row, dir_col_idx, period) }},
-				{ id: 'point_tip', 
+				{ id: 'point_tooltip', 
 					type: 'string',
 					calc: function(d, row) { return tooltip(d, row, revs_col_idx, period) }}]);
 			
-			var styledView = new google.visualization.DataView(view);
+			const styledView = new google.visualization.DataView(view);
 			styledView.setColumns([
 				0, 1, 
 				{ sourceColumn: 2, role: 'style' },
-				{ sourceColumn: 3, role: 'tooltip' }]);
+				{ sourceColumn: 3, role: 'tooltip', p: { html: true } }]);
 								
 			return styledView;			
 		}
@@ -204,33 +226,34 @@
 		 */
 	    google.charts.load('current', { 'packages': ['corechart','table'] });
 	    google.charts.setOnLoadCallback(function () {
-			var data = getData_fixed();
+			const data = getData_fixed();
 
-			var opts = {
+			const opts = {
 				legend: 'none',
 				colors: ['#cccccc'], 
 				lineWidth: 0,
 				pointsVisible: true,
 				pointSize: 21,
 				pointShape: 'triangle',
+				tooltip: { isHtml: true },
 				vAxis: { minValue: 0 }};								
 
 			opts.title = 'Over the last hour, every minute';
-			var chart1 = new google.visualization.AreaChart(
+			const chart1 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_hour'));
 			chart1.draw(
 				groupWindData(data, 1 * 60, 1), 
 				opts);
 
 			opts.title = 'Over the last day, every 20 minutes';
-			var chart2 = new google.visualization.AreaChart(
+			const chart2 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_day'));
 			chart2.draw(
 				groupWindData(data, 24 * 60, 20), 
 				opts);
 
 			opts.title = 'Over the last week, every hour';
-			var chart3 = new google.visualization.AreaChart(
+			const chart3 = new google.visualization.AreaChart(
 				document.getElementById('chart_speed_last_week'));
 			chart3.draw(
 				groupWindData(data, 7 * 24 * 60, 1 * 60), 
