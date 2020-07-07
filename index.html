@@ -2,254 +2,316 @@
   <head>
 	<meta charset="UTF-8" />
 	
-	<!-- for testing: load TEST_DATA -->
     <script type="text/javascript" src="http://beaglebone.lan:8888/getDataTable.cgi"></script>	
 	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
     <script type="text/javascript">
 
-// readonly MPH_KMH=1.609 # convert miles per hour to kilometers per hour
-// readonly MPH_MS=2.2352 # convert miles per hour to meters per second
-// CAST(ROUND(speed * $MPH_KMH) AS INTEGER) AS speed_kmh,
-// CAST(ROUND(speed / $MPH_MS ) AS INTEGER) AS speed_ms
-
-		function _getData(f_drawChart) 
-		{
-			var q = google.visualization.Query("getDataTable.cgi"); // same host
-			q.send(
-				function (response) { // google.visualization.QueryResponse
-					if (response.isError()) 
-					{
-						console.log("query failed" + response.getMessage());
-						google.visualization.errors.addErrorFromQueryResponse(
-							document.getElementById("chart_errors"),
-							response);
-					} 
-					else 
-					{
-						f_drawChart(response.getDataTable());
-					}
-				 }
-			);			
-		}
-		
-		function getData_fixed()
-		{
-			return new google.visualization.DataTable(DATA_TABLE);			
-		}
-		
-		function debug(data)
-		{
-			var t = new google.visualization.Table(document.getElementById('data_debug'));
-			t.draw(data, {showRowNumber: true});			
-		}
-
-		/*
-		 * compute wind speed in MPH
-		 * calculate wind speed in miles per hour according to:
-		 * V = 9P / 4T
-		 * per wind sensor manufacturer
-		 */
-		function to_mph(data, row, col, T)
-		{
-			var P = data.getValue(row, col)
-			var V = (9 * P) / (4 * T)
-			// console.log("r=" + row + " c=" + col + " P=" + P + " V=" + V)
-			return V
-		}
-
-		const K = 255 / 90;
-		const F_COLOR_PARAMS = {
-			r: [ [0, 255], [-K, 510], [0,     0], [+K, -765] ],
-			g: [ [K,   0], [0,  255], [-K,  765], [0,     0] ],
-			b: [ [0,   0], [0,    0], [+K, -510], [-K, 1020] ]
-		};
-		
-		function angle2color(x, dim)
-		{
-			var quadrant;
-			if (x < 90) 
-				quadrant = 0;
-			else if (x < 180)
-				quadrant = 1;
-			else if (x < 270)
-				quadrant = 2;
-			else // < 360
-				quadrant = 3;
-			
-			// y = ax + b
-			return Math.round(x * F_COLOR_PARAMS[dim][quadrant][0]
-				+ F_COLOR_PARAMS[dim][quadrant][1]);
-		}
-		
-		/*
-		 * Map 360 degrees into RBG colorspace, with:
-		 * North 0˚ => red
-		 * East  90˚ => yellow
-		 * South 180˚ => green
-		 * West  270˚ => blue 
-		 * North 360˚ => red
-		 */
-		function dir2color(dir)
-		{
-			var rgb_color = '#';
-			for (var dim of ['r', 'g', 'b'])
+function _getData(f_drawChart) 
+{
+	const q = google.visualization.Query("getDataTable.cgi"); // same host
+	q.send(
+		function (response) { // google.visualization.QueryResponse
+			if (response.isError()) 
 			{
-				var n = angle2color(dir, dim);
-				// console.log("n=" + n + " dim=" + dim + " dir=" + dir);
-				var hex_color = n.toString(16);
-				if (hex_color.length < 2) // pad with zero
-					hex_color = "0" + hex_color;
-				rgb_color += hex_color;
-			}
-			console.log(dir + " => " + rgb_color);
-			return rgb_color;
-		}
-		
-		// style the datapoint to indicate direction
-		function dir2style(data, row, col, period)
-		{
-			var dir = data.getValue(row, col)
-			return 'point { shape-type: triangle; ' 
-				+ 'shape-rotation: ' + dir
-				+ ' ; fill-color: ' + dir2color(dir) 
-				+ ' }';
-		}
-		
-		// data is defined as:
-		// column index 0
-		// id: "tstamp",
-		// type: "number"
-		// 
-		// column index 1
-		// id: "datim",
-		// type: "datetime"
-		// 
-		// column index 2
-		// id: "period",
-		// type: "number"
-		// 
-		// column index 3
-		// id: "direction",
-		// type: "number"
-		// 
-		// column index 4
-		// id: "revs",
-		// type: "number"		
-		function groupWindData(data, lookback, period)
-		{
-			lookback *= 60; // in seconds
-			period *= 60; // in seconds
-			
-			// from above
-			var dir_col_idx = 3; // column index for wind direction in degrees
-			var revs_col_idx = 4; // column index for count of revolutions
-
-			var view = new google.visualization.DataView(data);
-
-			// WHERE period=1 AND tstamp > 1 day ago
-			view.setRows(view.getFilteredRows([
-				{ column: 2, value: 1 }, // WHERE period = 1 (always)
-				{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
-
-			if (period > 1 * 60) // further grouping is necessary
+				console.log("query failed" + response.getMessage());
+				google.visualization.errors.addErrorFromQueryResponse(
+					document.getElementById("chart_errors"),
+					response);
+			} 
+			else 
 			{
-				// quantize into time windows of "period" seconds
-				var grouped = google.visualization.data.group(
-					view,
-					// group by timestamp over the period given
-					[{ column: 0,
-						modifier: function(t) { return period * Math.floor(t / period) }, 
-						type: 'number' }],
-					// aggregate columns: MIN(datim), AVG(dir), SUM(revs)
-					[{ column: 1,
-						aggregation: google.visualization.data.min, 
-						type: 'datetime' },
-					{ column: 3,
-						aggregation: google.visualization.data.avg, 
-						type: 'number' },
-					{ column: 4, 
-						aggregation: google.visualization.data.sum, 
-						type: 'number' }]);
-					
-				view = new google.visualization.DataView(grouped);
-				dir_col_idx = 2;
-				revs_col_idx = 3;
+				f_drawChart(response.getDataTable());
 			}
+		 }
+	);			
+}
 
-			view.setColumns([
-				1,  // timestamp, as a Date object
-				{ id: 'speed_mph', 
-					label: "Wind Speed (MPH)",
-					type: 'number', 
-					calc: function(d, row) { return to_mph(d, row, revs_col_idx, period) }}, 
-				{ id: 'point_style', 
-					type: 'string',
-					calc: function(d, row) { return dir2style(d, row, dir_col_idx, period) }},
-				{ id: 'point_tip', 
-					type: 'string',
-					calc: function(d, row) { return tooltip(d, row, revs_col_idx, period) }}]);
+function getDataTable_fixed()
+{
+	return new google.visualization.DataTable(DATA_TABLE);			
+}
+
+function debug(data)
+{
+	const t = new google.visualization.Table(document.getElementById('data_debug'));
+	t.draw(data, { showRowNumber: true });
+}
+
+/*
+ * From a number of revolutions per time period,
+ * calculate wind speed in miles per hour according to:
+ * V = 9P / 4T
+ * per wind sensor manufacturer
+ */
+function wind_speed(P, T /* seconds */)
+{
+	// convert miles per hour...
+	const MPH_KMH = 1.609344;	// ... to kilometers per hour
+	const MPH_MS = 2.2352;		// ... to meters per second
+	const MPH_KNOTS = 0.868976;	// ... to knots
+
+	const V = (9 * P) / (4 * T);
+
+	return {
+		mph: V,
+		kmh: V * MPH_KMH,
+		ms: V / MPH_MS,
+		knots: V * MPH_KNOTS };
+}
+
+function format_wind_speed(P, T /* minutes */)
+{
+	const ws = wind_speed(P, T * 60);
+	
+	return { 
+		mph: Math.round(ws.mph),
+		kmh: Math.round(ws.kmh),
+		ms: ws.ms.toFixed(1),
+		knots: Math.round(ws.knots) };
+}
+
+function to_mph(dt, row, col, T)
+{
+	const P = dt.getValue(row, col);
+	const ws = wind_speed(P, T);
+	return ws.mph;
+}
+
+/*
+ * To map any angle to a RGB color, we define linear functions between the
+ * 4 colors of the compass: red (N), yellow (E), green (S), blue (W).
+ */
+const K = 255 / 90;
+const F_COLOR_PARAMS = {
+	r: [ [ 0, 255], [-K, 510], [ 0,    0], [+K, -765] ],
+	g: [ [+K,   0], [ 0, 255], [-K,  765], [ 0,    0] ],
+	b: [ [ 0,   0], [ 0,   0], [+K, -510], [-K, 1020] ] };
+
+function angle2color(x, dim /* 'r' or 'g' or 'b' */)
+{
+	var quadrant = Math.floor(x / 90);
+	
+	// y = ax + b
+	return Math.round(
+		x * F_COLOR_PARAMS[dim][quadrant][0]
+		  + F_COLOR_PARAMS[dim][quadrant][1]);
+}
+
+/*
+ * Map 360 degrees into RBG colorspace, with:
+ * North 0˚ => red
+ * East  90˚ => yellow
+ * South 180˚ => green
+ * West  270˚ => blue 
+ * North 360˚ => red
+ */
+function dir2color(dir)
+{
+	var rgb_color = '#';
+	for (var dim of ['r', 'g', 'b'])
+	{
+		const n = angle2color(dir, dim);
+		// console.log("n=" + n + " dim=" + dim + " dir=" + dir);
+		var hex_color = n.toString(16);
+		if (hex_color.length < 2) // pad with zero
+			hex_color = "0" + hex_color;
+		rgb_color += hex_color;
+	}
+	// console.log(dir + " => " + rgb_color);
+	return rgb_color;
+}
+
+/* 
+ * Style the datapoint to indicate wind direction.
+ * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
+ */
+function dir2style(dt, row, col, period /* minutes */)
+{
+	const dir = dt.getValue(row, col);
+	const color = dir2color(dir);
+	return `point { 
+		shape-type: triangle; 
+		shape-rotation: ${dir}; 
+		fill-color: ${color} }`;
+}
+
+// see https://developers.google.com/chart/interactive/docs/reference#dateformat
+function format_timestamp(ts /* Date */, period /* minutes */)
+{
+	var format;
+	if (period < 60) // show minutes
+		format = "h:mm aa";
+	else // show day of week and hour
+		format = "EEE MMM d, h aa";
+
+	const f = new google.visualization.DateFormat({ pattern: format });
+	return f.formatValue(ts);
+}
+
+/*
+ * Custom tooltip
+ * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
+ */
+function tooltip(dt, row, col, period /* minutes */)
+{
+	const t = format_timestamp(dt.getValue(row, 1), period);
+	const s = format_wind_speed(dt.getValue(row, col), period);
+	return `<div class="tooltip">
+		<span class="timestamp">${t}</span><br>
+		${s.mph} mph<br>
+		${s.kmh} km/h<br>
+		${s.ms} m/s<br>
+		${s.knots} knots
+		</div>`;
+}
+
+// data is defined as:
+// column index 0
+// id: "tstamp",
+// type: "number"
+// 
+// column index 1
+// id: "datim",
+// type: "datetime"
+// 
+// column index 2
+// id: "period",
+// type: "number"
+// 
+// column index 3
+// id: "direction",
+// type: "number"
+// 
+// column index 4
+// id: "revs",
+// type: "number"		
+function groupWindData(dt, lookback, period)
+{
+	lookback *= 60;	// to seconds
+	period *= 60;	// to seconds
+	
+	// from above
+	var dir_col_idx = 3;	// column index for wind direction in degrees
+	var revs_col_idx = 4;	// column index for count of revolutions
+
+	var view = new google.visualization.DataView(dt);
+
+	// WHERE period=1 AND tstamp > 1 day ago
+	view.setRows(view.getFilteredRows([
+		{ column: 2, value: 1 }, // WHERE period = 1 (always)
+		{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
+
+	if (period > 1 * 60) // further grouping is necessary
+	{
+		// quantize into time windows of "period" seconds
+		const grouped = google.visualization.data.group(
+			view,
+			// group by timestamp over the period given
+			[{ column: 0,
+				modifier: function(t) { return period * Math.floor(t / period) }, 
+				type: 'number' }],
+			// aggregate columns: MIN(datim), AVG(dir), SUM(revs)
+			[{ column: 1,
+				aggregation: google.visualization.data.min, 
+				type: 'datetime' },
+			{ column: 3,
+				aggregation: google.visualization.data.avg, 
+				type: 'number' },
+			{ column: 4, 
+				aggregation: google.visualization.data.sum, 
+				type: 'number' }]);
 			
-			var styledView = new google.visualization.DataView(view);
-			styledView.setColumns([
-				0, 1, 
-				{ sourceColumn: 2, role: 'style' },
-				{ sourceColumn: 3, role: 'tooltip' }]);
-								
-			return styledView;			
-		}
+		view = new google.visualization.DataView(grouped);
+		dir_col_idx = 2;
+		revs_col_idx = 3;
+	}
 
-		/*
-		 * main()
-		 */
-	    google.charts.load('current', { 'packages': ['corechart','table'] });
-	    google.charts.setOnLoadCallback(function () {
-			var data = getData_fixed();
+	view.setColumns([
+		1,  // timestamp, as a Date object
+		{ id: 'speed_mph', 
+			label: "Wind Speed",
+			type: 'number', 
+			calc: function(dt, row) { return to_mph(dt, row, revs_col_idx, period) }}, 
+		{ id: 'point_style', 
+			type: 'string',
+			calc: function(dt, row) { return dir2style(dt, row, dir_col_idx, period / 60) }},
+		{ id: 'point_tooltip', 
+			type: 'string',
+			calc: function(dt, row) { return tooltip(dt, row, revs_col_idx, period / 60) }}]);
+	
+	const styledView = new google.visualization.DataView(view);
+	styledView.setColumns([
+		0, 1, 
+		{ sourceColumn: 2, role: 'style' },
+		{ sourceColumn: 3, role: 'tooltip', properties: { html: true } }]);
+						
+	return styledView;			
+}
 
-			var opts = {
-				legend: 'none',
-				colors: ['#cccccc'], 
-				lineWidth: 0,
-				pointsVisible: true,
-				pointSize: 21,
-				pointShape: 'triangle',
-				vAxis: { minValue: 0 }};								
+/*
+ * main()
+ */
+google.charts.load('current', { 'packages': ['corechart','table'] });
 
-			opts.title = 'Over the last hour, every minute';
-			var chart1 = new google.visualization.AreaChart(
-				document.getElementById('chart_speed_last_hour'));
-			chart1.draw(
-				groupWindData(data, 1 * 60, 1), 
-				opts);
+google.charts.setOnLoadCallback(function () {
+	const dt = getDataTable_fixed();
 
-			opts.title = 'Over the last day, every 20 minutes';
-			var chart2 = new google.visualization.AreaChart(
-				document.getElementById('chart_speed_last_day'));
-			chart2.draw(
-				groupWindData(data, 24 * 60, 20), 
-				opts);
+	const opts = {
+		legend: 'none',
+		colors: ['#cccccc'], 
+		lineWidth: 0,
+		pointsVisible: true,
+		pointSize: 22,
+		pointShape: 'triangle',
+		fontName: "Google Sans",
+		tooltip: { isHtml: true },
+		vAxis: { minValue: 0 }};								
 
-			opts.title = 'Over the last week, every hour';
-			var chart3 = new google.visualization.AreaChart(
-				document.getElementById('chart_speed_last_week'));
-			chart3.draw(
-				groupWindData(data, 7 * 24 * 60, 1 * 60), 
-				opts);
-		});	
+	opts.title = 'Last Hour';
+	const chart1 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_hour'));
+	chart1.draw(
+		groupWindData(dt, 1 * 60 /* 1 hour */, 1 /* minute */), 
+		opts);
+
+	opts.title = 'Last Day';
+	const chart2 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_day'));
+	chart2.draw(
+		groupWindData(dt, 24 * 60 /* 1 day */, 30 /* minutes */), 
+		opts);
+
+	opts.title = 'Last Week';
+	const chart3 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_week'));
+	chart3.draw(
+	groupWindData(dt, 7 * 24 * 60 /* 1 week */, 2 * 60 /* 2 hours */), 
+		opts);
+});	
     </script>
 	<style>
-	    body, table, div, td {
+	    body, table, div, tr, td {
 			border: 0;
 	        margin: 0;
 			padding: 0;
 	    }
+		.tooltip {
+			padding: 5px 5px 5px 5px;
+			font-size: 14;
+			font-family: "Google Sans";
+		}
+		.timestamp {
+			font-weight: bold;
+		}
 	</style>
   </head>
   <body>
 	<div id="chart_errors"></div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
 	<div id="all_charts">
-		<table cellpadding="0" ce>
+		<table>
 			<tr>
 				<td>
 				    <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
