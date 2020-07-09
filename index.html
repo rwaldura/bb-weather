@@ -132,7 +132,8 @@ function dir2style(dt, row, col, period /* minutes */)
 	const dir = dt.getValue(row, col);
 	const color = dir2color(dir);
 	return `point { 
-		shape-type: triangle; 
+		shape-type: star;
+		shape-sides: 2;
 		shape-rotation: ${dir}; 
 		fill-color: ${color} }`;
 }
