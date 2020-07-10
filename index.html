@@ -3,7 +3,7 @@
 	<meta charset="UTF-8" />
 	
     <script type="text/javascript" src="http://beaglebone.lan:8888/getDataTable.cgi"></script>	
-	
+    <script type="text/javascript" src="weather.js"></script>	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     <script type="text/javascript">
@@ -39,90 +39,6 @@ function debug(data)
 	t.draw(data, { showRowNumber: true });
 }
 
-/*
- * From a number of revolutions per time period,
- * calculate wind speed in miles per hour according to:
- * V = 9P / 4T
- * per wind sensor manufacturer
- */
-function wind_speed(P, T /* seconds */)
-{
-	// convert miles per hour...
-	const MPH_KMH = 1.609344;	// ... to kilometers per hour
-	const MPH_MS = 2.2352;		// ... to meters per second
-	const MPH_KNOTS = 0.868976;	// ... to knots
-
-	const V = (9 * P) / (4 * T);
-
-	return {
-		mph: V,
-		kmh: V * MPH_KMH,
-		ms: V / MPH_MS,
-		knots: V * MPH_KNOTS };
-}
-
-function format_wind_speed(P, T /* minutes */)
-{
-	const ws = wind_speed(P, T * 60);
-	
-	return { 
-		mph: Math.round(ws.mph),
-		kmh: Math.round(ws.kmh),
-		ms: ws.ms.toFixed(1),
-		knots: Math.round(ws.knots) };
-}
-
-function to_mph(dt, row, col, T)
-{
-	const P = dt.getValue(row, col);
-	const ws = wind_speed(P, T);
-	return ws.mph;
-}
-
-/*
- * To map any angle to a RGB color, we define linear functions between the
- * 4 colors of the compass: red (N), yellow (E), green (S), blue (W).
- */
-const K = 255 / 90;
-const F_COLOR_PARAMS = {
-	r: [ [ 0, 255], [-K, 510], [ 0,    0], [+K, -765] ],
-	g: [ [+K,   0], [ 0, 255], [-K,  765], [ 0,    0] ],
-	b: [ [ 0,   0], [ 0,   0], [+K, -510], [-K, 1020] ] };
-
-function angle2color(x, dim /* 'r' or 'g' or 'b' */)
-{
-	var quadrant = Math.floor(x / 90);
-	
-	// y = ax + b
-	return Math.round(
-		x * F_COLOR_PARAMS[dim][quadrant][0]
-		  + F_COLOR_PARAMS[dim][quadrant][1]);
-}
-
-/*
- * Map 360 degrees into RBG colorspace, with:
- * North 0˚ => red
- * East  90˚ => yellow
- * South 180˚ => green
- * West  270˚ => blue 
- * North 360˚ => red
- */
-function dir2color(dir)
-{
-	var rgb_color = '#';
-	for (var dim of ['r', 'g', 'b'])
-	{
-		const n = angle2color(dir, dim);
-		// console.log("n=" + n + " dim=" + dim + " dir=" + dir);
-		var hex_color = n.toString(16);
-		if (hex_color.length < 2) // pad with zero
-			hex_color = "0" + hex_color;
-		rgb_color += hex_color;
-	}
-	// console.log(dir + " => " + rgb_color);
-	return rgb_color;
-}
-
 /* 
  * Style the datapoint to indicate wind direction.
  * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
@@ -155,17 +71,26 @@ function format_timestamp(ts /* Date */, period /* minutes */)
  * Custom tooltip
  * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
  */
-function tooltip(dt, row, col, period /* minutes */)
+function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
 {
-	const t = format_timestamp(dt.getValue(row, 1), period);
-	const s = format_wind_speed(dt.getValue(row, col), period);
+	const d = format_direction(dt.getValue(row, dir_col));
+	const t = format_timestamp(dt.getValue(row, ts_col), period);
+	const s = format_speed(dt.getValue(row, revs_col), period);
 	return `<div class="tooltip">
 		<span class="timestamp">${t}</span><br>
-		${s.mph} mph<br>
+		${d} ${s.mph} mph
+		<div class="alt_units">
 		${s.kmh} km/h<br>
 		${s.ms} m/s<br>
-		${s.knots} knots
+		${s.knots} knots</div>
 		</div>`;
+}
+
+function to_mph(dt, row, col, T)
+{
+	const P = dt.getValue(row, col);
+	const ws = wind_speed(P, T);
+	return ws.mph;
 }
 
 // data is defined as:
@@ -240,7 +165,7 @@ function groupWindData(dt, lookback, period)
 			calc: function(dt, row) { return dir2style(dt, row, dir_col_idx, period / 60) }},
 		{ id: 'point_tooltip', 
 			type: 'string',
-			calc: function(dt, row) { return tooltip(dt, row, revs_col_idx, period / 60) }}]);
+			calc: function(dt, row) { return tooltip(dt, row, 1, dir_col_idx, revs_col_idx, period / 60) }}]);
 	
 	const styledView = new google.visualization.DataView(view);
 	styledView.setColumns([
@@ -265,7 +190,6 @@ google.charts.setOnLoadCallback(function () {
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 22,
-		pointShape: 'triangle',
 		fontName: "Google Sans",
 		tooltip: { isHtml: true },
 		vAxis: { minValue: 0 }};								
@@ -303,52 +227,20 @@ google.charts.setOnLoadCallback(function () {
 			font-size: 14;
 			font-family: "Google Sans";
 		}
-		.timestamp {
+		.tooltip .timestamp {
 			font-weight: bold;
 		}
+		.tooltip .alt_units {
+			font-size: 12;
+		}		
 	</style>
   </head>
   <body>
 	<div id="chart_errors"></div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
-	<div id="all_charts">
-		<table>
-			<tr>
-				<td>
-				    <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
-				</td>
-			</tr>
-			<tr>
-				<td>
-				    <div id="chart_speed_last_day" style="width: 1280; height: 360;"></div>				
-				</td>
-			</tr>
-			<tr>
-				<td>
-				    <div id="chart_speed_last_week" style="width: 1280; height: 360;"></div>				
-				</td>
-			</tr>
-		</table>
-	</div>
-	<div id="legend">
-		<table>
-			<tr>
-				<td></td>
-				<td style="background-color: #ff0000">North</td>
-				<td></td>
-			</tr>
-			<tr>
-				<td style="background-color: #0000ff">West</td>
-				<td></td>
-				<td style="background-color: #ffff00">East</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td style="background-color: #00ff00">South</td>
-				<td></td>
-			</tr>
-		</table>
-	</div>
+    <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
+    <div id="chart_speed_last_day" style="width: 1280; height: 360;"></div>				
+    <div id="chart_speed_last_week" style="width: 1280; height: 360;"></div>				
 	<div id="data_debug"></div>
   </body>
 </html>
