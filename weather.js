@@ -71,7 +71,7 @@ function angle2color(x, dim /* 'r' or 'g' or 'b' */)
  * West  270˚ => blue 
  * North 360˚ => red
  */
-function dir2color(dir)
+function dir2color(dir /* degrees */)
 {
 	var rgb_color = '#';
 	for (var dim of ['r', 'g', 'b'])
