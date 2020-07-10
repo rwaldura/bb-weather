@@ -6,7 +6,7 @@ function format_direction(d /* angle in degrees */)
 	const HEADINGS = [ "N", "NE", "E", "SE", "S", "SW", "W", "NW" ];
 
 	const s = 360 / HEADINGS.length; // "span" of one heading, in degrees
-	const i = Math.floor((d + s/2) / HEADINGS.length);
+	const i = Math.floor(d/s + 0.5);
 	return `${HEADINGS[i]} (${d}˚)`;
 }
 
