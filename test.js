@@ -27,8 +27,8 @@ assert.equal(  9/4, wind_speed(1, 1).mph);
 assert.equal(90/40, wind_speed(10, 10).mph);
 
 // format_speed
-assert.equal(Math.round(9/4), format_speed(1, 1).mph);
-assert.equal(Math.round(9/4), format_speed(1, 1).mph);
+assert.equal(0, format_speed(0, 1).mph);
+assert.equal(Math.round(9/4), format_speed(60, 1).mph);
 
 // colors
 assert.equal("#ff0000", dir2color(  0)); // red
