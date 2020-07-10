@@ -3,8 +3,8 @@
  */
  
 const assert = require('assert').strict;
-assert.startsWith = function(result, prefix, message) {
-	return assert.ok(result && result.startsWith(prefix), message);
+assert.startsWith = function(result, prefix) {
+	assert.ok(result && result.startsWith(prefix), '"' + result + '" does not start with "' + prefix + '"');
 }
 
 const fs = require('fs');
@@ -22,8 +22,8 @@ assert.startsWith(format_direction(170), "S ");
 assert.startsWith(format_direction(205), "SW ");
 
 // wind_speed
-assert.equal(.   0, wind_speed(0, 1).mph);
-assert.equal(. 9/4, wind_speed(1, 1).mph);
+assert.equal(    0, wind_speed(0, 1).mph);
+assert.equal(  9/4, wind_speed(1, 1).mph);
 assert.equal(90/40, wind_speed(10, 10).mph);
 
 // format_speed
