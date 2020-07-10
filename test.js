@@ -3,20 +3,23 @@
  */
  
 const assert = require('assert').strict;
+assert.startsWith = function(result, prefix, message) {
+	return assert.ok(result && result.startsWith(prefix), message);
+}
 
 const fs = require('fs');
-eval(fs.readFileSync('weather.js').toString());	// sue me
+eval(fs.readFileSync('weather.js').toString());	// bite me
 
 // format_direction
-assert.match(format_direction(  0), /^N /);
-assert.match(format_direction( 90), /^E /);
-assert.match(format_direction(180), /^S /);
-assert.match(format_direction(270), /^W /);
+assert.startsWith(format_direction(  0), "N ");
+assert.startsWith(format_direction( 90), "E ");
+assert.startsWith(format_direction(180), "S ");
+assert.startsWith(format_direction(270), "W ");
 
-assert.match(format_direction( 20), /^N /);
-assert.match(format_direction( 25), /^NE /);
-assert.match(format_direction(170), /^S /);
-assert.match(format_direction(205), /^SW /);
+assert.startsWith(format_direction( 20), "N ");
+assert.startsWith(format_direction( 25), "NE ");
+assert.startsWith(format_direction(170), "S ");
+assert.startsWith(format_direction(205), "SW ");
 
 // wind_speed
 assert.equal(.   0, wind_speed(0, 1).mph);
