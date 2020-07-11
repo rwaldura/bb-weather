@@ -6,7 +6,18 @@ A weather station running on BeagleBone.
 
 June 2020: wind only, speed and direction. 
 
-# Dependencies
+## Setup
+
+`sudo cp rc.local /etc`
+
+In crontab:
+
+```
+# m h  dom mon dow   command
+* * * * * $HOME/bb-weather/update-db.sh >>/tmp/update-db.out 2>&1
+```
+
+## Dependencies
 
 * [BeagleBone White](https://beagleboard.org/bone-original)
 * Wind sensor: [Davis Instruments Anemometer](https://www.amazon.com/Davis-Instruments-Anemometer-Vantage-Pro2/dp/B004GK9MFO/)
