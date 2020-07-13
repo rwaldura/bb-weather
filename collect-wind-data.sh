@@ -1,12 +1,16 @@
 #!/bin/sh
 
-readonly WIND_DATA_SOURCE=${1:-$HOME/bb-weather/anemometer.js}
+export NODE_PATH=/usr/local/lib/node_modules:/opt/node-red/lib/node_modules/beaglebone-io/node_modules
+
+readonly WEATHER_HOME=/home/debian/bb-weather
+
+readonly WIND_DATA_SOURCE=${1:-$WEATHER_HOME/anemometer.js}
 test -x $WIND_DATA_SOURCE || {
 	echo "$WIND_DATA_SOURCE: must be executable"
 	exit 1
 }
 
-readonly MANAGE_LOG=$HOME/bb-weather/manage-wind-data.sh
+readonly MANAGE_LOG=$WEATHER_HOME/manage-wind-data.sh
 
 # where the wind data is continuously stored
 readonly WIND_LOG=/var/weather/log/wind
@@ -27,7 +31,7 @@ readonly ROTATION_PERIOD=86400
 
 exec $WIND_DATA_SOURCE |
 	rotatelogs -e -D -l -f -p $MANAGE_LOG -L $WIND_LOG $WIND_LOG.%Y-%m-%d $ROTATION_PERIOD |
-		$HOME/bb-weather/populate-wind-db.sh |
+		$WEATHER_HOME/populate-wind-db.sh |
 			sqlite3 $WIND_DB
 
 # rotatelogs
