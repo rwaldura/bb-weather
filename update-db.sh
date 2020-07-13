@@ -13,10 +13,6 @@ test -r $SQLITE_FUNCS || {
 
 readonly WEATHER_DB=/var/weather/weather.db
 db=${1:-$WEATHER_DB}
-test -w "$db" || {
-	echo "$db: does not exist, or is not writable"
-	exit 1
-}
 
 readonly LOG_DB=/run/weather/wind_log.db
 log_db=${2:-$LOG_DB}
@@ -24,6 +20,8 @@ test -w "$log_db" || {
 	echo "$log_db: does not exist, or is not writable"
 	exit 1
 }
+
+date
 
 sqlite3 "$db" <<_SQL_
 -- load extra functions like MEDIAN() etc.
