@@ -4,17 +4,38 @@ A weather station running on BeagleBone.
 
 ## Current Status
 
-June 2020: wind only, speed and direction. 
+July 2020: wind only, speed and direction. 
 
 ## Setup
 
-`sudo cp rc.local /etc`
+```
+sudo ln -s $PWD/sys/rc.local /etc
+sudo ln -s $PWD/sys/mini_httpd.conf /etc
+sudo $VISUAL /etc/default/mini-httpd # change to START=1
+```
 
 In crontab:
 
 ```
 # m h  dom mon dow   command
-* * * * * $HOME/bb-weather/update-db.sh >>/tmp/update-db.out 2>&1
+* * * * * bb-weather/update-db.sh >>/tmp/update-db.out 2>&1
+```
+
+## Wifi
+
+What a hassle! Truly, I recommend buying the [BeagleBone Wireless](https://beagleboard.org/black-wireless).
+Otherwise, here's what I did:
+
+1. Find a USB Wifi adapter that is compatible. I got a Realtek RTL8192.
+1. To get the driver to autoload: `sudo rm /etc/modprobe.d/rtl8723bu-blacklist.conf`
+1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't work for me. 
+1. Edit `/etc/network/interfaces` and add:
+
+```auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+   wpa-ssid "my-ssid"
+   wpa-psk "my-password"
 ```
 
 ## Dependencies
