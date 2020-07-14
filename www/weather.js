@@ -3,7 +3,12 @@
  */
 function format_direction(d /* angle in degrees */)
 {
-	const HEADINGS = [ "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest" ];
+	const HEADINGS = [ 
+		"North", "NNE", "Northeast", 
+		"ENE", "East", "ESE",
+		"Southeast", "SSE", "South", "SSW", "Southwest", 
+		"WSW", "West", "WNW",
+		"Northwest", "NNW" ];
 
 	const s = 360 / HEADINGS.length; // "span" of one heading, in degrees
 	const i = Math.floor(d/s + 0.5);
