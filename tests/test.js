@@ -8,18 +8,20 @@ assert.startsWith = function(result, prefix) {
 }
 
 const fs = require('fs');
-eval(fs.readFileSync('weather.js').toString());	// bite me
+eval(fs.readFileSync('www/weather.js').toString());	// bite me
 
 // format_direction
-assert.startsWith(format_direction(  0), "N ");
-assert.startsWith(format_direction( 90), "E ");
-assert.startsWith(format_direction(180), "S ");
-assert.startsWith(format_direction(270), "W ");
+assert.startsWith(format_direction(  0), "North ");
+assert.startsWith(format_direction( 90), "East ");
+assert.startsWith(format_direction(180), "South ");
+assert.startsWith(format_direction(270), "West ");
 
-assert.startsWith(format_direction( 20), "N ");
-assert.startsWith(format_direction( 25), "NE ");
-assert.startsWith(format_direction(170), "S ");
-assert.startsWith(format_direction(205), "SW ");
+assert.startsWith(format_direction( 10), "North ");
+assert.startsWith(format_direction( 12), "NNE ");
+assert.startsWith(format_direction( 46), "Northeast ");
+assert.startsWith(format_direction(170), "South ");
+assert.startsWith(format_direction(192), "SSW ");
+assert.startsWith(format_direction(224), "Southwest ");
 
 // wind_speed
 assert.equal(    0, wind_speed(0, 1).mph);
