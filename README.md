@@ -28,7 +28,7 @@ Otherwise, here's what I did:
 
 1. Find a USB Wifi adapter that is compatible. I got a Realtek RTL8192.
 1. To get the driver to autoload: `sudo rm /etc/modprobe.d/rtl8723bu-blacklist.conf`
-1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't work for me. 
+1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
 1. Edit `/etc/network/interfaces` and add:
 
 ```auto wlan0

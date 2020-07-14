@@ -3,11 +3,11 @@
  */
 function format_direction(d /* angle in degrees */)
 {
-	const HEADINGS = [ "N", "NE", "E", "SE", "S", "SW", "W", "NW" ];
+	const HEADINGS = [ "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest" ];
 
 	const s = 360 / HEADINGS.length; // "span" of one heading, in degrees
 	const i = Math.floor(d/s + 0.5);
-	return `${HEADINGS[i]} (${Math.round(d)}˚)`;
+	return `${HEADINGS[i]} (${Math.round(d)}&deg;)`;
 }
 
 /*
