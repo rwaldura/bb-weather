@@ -12,6 +12,10 @@ July 2020: wind only, speed and direction.
 sudo ln -s $PWD/sys/rc.local /etc
 sudo ln -s $PWD/sys/mini_httpd.conf /etc
 sudo $VISUAL /etc/default/mini-httpd # change to START=1
+
+cd sys
+gcc -fPIC -lm -shared -o libsqlfunctions.so sqlite-extension-functions.c
+sudo cp libsqlfunctions.so /usr/lib
 ```
 
 In crontab:
@@ -31,7 +35,8 @@ Otherwise, here's what I did:
 1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
 1. Edit `/etc/network/interfaces` and add:
 
-```auto wlan0
+```
+auto wlan0
 allow-hotplug wlan0
 iface wlan0 inet dhcp
    wpa-ssid "my-ssid"

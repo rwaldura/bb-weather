@@ -1,20 +1,20 @@
 #!/bin/sh
 
-# Two distinct processes write to the temporary log database: this one, and
+# Two distinct processes write to the database: this one, and
 # the aggregator update-db.sh. This database may get therefore quite busy.
-# If a lock is encountered when trying to write, keep on re-trying for ~1 sec.
+# If a lock is encountered when trying to write, keep on re-trying for ~10 sec.
 # See https://www.sqlite.org/c3ref/busy_timeout.html
-readonly BUSY_TIMEOUT=1111
+readonly BUSY_TIMEOUT=11111
 
-# deal with concurrency issues by re-trying
-echo "PRAGMA busy_timeout = $BUSY_TIMEOUT;"
+cat <<_SQL_
+-- deal with concurrency issues by re-trying
+PRAGMA busy_timeout = $BUSY_TIMEOUT;
 
-# this database is written to, and deleted, a lot
-echo "PRAGMA auto_vacuum = 'full';"
-
-echo "CREATE TABLE IF NOT EXISTS wind_log(tstamp TIMESTAMP NOT NULL UNIQUE, direction INTEGER, revolutions INTEGER);"
+CREATE TABLE IF NOT EXISTS wind(tstamp TIMESTAMP NOT NULL, period INTEGER NOT NULL, direction INTEGER, revolutions INTEGER);
+CREATE UNIQUE INDEX IF NOT EXISTS wind_tstamp_period ON wind(tstamp, period);
+_SQL_
 
 while read tstamp dir revs
 do
-	echo "INSERT INTO wind_log(tstamp, direction, revolutions) VALUES($tstamp, $dir, $revs);"
+	echo "INSERT INTO wind VALUES($tstamp, 1, $dir, $revs);"
 done
