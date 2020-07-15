@@ -15,15 +15,14 @@ readonly MANAGE_LOG=$WEATHER_HOME/manage-wind-data.sh
 # where the wind data is continuously stored
 readonly WIND_LOG=/var/weather/log/wind
 test -w $( dirname $WIND_LOG ) || {
-        echo "$WIND_LOG: parent directory must be writable"
-        exit 1
+    echo "$WIND_LOG: parent directory must be writable"
+    exit 1
 }
 
-# temporary database for ongoing wind data
-readonly WIND_DB=/run/weather/wind_log.db
-mkdir /run/weather
-test -w $( dirname $WIND_DB ) || {
-	echo "$WIND_DB: parent directory must be writable"
+# database for ongoing wind data
+readonly WIND_DB=/var/weather/weather.db
+test -w $WIND_DB || {
+	echo "$WIND_DB: must be writable"
 	exit 1
 }
 

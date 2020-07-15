@@ -5,9 +5,6 @@ readonly WEATHER_HOME=/home/debian/bb-weather
 
 if [ "$1" = start ]
 then
-	mkdir /run/weather
-	chown $WEATHER_USER /run/weather
-
 	setpriv --reuid=$WEATHER_USER --groups=i2c,iio,spi,pwm,gpio --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
 fi
