@@ -1,7 +1,7 @@
 /*
  * Map an angle in degrees to a compass heading.
  */
-function format_direction(d /* angle in degrees */)
+function format_direction(dir /* angle in degrees */)
 {
 	const HEADINGS = [ 
 		"North", "NNE", "Northeast", 
@@ -10,9 +10,9 @@ function format_direction(d /* angle in degrees */)
 		"WSW", "West", "WNW",
 		"Northwest", "NNW" ];
 
-	const s = 360 / HEADINGS.length; // "span" of one heading, in degrees
-	const i = Math.floor(d/s + 0.5);
-	return `${HEADINGS[i]} (${Math.round(d)}&deg;)`;
+	const span = 360 / HEADINGS.length; // "span" of one heading, in degrees
+	const i = Math.floor(dir / span + 0.5);
+	return `${HEADINGS[i]} (${Math.round(dir)}&deg;)`;
 }
 
 /*
