@@ -1,4 +1,4 @@
-/*
+/***************************************************************************
  * Map an angle in degrees to a compass heading.
  */
 function format_direction(dir /* angle in degrees */)
@@ -15,7 +15,7 @@ function format_direction(dir /* angle in degrees */)
 	return `${HEADINGS[i]} (${Math.round(dir)}&deg;)`;
 }
 
-/*
+/***************************************************************************
  * From a number of revolutions per time period,
  * calculate wind speed in miles per hour according to:
  * V = 9P / 4T
@@ -37,6 +37,7 @@ function wind_speed(P, T /* seconds */)
 		knots: V * MPH_KNOTS };
 }
 
+/****************************************************************************/
 function format_speed(P, T /* minutes */)
 {
 	const ws = wind_speed(P, T * 60);
@@ -48,7 +49,7 @@ function format_speed(P, T /* minutes */)
 		knots: Math.round(ws.knots) };
 }
 
-/*
+/***************************************************************************
  * To map any angle to a RGB color, we define linear functions between the
  * 4 colors of the compass: red (N), yellow (E), green (S), blue (W).
  */
@@ -68,7 +69,7 @@ function angle2color(x, dim /* 'r' or 'g' or 'b' */)
 		  + F_COLOR_PARAMS[dim][quadrant][1]);
 }
 
-/*
+/***************************************************************************
  * Map 360 degrees into RBG colorspace, with:
  * North   0˚ => red
  * East   90˚ => yellow
