@@ -2,44 +2,26 @@
   <head>
 	<meta charset="UTF-8" />
 	
-    <script type="text/javascript" src="getDataTable.cgi"></script>	
     <script type="text/javascript" src="weather.js"></script>	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     <script type="text/javascript">
-
-function _getData(f_drawChart) 
+/****************************************************************************/
+function error(message)
 {
-	const q = google.visualization.Query("getDataTable.cgi"); // same host
-	q.send(
-		function (response) { // google.visualization.QueryResponse
-			if (response.isError()) 
-			{
-				console.log("query failed" + response.getMessage());
-				google.visualization.errors.addErrorFromQueryResponse(
-					document.getElementById("chart_errors"),
-					response);
-			} 
-			else 
-			{
-				f_drawChart(response.getDataTable());
-			}
-		 }
-	);			
+	console.log("*** ERROR " + message);
+	const e = document.getElementById('chart_errors');
+	e.textContent = message;
 }
 
-function getDataTable_fixed()
-{
-	return new google.visualization.DataTable(DATA_TABLE);			
-}
-
+/****************************************************************************/
 function debug(data)
 {
 	const t = new google.visualization.Table(document.getElementById('data_debug'));
 	t.draw(data, { showRowNumber: true });
 }
 
-/* 
+/***************************************************************************
  * Style the datapoint to indicate wind direction.
  * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
  */
@@ -54,7 +36,9 @@ function dir2style(dt, row, col, period /* minutes */)
 		fill-color: ${color} }`;
 }
 
-// see https://developers.google.com/chart/interactive/docs/reference#dateformat
+/***************************************************************************
+ * see https://developers.google.com/chart/interactive/docs/reference#dateformat
+ */
 function format_timestamp(ts /* Date */, period /* minutes */)
 {
 	var format;
@@ -67,7 +51,7 @@ function format_timestamp(ts /* Date */, period /* minutes */)
 	return f.formatValue(ts);
 }
 
-/*
+/***************************************************************************
  * Custom tooltip
  * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
  */
@@ -83,6 +67,7 @@ function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
 		</div>`;
 }
 
+/****************************************************************************/
 function to_mph(dt, row, col, T)
 {
 	const P = dt.getValue(row, col);
@@ -90,6 +75,7 @@ function to_mph(dt, row, col, T)
 	return ws.mph;
 }
 
+/****************************************************************************/
 // data is defined as:
 // column index 0
 // id: "tstamp",
@@ -173,14 +159,9 @@ function groupWindData(dt, lookback, period)
 	return styledView;			
 }
 
-/*
- * main()
- */
-google.charts.load('current', { 'packages': ['corechart','table'] });
-
-google.charts.setOnLoadCallback(function () {
-	const dt = getDataTable_fixed();
-
+/****************************************************************************/
+function drawCharts(dt /* datatable */)
+{
 	const opts = {
 		legend: 'none',
 		colors: ['#cccccc'], 
@@ -192,25 +173,71 @@ google.charts.setOnLoadCallback(function () {
 		vAxis: { minValue: 0 }};								
 
 	opts.title = 'Last Hour';
-	const chart1 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_hour'));
 	chart1.draw(
 		groupWindData(dt, 1 * 60 /* 1 hour */, 1 /* minute */), 
 		opts);
 
 	opts.title = 'Last Day';
-	const chart2 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_day'));
 	chart2.draw(
 		groupWindData(dt, 24 * 60 /* 1 day */, 30 /* minutes */), 
 		opts);
 
 	opts.title = 'Last Week';
-	const chart3 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_week'));
 	chart3.draw(
-	groupWindData(dt, 7 * 24 * 60 /* 1 week */, 2 * 60 /* 2 hours */), 
-		opts);
+		groupWindData(dt, 7 * 24 * 60 /* 1 week */, 2 * 60 /* 2 hours */), 
+		opts);	
+}
+
+/***************************************************************************
+ * main()
+ */
+const xhr = new XMLHttpRequest();
+xhr.responseType = "text"; // "json"
+xhr.onerror = function(e) {
+	error("Error loading chart data: " + e);
+};
+xhr.onload = function() {
+	if (xhr.status != 200) // HTTP OK
+	{
+		error("Error loading chart data: " + xhr.status + " " + xhr.responseText);
+	}
+	else
+	{
+		// console.log("XHR response = " + xhr.responseText.substring(0, 100));
+
+		// SECURITY BUG ALERT: I'm executing unsafe data, that's come off the network
+		var DATA_TABLE;
+		eval(xhr.responseText); // defines DATA_TABLE
+
+		if (DATA_TABLE 
+			&& DATA_TABLE.cols && DATA_TABLE.cols.length > 0
+			&& DATA_TABLE.rows && DATA_TABLE.rows.length > 0)
+			drawCharts(new google.visualization.DataTable(DATA_TABLE));
+		else
+			error("Invalid DATA_TABLE received");
+	}
+};
+
+function refreshCharts()
+{
+	xhr.open("GET", "getDataTable.cgi", true);
+	xhr.send();
+}
+
+// refresh charts every minute
+setInterval(refreshCharts, 60 * 1000 /* ms */);
+
+google.charts.load('current', { 'packages': ['corechart','table'] });
+var chart1, chart2, chart3;
+google.charts.setOnLoadCallback(function () {
+	chart1 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_hour'));
+	chart2 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_day'));
+	chart3 = new google.visualization.AreaChart(
+		document.getElementById('chart_speed_last_week'));
+
+	refreshCharts();
 });	
     </script>
 	<style>
