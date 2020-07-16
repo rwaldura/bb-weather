@@ -64,7 +64,7 @@ output_datatable()
 # output entire document
 echo 'Content-type: text/javascript
 
-const DATA_TABLE =
+DATA_TABLE =
 {
 	"cols": [ 
 		{	// column 0
