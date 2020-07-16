@@ -142,21 +142,18 @@ function groupWindData(dt, lookback, period)
 		{ id: 'speed_mph', 
 			label: "Wind Speed",
 			type: 'number', 
-			calc: function(dt, row) { return to_mph(dt, row, revs_col_idx, period) }}, 
+			calc: function(dt, row) { return to_mph(dt, row, revs_col_idx, period) } }, 
 		{ id: 'point_style', 
-			type: 'string',
-			calc: function(dt, row) { return dir2style(dt, row, dir_col_idx, period / 60) }},
+			role: 'style',
+			type: 'string', 
+			calc: function(dt, row) { return dir2style(dt, row, dir_col_idx, period / 60) } },
 		{ id: 'point_tooltip', 
-			type: 'string',
-			calc: function(dt, row) { return tooltip(dt, row, 1, dir_col_idx, revs_col_idx, period / 60) }}]);
-	
-	const styledView = new google.visualization.DataView(view);
-	styledView.setColumns([
-		0, 1, 
-		{ sourceColumn: 2, role: 'style' },
-		{ sourceColumn: 3, role: 'tooltip', properties: { html: true } }]);
-						
-	return styledView;			
+			role: 'tooltip', 
+			properties: { html: true },
+			type: 'string', 
+			calc: function(dt, row) { return tooltip(dt, row, 1, dir_col_idx, revs_col_idx, period / 60) } } ]);
+
+	return view;	
 }
 
 /****************************************************************************/
@@ -167,10 +164,10 @@ function drawCharts(dt /* datatable */)
 		colors: ['#cccccc'], 
 		lineWidth: 0,
 		pointsVisible: true,
-		pointSize: 22,
+		pointSize: 24,
 		fontName: "Google Sans",
 		tooltip: { isHtml: true },
-		vAxis: { minValue: 0 }};								
+		vAxis: { minValue: 0 } };								
 
 	opts.title = 'Last Hour';
 	chart1.draw(
@@ -179,7 +176,7 @@ function drawCharts(dt /* datatable */)
 
 	opts.title = 'Last Day';
 	chart2.draw(
-		groupWindData(dt, 24 * 60 /* 1 day */, 30 /* minutes */), 
+		groupWindData(dt, 26 * 60 /* ~1 day */, 60 /* minutes */), 
 		opts);
 
 	opts.title = 'Last Week';
@@ -259,7 +256,7 @@ google.charts.setOnLoadCallback(function () {
 		}		
 	</style>
   </head>
-  <body>
+  <body bgcolor="white">
 	<div id="chart_errors"></div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
     <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
