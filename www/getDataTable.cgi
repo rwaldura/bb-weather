@@ -89,7 +89,8 @@ output_datatable $QUERY_STRING
 #read start start end end <<< "$QUERY_STRING"
 
 # conclude
-echo '	
+echo '
+		{ "c": [] }
 	]
 }
 '
