@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# Produce Javascript data used to initialize a DataTable.
+# Produce JSON data used to initialize a DataTable.
 # Format defined at
 # https://developers.google.com/chart/interactive/docs/reference#DataTable_toJSON
 #
 # This program takes 2 parameters on the query string: "start" and "end". 
-# "End" is optional. Both must be a Unix epoch time value.
+# "End" is optional. Both must be a Unix epoch time value in seconds.
 # 
 # As an optimization, we return all aggregates: by minute, by hour, etc. 
 # Up to the client to split out by aggregate. 
@@ -14,18 +14,12 @@
 readonly WEATHER_DB=/var/weather/weather.db
 db="${1:-$WEATHER_DB}"
 
-### For JSON, must use:
-### "Date(Year, Month, Day, Hours, Minutes, Seconds, Milliseconds)"
-### When using this Date String Representation, months are indexed 
-### starting at zero (January is month 0, December is month 11). 
-
 ##############################################################################
 ouput_json_rows()
 {
 	sql="
 		SELECT 
 			tstamp, 
-			'new Date(' || (tstamp * 1000) || ')',
 			period,
 			direction,
 			revolutions
@@ -34,16 +28,15 @@ ouput_json_rows()
 		WHERE
 			tstamp BETWEEN $1 AND $2"
 
-	IFS="|" # SQLite default column separator
-	sqlite3 "$db" "$sql" | while read ts dt per dir rpp
+	IFS="|" # SQLite column separator
+	sqlite3 "$db" "$sql" | while read ts per dir revs
 	do
 		echo '
 			{ "c": [
 				{ "v": '$ts' },
-				{ "v": '$dt' },
 				{ "v": '$per' },
 				{ "v": '$dir' },
-				{ "v": '$rpp' }
+				{ "v": '$revs' }
 			] },'
 	done
 }
@@ -62,29 +55,24 @@ output_datatable()
 # main
 
 # output entire document
-echo 'Content-type: text/javascript
+echo 'Content-type: application/json
 
-DATA_TABLE =
 {
 	"cols": [ 
-		{	// column 0
+		{
 			"id": "tstamp",
 			"type": "number"
 		},
-		{	// column 1
-			"id": "datim",
-			"type": "datetime"
-		},
-		{	// column 2
+		{
 			"id": "period",
 			"type": "number"
 		},
-		{	// column 3
+		{
 			"id": "direction",
 			"label": "Wind Direction (degrees)",
 			"type": "number"
 		},
-		{	// column 4
+		{
 			"id": "revs",
 			"label": "Wind Speed (revolutions per period)",
 			"type": "number"
@@ -100,8 +88,9 @@ output_datatable $QUERY_STRING
 # better (but unsupported, alas) would be:
 #read start start end end <<< "$QUERY_STRING"
 
-# conclude
-echo '	
+# conclude with an empty cell to avoid a dangling comma
+echo '
+		{ "c": [] }
 	]
 }
 '

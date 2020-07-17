@@ -61,6 +61,8 @@ const F_COLOR_PARAMS = {
 
 function angle2color(x, dim /* 'r' or 'g' or 'b' */)
 {
+	if (x < 0 || x >= 360) throw new Error("Invalid angle: " + x);
+	
 	const quadrant = Math.floor(x / 90);
 	
 	// y = ax + b
