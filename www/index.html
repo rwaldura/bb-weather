@@ -42,7 +42,7 @@ function dir2style(dt, row, col, period /* minutes */)
 }
 
 /***************************************************************************
- * see https://developers.google.com/chart/interactive/docs/reference#dateformat
+ * See https://developers.google.com/chart/interactive/docs/reference#dateformat
  */
 function format_timestamp(ts /* Date */, period /* minutes */)
 {
@@ -88,18 +88,14 @@ function to_mph(dt, row, col, T)
 // type: "number"
 // 
 // column index 1
-// id: "datim",
-// type: "datetime"
-// 
-// column index 2
 // id: "period",
 // type: "number"
 // 
-// column index 3
+// column index 2
 // id: "direction",
 // type: "number"
 // 
-// column index 4
+// column index 3
 // id: "revs",
 // type: "number"		
 function groupWindData(dt, lookback, period)
@@ -108,14 +104,14 @@ function groupWindData(dt, lookback, period)
 	period *= 60;	// to seconds
 	
 	// from above
-	var dir_col_idx = 3;	// column index for wind direction in degrees
-	var revs_col_idx = 4;	// column index for count of revolutions
+	var dir_col_idx = 2;	// column index for wind direction in degrees
+	var revs_col_idx = 3;	// column index for count of revolutions
 
 	var view = new google.visualization.DataView(dt);
 
 	// WHERE period=1 AND tstamp > 1 day ago
 	view.setRows(view.getFilteredRows([
-		{ column: 2, value: 1 }, // WHERE period = 1 (always)
+		{ column: 1, value: 1 }, // WHERE period = 1 (always)
 		{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
 
 	if (period > 1 * 60) // further grouping is necessary
@@ -127,24 +123,23 @@ function groupWindData(dt, lookback, period)
 			[{ column: 0,
 				modifier: function(t) { return period * Math.floor(t / period) }, 
 				type: 'number' }],
-			// aggregate columns: MIN(datim), AVG(dir), SUM(revs)
-			[{ column: 1,
-				aggregation: google.visualization.data.min, 
-				type: 'datetime' },
-			{ column: 3,
+			// aggregate columns: AVG(dir), SUM(revs)
+			{ column: 2,
 				aggregation: google.visualization.data.avg, 
 				type: 'number' },
-			{ column: 4, 
+			{ column: 3, 
 				aggregation: google.visualization.data.sum, 
 				type: 'number' }]);
 			
 		view = new google.visualization.DataView(grouped);
-		dir_col_idx = 2;
-		revs_col_idx = 3;
+		dir_col_idx = 1;
+		revs_col_idx = 2;
 	}
 
 	view.setColumns([
-		1,  // timestamp, as a Date object
+		{ id: 'date_time', // timestamp, as a Date object
+			type: 'date', 
+			calc: function(dt, row) { const ts = dt.getValue(row, 0); return new Date(ts * 1000) } }, 
 		{ id: 'speed_mph', 
 			label: "Wind Speed",
 			type: 'number', 
@@ -192,29 +187,16 @@ function drawCharts(dt /* datatable */)
 }
 
 /****************************************************************************/
-function loadDataAndUpdateCharts(text)
+function loadDataAndUpdateCharts(json)
 {
 	try
 	{
-		// SECURITY BUG ALERT: I'm executing unsafe data, that's come off the network
-		var DATA_TABLE;
-		eval(text); // defines DATA_TABLE
-
-		if (DATA_TABLE 
-			&& DATA_TABLE.cols && DATA_TABLE.cols.length > 0
-			&& DATA_TABLE.rows && DATA_TABLE.rows.length > 0)
-		{
-			clearError();
-			drawCharts(new google.visualization.DataTable(DATA_TABLE));
-		} 
-		else
-		{
-			showError("Error loading chart data: invalid DATA_TABLE");			
-		}
+		clearError();
+		drawCharts(new google.visualization.DataTable(json));
 	}
 	catch (e)
 	{
-		showError("Error loading chart data: invalid DATA_TABLE: " + e.message);
+		showError("Error drawing charts: " + e.message);
 	}	
 }
 
@@ -222,7 +204,7 @@ function loadDataAndUpdateCharts(text)
  * main()
  */
 const xhr = new XMLHttpRequest();
-xhr.responseType = "text"; // "json"
+xhr.responseType = "json";
 xhr.onerror = function(e) {
 	showError("Error loading chart data: " + e.message);
 };
@@ -230,7 +212,7 @@ xhr.onload = function() {
 	if (xhr.status == 200) // HTTP OK
 	{
 		// console.log("XHR response = " + xhr.responseText.substring(0, 100));
-		loadDataAndUpdateCharts(xhr.responseText);
+		loadDataAndUpdateCharts(xhr.response);
 	}
 	else
 	{
@@ -242,10 +224,11 @@ function refreshCharts()
 {
 	xhr.open("GET", "getDataTable.cgi", true);
 	xhr.send();
+	// next, the onload handler gets called
 }
 
 // refresh charts every minute
-setInterval(refreshCharts, 60 * 1000 /* ms */);
+setInterval(refreshCharts, 66666 /* ms */);
 
 google.charts.load('current', { 'packages': ['corechart','table'] });
 var chart1, chart2, chart3;
@@ -280,11 +263,12 @@ google.charts.setOnLoadCallback(function () {
 		#chart_errors {
 			font-size: 20;
 			color: red;
+			text-align: center;
 		}	
 	</style>
   </head>
   <body bgcolor="white">
-	<div id="chart_errors">Loading...</div>
+	<div id="chart_errors">Loading... Please wait</div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
     <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
     <div id="chart_speed_last_day" style="width: 1280; height: 360;"></div>				
