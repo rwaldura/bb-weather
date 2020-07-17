@@ -33,10 +33,10 @@ ouput_json_rows()
 	do
 		echo '
 			{ "c": [
-				{ "v": "'$ts'" },
-				{ "v": "'$per'" },
-				{ "v": "'$dir'" },
-				{ "v": "'$revs'" }
+				{ "v": '$ts' },
+				{ "v": '$per' },
+				{ "v": '$dir' },
+				{ "v": '$revs' }
 			] },'
 	done
 }
