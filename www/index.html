@@ -44,8 +44,10 @@ function dir2style(dt, row, col, period /* minutes */)
 /***************************************************************************
  * See https://developers.google.com/chart/interactive/docs/reference#dateformat
  */
-function format_timestamp(ts /* Date */, period /* minutes */)
+function format_timestamp(ts /* Unix timestamp */, period /* minutes */)
 {
+	const date = new Date(ts * 1000);
+
 	var format;
 	if (period < 60) // show minutes
 		format = "h:mm aa";
@@ -53,7 +55,7 @@ function format_timestamp(ts /* Date */, period /* minutes */)
 		format = "EEE MMM d, h aa";
 
 	const f = new google.visualization.DateFormat({ pattern: format });
-	return f.formatValue(ts);
+	return f.formatValue(date);
 }
 
 /***************************************************************************
@@ -80,7 +82,9 @@ function to_mph(dt, row, col, T)
 	return ws.mph;
 }
 
-/****************************************************************************/
+/***************************************************************************
+ * See https://developers.google.com/chart/interactive/docs/reference#group 
+ */
 // data is defined as:
 //
 // column index 0
@@ -110,7 +114,7 @@ function groupWindData(dt, lookback, period)
 	var view = new google.visualization.DataView(dt);
 
 	// WHERE period=1 AND tstamp > 1 day ago
-	view.setRows(view.getFilteredRows([
+	view.setRows( view.getFilteredRows( [
 		{ column: 1, value: 1 }, // WHERE period = 1 (always)
 		{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
 
@@ -138,8 +142,8 @@ function groupWindData(dt, lookback, period)
 
 	view.setColumns([
 		{ id: 'date_time', // timestamp, as a Date object
-			type: 'date', 
-			calc: function(dt, row) { const ts = dt.getValue(row, 0); return new Date(ts * 1000) } }, 
+			type: 'datetime', 
+			calc: function(dt, row) { let t = dt.getValue(row, 0); return new Date(t * 1000) } }, 
 		{ id: 'speed_mph', 
 			label: "Wind Speed",
 			type: 'number', 
@@ -154,7 +158,7 @@ function groupWindData(dt, lookback, period)
 			type: 'string', 
 			calc: function(dt, row) { return tooltip(dt, row, 1, dir_col_idx, revs_col_idx, period / 60) } } ]);
 
-	return view;	
+	return view;
 }
 
 /****************************************************************************/
