@@ -7,14 +7,19 @@
 
     <script type="text/javascript">
 /****************************************************************************/
-function error(message)
+function showError(message)
 {
 	console.log("*** ERROR " + message);
 	const e = document.getElementById('chart_errors');
 	e.textContent = message;
 }
 
-/****************************************************************************/
+function clearError()
+{
+	const e = document.getElementById('chart_errors');
+	e.textContent = '';
+}
+
 function debug(data)
 {
 	const t = new google.visualization.Table(document.getElementById('data_debug'));
@@ -77,6 +82,7 @@ function to_mph(dt, row, col, T)
 
 /****************************************************************************/
 // data is defined as:
+//
 // column index 0
 // id: "tstamp",
 // type: "number"
@@ -185,33 +191,50 @@ function drawCharts(dt /* datatable */)
 		opts);	
 }
 
+/****************************************************************************/
+function loadDataAndUpdateCharts(text)
+{
+	try
+	{
+		// SECURITY BUG ALERT: I'm executing unsafe data, that's come off the network
+		var DATA_TABLE;
+		eval(text); // defines DATA_TABLE
+
+		if (DATA_TABLE 
+			&& DATA_TABLE.cols && DATA_TABLE.cols.length > 0
+			&& DATA_TABLE.rows && DATA_TABLE.rows.length > 0)
+		{
+			clearError();
+			drawCharts(new google.visualization.DataTable(DATA_TABLE));
+		} 
+		else
+		{
+			showError("Error loading chart data: invalid DATA_TABLE");			
+		}
+	}
+	catch (e)
+	{
+		showError("Error loading chart data: invalid DATA_TABLE: " + e.message);
+	}	
+}
+
 /***************************************************************************
  * main()
  */
 const xhr = new XMLHttpRequest();
 xhr.responseType = "text"; // "json"
 xhr.onerror = function(e) {
-	error("Error loading chart data: " + e);
+	showError("Error loading chart data: " + e.message);
 };
 xhr.onload = function() {
-	if (xhr.status != 200) // HTTP OK
+	if (xhr.status == 200) // HTTP OK
 	{
-		error("Error loading chart data: " + xhr.status + " " + xhr.responseText);
+		// console.log("XHR response = " + xhr.responseText.substring(0, 100));
+		loadDataAndUpdateCharts(xhr.responseText);
 	}
 	else
 	{
-		// console.log("XHR response = " + xhr.responseText.substring(0, 100));
-
-		// SECURITY BUG ALERT: I'm executing unsafe data, that's come off the network
-		var DATA_TABLE;
-		eval(xhr.responseText); // defines DATA_TABLE
-
-		if (DATA_TABLE 
-			&& DATA_TABLE.cols && DATA_TABLE.cols.length > 0
-			&& DATA_TABLE.rows && DATA_TABLE.rows.length > 0)
-			drawCharts(new google.visualization.DataTable(DATA_TABLE));
-		else
-			error("Invalid DATA_TABLE received");
+		showError("Error loading chart data: status=" + xhr.status + "/" + xhr.statusText + " text=" + xhr.responseText);
 	}
 };
 
@@ -242,22 +265,26 @@ google.charts.setOnLoadCallback(function () {
 			border: 0;
 	        margin: 0;
 			padding: 0;
+			font-family: "Google Sans";
 	    }
 		.tooltip {
-			padding: 5px 5px 5px 5px;
+			padding: 5;
 			font-size: 14;
-			font-family: "Google Sans";
 		}
 		.tooltip .timestamp {
 			font-weight: bold;
 		}
 		.tooltip .alt_units {
 			font-size: 10;
-		}		
+		}	
+		#chart_errors {
+			font-size: 20;
+			color: red;
+		}	
 	</style>
   </head>
   <body bgcolor="white">
-	<div id="chart_errors"></div>
+	<div id="chart_errors">Loading...</div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
     <div id="chart_speed_last_hour" style="width: 1280; height: 360;"></div>				
     <div id="chart_speed_last_day" style="width: 1280; height: 360;"></div>				
