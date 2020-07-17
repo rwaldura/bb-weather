@@ -88,7 +88,7 @@ output_datatable $QUERY_STRING
 # better (but unsupported, alas) would be:
 #read start start end end <<< "$QUERY_STRING"
 
-# conclude
+# conclude with an empty cell to avoid a dangling comma
 echo '
 		{ "c": [] }
 	]

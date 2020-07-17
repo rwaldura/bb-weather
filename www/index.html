@@ -129,7 +129,7 @@ function groupWindData(dt, lookback, period)
 				type: 'number' },
 			{ column: 3, 
 				aggregation: google.visualization.data.sum, 
-				type: 'number' }]);
+				type: 'number' });
 			
 		view = new google.visualization.DataView(grouped);
 		dir_col_idx = 1;
@@ -209,14 +209,14 @@ xhr.onerror = function(e) {
 	showError("Error loading chart data: " + e.message);
 };
 xhr.onload = function() {
-	if (xhr.status == 200) // HTTP OK
+	if (xhr.status == 200 // HTTP OK
+		&& xhr.response)
 	{
-		// console.log("XHR response = " + xhr.responseText.substring(0, 100));
 		loadDataAndUpdateCharts(xhr.response);
 	}
 	else
 	{
-		showError("Error loading chart data: status=" + xhr.status + "/" + xhr.statusText + " text=" + xhr.responseText);
+		showError("Error loading chart data: status=" + xhr.status + " resp=" + xhr.response);
 	}
 };
 
