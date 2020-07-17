@@ -20,10 +20,10 @@ function clearError()
 	e.textContent = '';
 }
 
-function debug(data)
+function debug(dt)
 {
 	const t = new google.visualization.Table(document.getElementById('data_debug'));
-	t.draw(data, { showRowNumber: true });
+	t.draw(dt, { showRowNumber: true });
 }
 
 /***************************************************************************
@@ -64,8 +64,8 @@ function format_timestamp(ts /* Unix timestamp */, period /* minutes */)
  */
 function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
 {
-	const d = format_direction(dt.getValue(row, dir_col));
 	const t = format_timestamp(dt.getValue(row, ts_col), period);
+	const d = format_direction(dt.getValue(row, dir_col));
 	const s = format_speed(dt.getValue(row, revs_col), period);
 	return `<div class="tooltip">
 		<span class="timestamp">${t}</span><br>
@@ -83,7 +83,6 @@ function to_mph(dt, row, col, T)
 }
 
 /***************************************************************************
- * See https://developers.google.com/chart/interactive/docs/reference#group 
  */
 // data is defined as:
 //
@@ -107,37 +106,36 @@ function groupWindData(dt, lookback, period)
 	lookback *= 60;	// to seconds
 	period *= 60;	// to seconds
 	
-	// from above
-	var dir_col_idx = 2;	// column index for wind direction in degrees
-	var revs_col_idx = 3;	// column index for count of revolutions
-
 	var view = new google.visualization.DataView(dt);
 
 	// WHERE period=1 AND tstamp > 1 day ago
 	view.setRows( view.getFilteredRows( [
-		{ column: 1, value: 1 }, // WHERE period = 1 (always)
-		{ column: 0, minValue: view.getColumnRange(0).max - lookback }]));
+		{ column: 1, value: 1 },
+		{ column: 0, minValue: view.getColumnRange(0).max - lookback } ]));
 
 	if (period > 1 * 60) // further grouping is necessary
 	{
 		// quantize into time windows of "period" seconds
+		// see https://developers.google.com/chart/interactive/docs/reference#group 
 		const grouped = google.visualization.data.group(
 			view,
 			// group by timestamp over the period given
 			[{ column: 0,
 				modifier: function(t) { return period * Math.floor(t / period) }, 
 				type: 'number' }],
-			// aggregate columns: AVG(dir), SUM(revs)
+			// aggregate columns: MIN(period), AVG(dir), SUM(revs)
+			// MIN(period) isn't actually used, it's there merely to preserve column indices
+			[ { column: 1,
+				aggregation: google.visualization.data.min, 
+				type: 'number' },
 			{ column: 2,
 				aggregation: google.visualization.data.avg, 
 				type: 'number' },
 			{ column: 3, 
 				aggregation: google.visualization.data.sum, 
-				type: 'number' });
+				type: 'number' } ]);
 			
 		view = new google.visualization.DataView(grouped);
-		dir_col_idx = 1;
-		revs_col_idx = 2;
 	}
 
 	view.setColumns([
@@ -147,16 +145,16 @@ function groupWindData(dt, lookback, period)
 		{ id: 'speed_mph', 
 			label: "Wind Speed",
 			type: 'number', 
-			calc: function(dt, row) { return to_mph(dt, row, revs_col_idx, period) } }, 
+			calc: function(dt, row) { return to_mph(dt, row, 3 /* revs */, period) } }, 
 		{ id: 'point_style', 
 			role: 'style',
 			type: 'string', 
-			calc: function(dt, row) { return dir2style(dt, row, dir_col_idx, period / 60) } },
+			calc: function(dt, row) { return dir2style(dt, row, 2 /* dir */, period / 60) } },
 		{ id: 'point_tooltip', 
 			role: 'tooltip', 
 			properties: { html: true },
 			type: 'string', 
-			calc: function(dt, row) { return tooltip(dt, row, 1, dir_col_idx, revs_col_idx, period / 60) } } ]);
+			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period / 60) } } ]);
 
 	return view;
 }
