@@ -165,6 +165,7 @@ function drawCharts(dt /* datatable */)
 	const opts = {
 		legend: 'none',
 		colors: ['#cccccc'], 
+		backgroundColor: '#FFF0DE',
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 24,
@@ -212,7 +213,7 @@ xhr.onerror = function(e) {
 };
 xhr.onload = function() {
 	if (xhr.status == 200 // HTTP OK
-		&& xhr.response)
+		&& xhr.response) // JSON parsed successfully
 	{
 		loadDataAndUpdateCharts(xhr.response);
 	}
