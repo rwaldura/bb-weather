@@ -232,7 +232,7 @@ function parseSearchParameters()
 	const params = new URLSearchParams(window.location.search);
 	
 	const g = {
-		bgColor: (params.get("colors") === "muted") ? "#FFF0DE" : "white",
+		bgColor: (params.get("colors") === "muted") ? "#C9B091" : "white",
 		speed: UNITS_OF_MEASUREMENT[ params.get("speed") || "mph" ],
 		temp:  UNITS_OF_MEASUREMENT[ params.get("temp")  || "F"   ],
 	};
