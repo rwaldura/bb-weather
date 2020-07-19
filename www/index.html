@@ -183,10 +183,10 @@ function drawCharts(dt /* datatable */)
 		legend: 'none',
 		colors: ['#cccccc'], 
 		backgroundColor: G.bgColor,
-		chartArea: { left: 40, top: 30, width: '95%' },
+		chartArea: { left: 50, top: 40, width: '90%', height: '80%' },
 		lineWidth: 0,
 		pointsVisible: true,
-		pointSize: 18,
+		pointSize: 20,
 		fontName: "Google Sans",
 		tooltip: { isHtml: true },
 		vAxis: { minValue: 0 } };								
@@ -208,7 +208,7 @@ function drawCharts(dt /* datatable */)
 }
 
 /****************************************************************************/
-function loadDataAndUpdateCharts(json)
+function updateCharts(json)
 {
 	try
 	{
@@ -228,13 +228,13 @@ const MPH_MS = 2.2352;		// ... to meters per second
 const MPH_KNOTS = 0.868976;	// ... to knots
 
 const UNITS_OF_MEASUREMENT = {
-	"mph":   { format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
-	"kmh":   { format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
-	"ms":    { format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
-	"knots": { format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
+	"mph":   { label: "Miles per hour", format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
+	"kmh":   { label: "Km/hour",        format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
+	"ms":    { label: "Meter/sec",      format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
+	"knots": { label: "Knots",          format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
 
-	"C": { format: function(t) { return t + "&deg;C" }, convert: function(t) { return t } },
-	"F": { format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
+	"C": { label: "Celsius",    format: function(t) { return t + "&deg;C" }, convert: function(t) { return t } },
+	"F": { label: "Fahrenheit", format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
 };
 
 function parseSearchParameters()
@@ -256,7 +256,40 @@ function parseSearchParameters()
 function changeSpeedUnit(speedUnit)
 {
 	G.speed = UNITS_OF_MEASUREMENT[speedUnit];
-	drawCharts();
+	drawCharts(/* re-use current datatable */);
+}
+
+/***************************************************************************/
+function newDataTableRequest()
+{
+	const xhr = new XMLHttpRequest();
+	xhr.responseType = "json";
+	
+	xhr.onerror = function(e) {
+		showError("Loading chart data: " + e.message);
+	};
+	
+	xhr.onload = function() {
+		if (xhr.status == 200 // HTTP OK
+			&& xhr.response) // JSON parsed successfully
+		{
+			updateCharts(xhr.response);
+		}
+		else
+		{
+			showError("Loading chart data: status=" + xhr.status + " resp=" + xhr.response);
+		}
+	};
+
+	return xhr;
+}
+
+/***************************************************************************/
+function loadChartData()
+{
+	G.request.open("GET", "getDataTable.cgi", true);
+	G.request.send();
+	// the XHR onload handler is called next
 }
 
 /***************************************************************************
@@ -264,33 +297,10 @@ function changeSpeedUnit(speedUnit)
  */
 // global settings 
 const G = parseSearchParameters();
-
-const xhr = new XMLHttpRequest();
-xhr.responseType = "json";
-xhr.onerror = function(e) {
-	showError("Loading chart data: " + e.message);
-};
-xhr.onload = function() {
-	if (xhr.status == 200 // HTTP OK
-		&& xhr.response) // JSON parsed successfully
-	{
-		loadDataAndUpdateCharts(xhr.response);
-	}
-	else
-	{
-		showError("Loading chart data: status=" + xhr.status + " resp=" + xhr.response);
-	}
-};
-
-function refreshCharts()
-{
-	xhr.open("GET", "getDataTable.json", true);
-	xhr.send();
-	// next, the onload handler gets called
-}
+G.request = newDataTableRequest();
 
 // refresh charts every minute
-setInterval(refreshCharts, 66666 /* ms */);
+setInterval(loadChartData, 66666 /* ms */);
 
 google.charts.load('current', { 'packages': ['corechart','table'] });
 var chart1, chart2, chart3;
@@ -302,11 +312,11 @@ google.charts.setOnLoadCallback(function () {
 	chart3 = new google.visualization.AreaChart(
 		document.getElementById('chart_speed_last_week'));
 
-	refreshCharts();
+	loadChartData();
 });	
     </script>
 	<style>
-	    body, div, td, select {
+	    body, div, td {
 			border: 0;
 	        margin: 0;
 			padding: 0;
@@ -323,16 +333,34 @@ google.charts.setOnLoadCallback(function () {
 			font-size: 10;
 		}	
 		#chart_errors {
-			font-size: 20;
+			font-size: 18;
 			color: red;
 			text-align: center;
+		}	
+		#unit_selector {
+			text-align: right;
+		}	
+		#speed_unit {
+			font-family: "Google Sans";
+			font-size: 12;
 		}	
 	</style>
   </head>
   <body bgcolor="white">
-	<div id="chart_errors">Loading... Please wait</div>
 	<!-- sized to fit on 720p screen: 1280x720 -->
 	<table>
+		<tr>
+			<td><div id="chart_errors">Loading... Please wait</div></td>
+			<td>
+				<div id="unit_selector">
+					<select id="speed_unit" onchange="changeSpeedUnit(this.value)">
+						<option value="mph">Miles per hour</option>
+						<option value="kmh">Kilometers per hour</option>
+						<option value="ms">Meters per second</option>
+						<option value="knots">Knots</option>
+					</select>
+				</div>				
+			</td>
 		<tr>
 			<td><div id="chart_speed_last_hour" style="width: 640; height: 360;"></div></td>
 			<td><div id="chart_speed_last_day" style="width: 640; height: 360;"></div></td>
@@ -341,14 +369,11 @@ google.charts.setOnLoadCallback(function () {
 			<td colspan="2"><div id="chart_speed_last_week" style="width: 1280; height: 360;"></div></td>
 		</tr>
 	</table>
-	<div id="unit_selector">
-		<select id="speed_unit" name="speed" onchange="changeSpeedUnit(this.value)">
-			<option value="mph">Miles per hour</option>
-			<option value="kmh">Kilometers per hour</option>
-			<option value="ms">Meters per second</option>
-			<option value="knots">Knots</option>
-		</select>
-	</div>				
 	<div id="data_debug"></div>
   </body>
+  <script>
+	// 
+	const speedUnitSelector = document.getElementById('speed_unit');
+	// speedUnitSelector.value = G.speed;
+  </script>
 </html>
