@@ -44,7 +44,7 @@ function dir2style(dt, row, col, period /* minutes */)
 /***************************************************************************
  * See https://developers.google.com/chart/interactive/docs/reference#dateformat
  */
-function format_timestamp(ts /* Unix timestamp */, period /* minutes */)
+function formatTimestamp(ts /* Unix timestamp */, period /* minutes */)
 {
 	const date = new Date(ts * 1000);
 
@@ -58,28 +58,36 @@ function format_timestamp(ts /* Unix timestamp */, period /* minutes */)
 	return f.formatValue(date);
 }
 
+/****************************************************************************/
+function formatSpeed(P, T /* minutes */)
+{
+	var v = wind_speed(P, T * 60); // in canonical unit
+	v = G.speed.convert(v); // to current unit
+	return G.speed.format(v);
+}
+
 /***************************************************************************
  * Custom tooltip
  * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
  */
 function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
 {
-	const t = format_timestamp(dt.getValue(row, ts_col), period);
-	const d = format_direction(dt.getValue(row, dir_col));
-	const s = format_speed(dt.getValue(row, revs_col), period);
+	const t = formatTimestamp(dt.getValue(row, ts_col), period);
+	const d = formatDirection(dt.getValue(row, dir_col));
+	const s = formatSpeed(dt.getValue(row, revs_col), period);
 	return `<div class="tooltip">
 		<span class="timestamp">${t}</span><br>
 		${d}<br> 
-		${s.mph} mph
+		${s}
 		</div>`;
 }
 
 /****************************************************************************/
-function to_mph(dt, row, col, T)
+function windSpeed(dt, row, col, T)
 {
 	const P = dt.getValue(row, col);
-	const ws = wind_speed(P, T);
-	return ws.mph;
+	const v = wind_speed(P, T);
+	return G.speed.convert(v);
 }
 
 /***************************************************************************
@@ -145,7 +153,7 @@ function groupWindData(dt, lookback, period)
 		{ id: 'speed_mph', 
 			label: "Wind Speed",
 			type: 'number', 
-			calc: function(dt, row) { return to_mph(dt, row, 3 /* revs */, period) } }, 
+			calc: function(dt, row) { return windSpeed(dt, row, 3 /* revs */, period) } }, 
 		{ id: 'point_style', 
 			role: 'style',
 			type: 'string', 
@@ -165,7 +173,7 @@ function drawCharts(dt /* datatable */)
 	const opts = {
 		legend: 'none',
 		colors: ['#cccccc'], 
-		backgroundColor: '#FFF0DE',
+		backgroundColor: G.bgColor,
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 24,
@@ -199,17 +207,49 @@ function loadDataAndUpdateCharts(json)
 	}
 	catch (e)
 	{
-		showError("Error drawing charts: " + e.message);
+		showError("Drawing charts: " + e + " " + e.message);
 	}	
+}
+
+/****************************************************************************/
+// convert miles per hour...
+const MPH_KMH = 1.609344;	// ... to kilometers per hour
+const MPH_MS = 2.2352;		// ... to meters per second
+const MPH_KNOTS = 0.868976;	// ... to knots
+
+const UNITS_OF_MEASUREMENT = {
+	"mph":    { format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
+	"kmh":    { format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
+	"ms":     { format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
+	"knots":  { format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
+
+	"C": { format: function(t) { return t + "&deg;C" }, convert: function(t) { return t } },
+	"F": { format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
+};
+
+function parseSearchParameters()
+{
+	const params = new URLSearchParams(window.location.search);
+	
+	const g = {
+		bgColor: (params.get("colors") === "muted") ? "#FFF0DE" : "white",
+		speed: UNITS_OF_MEASUREMENT[ params.get("speed") || "mph" ],
+		temp:  UNITS_OF_MEASUREMENT[ params.get("temp")  || "F"   ],
+	};
+
+	return g;
 }
 
 /***************************************************************************
  * main()
  */
+// global settings 
+const G = parseSearchParameters();
+
 const xhr = new XMLHttpRequest();
 xhr.responseType = "json";
 xhr.onerror = function(e) {
-	showError("Error loading chart data: " + e.message);
+	showError("Loading chart data: " + e.message);
 };
 xhr.onload = function() {
 	if (xhr.status == 200 // HTTP OK
@@ -219,7 +259,7 @@ xhr.onload = function() {
 	}
 	else
 	{
-		showError("Error loading chart data: status=" + xhr.status + " resp=" + xhr.response);
+		showError("Loading chart data: status=" + xhr.status + " resp=" + xhr.response);
 	}
 };
 
