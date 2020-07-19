@@ -1,7 +1,7 @@
 /***************************************************************************
  * Map an angle in degrees to a compass heading.
  */
-function format_direction(dir /* angle in degrees */)
+function formatDirection(dir /* angle in degrees */)
 {
 	const HEADINGS = [ 
 		"North", "NNE", "Northeast", 
@@ -23,30 +23,8 @@ function format_direction(dir /* angle in degrees */)
  */
 function wind_speed(P, T /* seconds */)
 {
-	// convert miles per hour...
-	const MPH_KMH = 1.609344;	// ... to kilometers per hour
-	const MPH_MS = 2.2352;		// ... to meters per second
-	const MPH_KNOTS = 0.868976;	// ... to knots
-
 	const V = (9 * P) / (4 * T);
-
-	return {
-		mph: V,
-		kmh: V * MPH_KMH,
-		ms: V / MPH_MS,
-		knots: V * MPH_KNOTS };
-}
-
-/****************************************************************************/
-function format_speed(P, T /* minutes */)
-{
-	const ws = wind_speed(P, T * 60);
-	
-	return { 
-		mph: Math.round(ws.mph),
-		kmh: Math.round(ws.kmh),
-		ms: ws.ms.toFixed(1),
-		knots: Math.round(ws.knots) };
+	return V;
 }
 
 /***************************************************************************
