@@ -184,6 +184,8 @@ function drawCharts(dt /* datatable */)
 		colors: ['#cccccc'], 
 		backgroundColor: G.bgColor,
 		chartArea: { left: 50, top: 40, width: '90%', height: '80%' },
+		// theme: "maximized", // bof
+		titleTextStyle: { fontSize: 14 },
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 20,
@@ -191,17 +193,17 @@ function drawCharts(dt /* datatable */)
 		tooltip: { isHtml: true },
 		vAxis: { minValue: 0 } };								
 
-	opts.title = 'Last 20 minutes';
+	opts.title = 'Recently';
 	chart1.draw(
 		groupWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
 		opts);
 
-	opts.title = 'Last Day';
+	opts.title = 'Today';
 	chart2.draw(
 		groupWindData(dt, 26 * 60 /* ~1 day */, 60 /* minutes */), 
 		opts);
 
-	opts.title = 'Last Week';
+	opts.title = 'This Week';
 	chart3.draw(
 		groupWindData(dt, 7 * 24 * 60 /* 1 week */, 2 * 60 /* 2 hours */), 
 		opts);	
@@ -228,11 +230,11 @@ const MPH_MS = 2.2352;		// ... to meters per second
 const MPH_KNOTS = 0.868976;	// ... to knots
 
 const UNITS_OF_MEASUREMENT = {
-	"mph":   { label: "Miles per hour", format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
-	"kmh":   { label: "Km/hour",        format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
-	"ms":    { label: "Meter/sec",      format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
-	"knots": { label: "Knots",          format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
-
+	"mph":   { unit: "mph",   label: "Miles per hour", format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
+	"kmh":   { unit: "kmh",   label: "Km/hour",        format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
+	"ms":    { unit: "ms",    label: "Meter/sec",      format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
+	"knots": { unit: "knots", label: "Knots",          format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
+	// unused
 	"C": { label: "Celsius",    format: function(t) { return t + "&deg;C" }, convert: function(t) { return t } },
 	"F": { label: "Fahrenheit", format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
 };
@@ -243,8 +245,7 @@ function parseSearchParameters()
 	
 	const g = {
 		bgColor: (params.get("colors") === "muted") ? "#C9B091" : "white",
-		speed: UNITS_OF_MEASUREMENT[ params.get("speed") || "mph" ],
-		temp:  UNITS_OF_MEASUREMENT[ params.get("temp")  || "F"   ],
+		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
 	};
 
 	return g;
@@ -257,6 +258,7 @@ function changeSpeedUnit(speedUnit)
 {
 	G.speed = UNITS_OF_MEASUREMENT[speedUnit];
 	drawCharts(/* re-use current datatable */);
+	// edit the current URL and add it to the history? 
 }
 
 /***************************************************************************/
@@ -372,8 +374,8 @@ google.charts.setOnLoadCallback(function () {
 	<div id="data_debug"></div>
   </body>
   <script>
-	// 
+	// initialize the selector on page load
 	const speedUnitSelector = document.getElementById('speed_unit');
-	// speedUnitSelector.value = G.speed;
+	speedUnitSelector.value = G.speed.unit;
   </script>
 </html>
