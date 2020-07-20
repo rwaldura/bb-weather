@@ -220,7 +220,7 @@ function updateCharts(json)
 	}
 	catch (e)
 	{
-		showError("Drawing charts: " + e + " " + e.message);
+		showError("Drawing charts: " + e);
 	}	
 }
 
@@ -268,9 +268,7 @@ function newDataTableRequest()
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = "json";
 	
-	xhr.onerror = function(e) {
-		showError("Loading chart data: " + e.message);
-	};
+	xhr.onerror = function(e) { showError("Loading chart data: " + e) };
 	
 	xhr.onload = function() {
 		if (xhr.status == 200 // HTTP OK
@@ -305,7 +303,7 @@ G.request = newDataTableRequest();
 // refresh charts every minute
 setInterval(loadChartData, 66666 /* ms */);
 
-google.charts.load('current', { 'packages': ['corechart','table'] });
+google.charts.load('current', { 'packages': ['corechart', 'table'] });
 var chart1, chart2, chart3;
 google.charts.setOnLoadCallback(function () {
 	chart1 = new google.visualization.AreaChart(
