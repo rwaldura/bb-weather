@@ -12,12 +12,13 @@ function showError(message)
 	console.log("*** ERROR " + message);
 	const e = document.getElementById('chart_errors');
 	e.textContent = message;
+	e.style.display = 'block';
 }
 
 function clearError()
 {
 	const e = document.getElementById('chart_errors');
-	e.textContent = '';
+	e.style.display = 'none';
 }
 
 function debug(dt)
@@ -182,7 +183,7 @@ function drawCharts(dt /* datatable */)
 	const opts = {
 		legend: 'none',
 		colors: ['#cccccc'], 
-		backgroundColor: G.bgColor,
+		backgroundColor: G.color,
 		chartArea: { left: 50, top: 40, width: '90%', height: '80%' },
 		// theme: "maximized", // bof
 		titleTextStyle: { fontSize: 14 },
@@ -193,7 +194,7 @@ function drawCharts(dt /* datatable */)
 		tooltip: { isHtml: true },
 		vAxis: { minValue: 0 } };								
 
-	opts.title = 'Recently';
+	opts.title = 'Now';
 	chart1.draw(
 		groupWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
 		opts);
@@ -219,7 +220,7 @@ function updateCharts(json)
 	}
 	catch (e)
 	{
-		showError("Drawing charts: " + e + " " + e.message);
+		showError("Drawing charts: " + e);
 	}	
 }
 
@@ -244,7 +245,7 @@ function parseSearchParameters()
 	const params = new URLSearchParams(window.location.search);
 	
 	const g = {
-		bgColor: (params.get("colors") === "muted") ? "#C9B091" : "white",
+		color: (params.get("colors") === "muted") ? "#C9B091" : "white",
 		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
 	};
 
@@ -267,9 +268,7 @@ function newDataTableRequest()
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = "json";
 	
-	xhr.onerror = function(e) {
-		showError("Loading chart data: " + e.message);
-	};
+	xhr.onerror = function(e) { showError("Loading chart data: " + e) };
 	
 	xhr.onload = function() {
 		if (xhr.status == 200 // HTTP OK
@@ -304,76 +303,94 @@ G.request = newDataTableRequest();
 // refresh charts every minute
 setInterval(loadChartData, 66666 /* ms */);
 
-google.charts.load('current', { 'packages': ['corechart','table'] });
+google.charts.load('current', { 'packages': ['corechart', 'table'] });
 var chart1, chart2, chart3;
 google.charts.setOnLoadCallback(function () {
 	chart1 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_hour'));
+		document.getElementById('chart1'));
 	chart2 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_day'));
+		document.getElementById('chart2'));
 	chart3 = new google.visualization.AreaChart(
-		document.getElementById('chart_speed_last_week'));
+		document.getElementById('chart3'));
 
 	loadChartData();
 });	
     </script>
 	<style>
-	    body, div, td {
-			border: 0;
-	        margin: 0;
-			padding: 0;
-			font-family: "Google Sans";
-	    }
-		.tooltip {
-			padding: 5;
-			font-size: 14;
-		}
-		.tooltip .timestamp {
-			font-weight: bold;
-		}
-		.tooltip .alt_units {
-			font-size: 10;
-		}	
-		#chart_errors {
-			font-size: 18;
-			color: red;
-			text-align: center;
-		}	
-		#unit_selector {
-			text-align: right;
-		}	
-		#speed_unit {
-			font-family: "Google Sans";
-			font-size: 12;
-		}	
+body, div, td {
+	border: 0;
+    margin: 0;
+	padding: 0;
+	font-family: "Google Sans";
+}
+
+.tooltip {
+	padding: 5;
+	font-size: 14;
+}
+.tooltip .timestamp {
+	font-weight: bold;
+}
+.tooltip .alt_units {
+	font-size: 10;
+}	
+
+#chart_errors {
+	position: absolute;
+	top: 200;
+	left: 0;
+	width: 100%;
+	font-size: 18;
+	color: red;
+	text-align: center;
+}	
+
+#speed_unit {
+	font-family: "Google Sans";
+	font-size: 12;
+	margin-left: 5;
+}	
+
+/* sized to fit on 720p screen: 1280x720 */
+#chart1 {
+	width: 640; 
+	height: 348;
+}
+#chart2 {
+	width: 640; 
+	height: 348;
+	position: absolute;
+	top: 0;
+	left: 640;
+}
+#chart3 {
+	width: 1280; 
+	height: 348;
+}
+#footer {
+	height: 24;
+	text-align: center;
+}
 	</style>
   </head>
-  <body bgcolor="white">
-	<!-- sized to fit on 720p screen: 1280x720 -->
-	<table>
-		<tr>
-			<td><div id="chart_errors">Loading... Please wait</div></td>
-			<td>
-				<div id="unit_selector">
-					<select id="speed_unit" onchange="changeSpeedUnit(this.value)">
-						<option value="mph">Miles per hour</option>
-						<option value="kmh">Kilometers per hour</option>
-						<option value="ms">Meters per second</option>
-						<option value="knots">Knots</option>
-					</select>
-				</div>				
-			</td>
-		<tr>
-			<td><div id="chart_speed_last_hour" style="width: 640; height: 360;"></div></td>
-			<td><div id="chart_speed_last_day" style="width: 640; height: 360;"></div></td>
-    	</tr>
-		<tr>
-			<td colspan="2"><div id="chart_speed_last_week" style="width: 1280; height: 360;"></div></td>
-		</tr>
-	</table>
+  <body id="body">
+	<div id="chart1"></div>
+	<div id="chart2"></div>
+	<div id="chart3"></div>
+	<div id="footer">
+		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">
+			<option value="mph">Miles per hour</option>
+			<option value="kmh">Kilometers per hour</option>
+			<option value="ms">Meters per second</option>
+			<option value="knots">Knots</option>
+		</select>
+	</div>				
+	<div id="chart_errors">Loading... Please wait</div>
 	<div id="data_debug"></div>
   </body>
   <script>
+  	document.body.style.backgroundColor = G.color;
+
 	// initialize the selector on page load
 	const speedUnitSelector = document.getElementById('speed_unit');
 	speedUnitSelector.value = G.speed.unit;
