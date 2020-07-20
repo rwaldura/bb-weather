@@ -211,12 +211,31 @@ function drawCharts(dt /* datatable */)
 }
 
 /****************************************************************************/
-function updateCharts(json)
+function updateClock()
+{
+	const clock = document.getElementById('clock');
+	clock.textContent = (new Date()).toString();
+}
+
+/****************************************************************************/
+function updateInstantMetrics(dt)
+{
+	const instant = document.getElementById('instant');
+	instant.textContent = "xxx";
+}
+
+/****************************************************************************/
+function updateAll(json)
 {
 	try
 	{
 		clearError();
-		drawCharts(new google.visualization.DataTable(json));
+		
+		const dt = new google.visualization.DataTable(json);
+		drawCharts(dt);
+		
+		updateInstantMetrics(dt);
+		updateClock();
 	}
 	catch (e)
 	{
@@ -274,7 +293,7 @@ function newDataTableRequest()
 		if (xhr.status == 200 // HTTP OK
 			&& xhr.response) // JSON parsed successfully
 		{
-			updateCharts(xhr.response);
+			updateAll(xhr.response);
 		}
 		else
 		{
@@ -288,7 +307,7 @@ function newDataTableRequest()
 /***************************************************************************/
 function loadChartData()
 {
-	G.request.open("GET", "getDataTable.cgi", true);
+	G.request.open("GET", "getDataTable.json", true);
 	G.request.send();
 	// the XHR onload handler is called next
 }
@@ -348,7 +367,7 @@ body, div, td {
 #speed_unit {
 	font-family: "Google Sans";
 	font-size: 12;
-	margin-left: 5;
+	float: left;
 }	
 
 /* sized to fit on 720p screen: 1280x720 */
@@ -368,8 +387,13 @@ body, div, td {
 	height: 348;
 }
 #footer {
+	margin: 10;
+	font-size: 12;
 	height: 24;
 	text-align: center;
+}
+#clock {
+	float: right;
 }
 	</style>
   </head>
@@ -384,6 +408,8 @@ body, div, td {
 			<option value="ms">Meters per second</option>
 			<option value="knots">Knots</option>
 		</select>
+		<span id="instant">&nbsp;</span>
+		<span id="clock">0</span>		
 	</div>				
 	<div id="chart_errors">Loading... Please wait</div>
 	<div id="data_debug"></div>
