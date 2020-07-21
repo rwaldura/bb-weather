@@ -23,29 +23,15 @@ SELECT load_extension('$SQLITE_FUNCS');
 -- compute 10-min aggregate
 INSERT OR REPLACE INTO wind
 	SELECT
-		(10 * 60) * (tstamp / (10 * 60)), -- round to the lowest time period
+		(10 * 60) * (tstamp / (10 * 60)), -- round to the lowest timeperiod
 		10,
 		ROUND(MEDIAN(direction)),
 		SUM(revolutions)
 	FROM
 		wind
 	WHERE
-		tstamp > strftime('%s', 'now') - 2 * 10 * 60  -- 2 timeperiods ago
+		tstamp >= (10 * 60) * (strftime('%s', 'now') / (10 * 60))  -- current timeperiod only
 		AND period = 1
-	GROUP BY 1;
-
--- compute 30-min aggregate
-INSERT OR REPLACE INTO wind
-	SELECT
-		(30 * 60) * (tstamp / (30 * 60)), -- round to the lowest time period
-		30,
-		ROUND(MEDIAN(direction)),
-		SUM(revolutions)
-	FROM
-		wind
-	WHERE
-		tstamp > strftime('%s', 'now') - 2 * 30 * 60  -- 2 timeperiods ago
-		AND period = 1		
 	GROUP BY 1;
 
 -- compute 1-hour aggregate
@@ -58,7 +44,7 @@ INSERT OR REPLACE INTO wind
 	FROM
 		wind
 	WHERE
-		tstamp > strftime('%s', 'now') - 2 * 60 * 60  -- 2 timeperiods ago
+		tstamp >= (60 * 60) * (strftime('%s', 'now') / (60 * 60))  -- current timeperiod only
 		AND period = 1		
 	GROUP BY 1;
 _SQL_
