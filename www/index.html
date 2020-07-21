@@ -2,10 +2,16 @@
   <head>
 	<meta charset="UTF-8" />
 	
-    <script type="text/javascript" src="weather.js"></script>	
+    <script type="text/javascript" src="uom.js"></script>	
+    <script type="text/javascript" src="data.js"></script>	
+    <script type="text/javascript" src="styling.js"></script>	
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     <script type="text/javascript">
+/*
+ * Functions that manipulate DOM elements.
+ */
+		
 /****************************************************************************/
 function showError(message)
 {
@@ -25,147 +31,6 @@ function debug(dt)
 {
 	const t = new google.visualization.Table(document.getElementById('data_debug'));
 	t.draw(dt, { showRowNumber: true });
-}
-
-/***************************************************************************
- * Style the datapoint to indicate wind direction.
- * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
- */
-function dir2style(dt, row, col, period /* minutes */)
-{
-	const dir = dt.getValue(row, col);
-	const color = dir2color(dir);
-	return `point { 
-		shape-type: star;
-		shape-sides: 2;
-		shape-rotation: ${dir}; 
-		fill-color: ${color} }`;
-}
-
-/***************************************************************************
- * See https://developers.google.com/chart/interactive/docs/reference#dateformat
- */
-function formatTimestamp(ts /* Unix timestamp */, period /* minutes */)
-{
-	const date = new Date(ts * 1000);
-
-	var format;
-	if (period < 60) // show minutes
-		format = "h:mm aa";
-	else // show day of week and hour
-		format = "EEE MMM d, h aa";
-
-	const f = new google.visualization.DateFormat({ pattern: format });
-	return f.formatValue(date);
-}
-
-/****************************************************************************/
-function formatSpeed(P, T /* minutes */)
-{
-	var V = wind_speed(P, T * 60); // in canonical unit
-	V = G.speed.convert(V); // to current unit
-	return G.speed.format(V);
-}
-
-/***************************************************************************
- * Custom tooltip
- * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
- */
-function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
-{
-	const tstamp = formatTimestamp(dt.getValue(row, ts_col), period);
-	const dir = formatDirection(dt.getValue(row, dir_col));
-	const speed = formatSpeed(dt.getValue(row, revs_col), period);
-	return `<div class="tooltip">
-		<span class="timestamp">${tstamp}</span><br>
-		${dir}<br> 
-		${speed}
-		</div>`;
-}
-
-/****************************************************************************/
-function windSpeed(dt, row, col, T)
-{
-	const P = dt.getValue(row, col);
-	const V = wind_speed(P, T);
-	return G.speed.convert(V);
-}
-
-/***************************************************************************
- */
-// data is defined as:
-//
-// column index 0
-// id: "tstamp",
-// type: "number"
-// 
-// column index 1
-// id: "period",
-// type: "number"
-// 
-// column index 2
-// id: "direction",
-// type: "number"
-// 
-// column index 3
-// id: "revs",
-// type: "number"		
-function groupWindData(dt, lookback, period)
-{
-	lookback *= 60;	// to seconds
-	period *= 60;	// to seconds
-	
-	var view = new google.visualization.DataView(dt);
-
-	// WHERE period=1 AND tstamp > 1 day ago
-	view.setRows( view.getFilteredRows( [
-		{ column: 1, value: 1 },
-		{ column: 0, minValue: view.getColumnRange(0).max - lookback } ]));
-
-	if (period > 1 * 60) // further grouping is necessary
-	{
-		// quantize into time windows of "period" seconds
-		// see https://developers.google.com/chart/interactive/docs/reference#group 
-		const grouped = google.visualization.data.group(
-			view,
-			// group by timestamp over the period given
-			[{ column: 0,
-				modifier: function(t) { return period * Math.floor(t / period) }, 
-				type: 'number' }],
-			// aggregate columns: MIN(period), AVG(dir), SUM(revs)
-			// MIN(period) isn't actually used, it's there merely to preserve column indices
-			[ { column: 1,
-				aggregation: google.visualization.data.min, 
-				type: 'number' },
-			{ column: 2,
-				aggregation: google.visualization.data.avg, 
-				type: 'number' },
-			{ column: 3, 
-				aggregation: google.visualization.data.sum, 
-				type: 'number' } ]);
-			
-		view = new google.visualization.DataView(grouped);
-	}
-
-	view.setColumns([
-		{ id: 'date_time', // timestamp, as a Date object
-			type: 'datetime', 
-			calc: function(dt, row) { const t = dt.getValue(row, 0); return new Date(t * 1000) } }, 
-		{ id: 'speed_mph', 
-			label: "Wind Speed",
-			type: 'number', 
-			calc: function(dt, row) { return windSpeed(dt, row, 3 /* revs */, period) } }, 
-		{ id: 'point_style', 
-			role: 'style',
-			type: 'string', 
-			calc: function(dt, row) { return dir2style(dt, row, 2 /* dir */, period / 60) } },
-		{ id: 'point_tooltip', 
-			role: 'tooltip', 
-			properties: { html: true },
-			type: 'string', 
-			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period / 60) } } ]);
-
-	return view;
 }
 
 /****************************************************************************/
@@ -213,13 +78,18 @@ function drawCharts(dt /* datatable */)
 /****************************************************************************/
 function updateClock()
 {
+	const f = new google.visualization.DateFormat({ pattern: "EEEE MMMM d, YYYY h:mm aa" });
+	const now = f.formatValue(new Date());	
+	
 	const clock = document.getElementById('clock');
-	clock.textContent = (new Date()).toString();
+	clock.textContent = now;
 }
 
 /****************************************************************************/
 function updateInstantMetrics(dt)
 {
+	// find current max, mean, min
+	
 	const instant = document.getElementById('instant');
 	instant.textContent = "xxx";
 }
@@ -243,22 +113,9 @@ function updateAll(json)
 	}	
 }
 
-/****************************************************************************/
-// convert miles per hour...
-const MPH_KMH = 1.609344;	// ... to kilometers per hour
-const MPH_MS = 2.2352;		// ... to meters per second
-const MPH_KNOTS = 0.868976;	// ... to knots
-
-const UNITS_OF_MEASUREMENT = {
-	"mph":   { unit: "mph",   label: "Miles per hour", format: function(v) { return Math.round(v) + " MPH"   }, convert: function(v) { return v             } },
-	"kmh":   { unit: "kmh",   label: "Km/hour",        format: function(v) { return Math.round(v) + " km/h"  }, convert: function(v) { return v * MPH_KMH   } },
-	"ms":    { unit: "ms",    label: "Meter/sec",      format: function(v) { return  v.toFixed(1) + " m/s"   }, convert: function(v) { return v / MPH_MS    } },
-	"knots": { unit: "knots", label: "Knots",          format: function(v) { return Math.round(v) + " knots" }, convert: function(v) { return v * MPH_KNOTS } },
-	// unused
-	"C": { label: "Celsius",    format: function(t) { return t + "&deg;C" }, convert: function(t) { return t } },
-	"F": { label: "Fahrenheit", format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
-};
-
+/***************************************************************************
+ * UNITS_OF_MEASUREMENT is defined in uom.js
+ */
 function parseSearchParameters()
 {
 	const params = new URLSearchParams(window.location.search);
@@ -281,45 +138,15 @@ function changeSpeedUnit(speedUnit)
 	// edit the current URL and add it to the history? 
 }
 
-/***************************************************************************/
-function newDataTableRequest()
-{
-	const xhr = new XMLHttpRequest();
-	xhr.responseType = "json";
-	
-	xhr.onerror = function(e) { showError("Loading chart data: " + e) };
-	
-	xhr.onload = function() {
-		if (xhr.status == 200 // HTTP OK
-			&& xhr.response) // JSON parsed successfully
-		{
-			updateAll(xhr.response);
-		}
-		else
-		{
-			showError("Loading chart data: status=" + xhr.status + " resp=" + xhr.response);
-		}
-	};
-
-	return xhr;
-}
-
-/***************************************************************************/
-function loadChartData()
-{
-	G.request.open("GET", "getDataTable.cgi", true);
-	G.request.send();
-	// the XHR onload handler is called next
-}
-
 /***************************************************************************
  * main()
  */
 // global settings 
 const G = parseSearchParameters();
-G.request = newDataTableRequest();
+G.request = newDataTableRequest(); // defined in data.js
 
 // refresh charts every minute
+// loadChartData() is defined in data.js
 setInterval(loadChartData, 66666 /* ms */);
 
 google.charts.load('current', { 'packages': ['corechart', 'table'] });
