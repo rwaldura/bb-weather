@@ -162,67 +162,7 @@ google.charts.setOnLoadCallback(function () {
 	loadChartData();
 });	
     </script>
-	<style>
-body, div, td {
-	border: 0;
-    margin: 0;
-	padding: 0;
-	font-family: "Google Sans";
-}
-
-.tooltip {
-	padding: 5;
-	font-size: 14;
-}
-.tooltip .timestamp {
-	font-weight: bold;
-}
-.tooltip .alt_units {
-	font-size: 10;
-}	
-
-#chart_errors {
-	position: absolute;
-	top: 200;
-	left: 0;
-	width: 100%;
-	font-size: 18;
-	color: red;
-	text-align: center;
-}	
-
-#speed_unit {
-	font-family: "Google Sans";
-	font-size: 12;
-	float: left;
-}	
-
-/* sized to fit on 720p screen: 1280x720 */
-#chart1 {
-	width: 640; 
-	height: 348;
-}
-#chart2 {
-	width: 640; 
-	height: 348;
-	position: absolute;
-	top: 0;
-	left: 640;
-}
-#chart3 {
-	width: 1280; 
-	height: 348;
-}
-#footer {
-	margin: 10;
-	font-size: 12;
-	height: 24;
-	text-align: center;
-}
-#clock {
-	float: right;
-}
-	</style>
+	<link rel="stylesheet" href="styles.css">
   </head>
   <body id="body">
 	<div id="chart1"></div>
