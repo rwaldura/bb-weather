@@ -34,6 +34,17 @@ function debug(dt)
 }
 
 /****************************************************************************/
+function getChartArea()
+{
+	return { 
+		top: 40, 
+		left: 40,
+		height: 260,
+		width: 570,
+	};
+}
+
+/****************************************************************************/
 function drawCharts(dt /* datatable */)
 {
 	if (dt)
@@ -49,15 +60,17 @@ function drawCharts(dt /* datatable */)
 		legend: 'none',
 		colors: ['#cccccc'], 
 		backgroundColor: G.color,
-		chartArea: { left: 50, top: 40, width: '90%', height: '80%' },
+		chartArea: getChartArea(),
 		// theme: "maximized", // bof
-		titleTextStyle: { fontSize: 14 },
+		titleTextStyle: { fontSize: 16 },
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 20,
 		fontName: "Google Sans",
 		tooltip: { isHtml: true },
-		vAxis: { minValue: 0 } };								
+		hAxis: { textStyle: { fontSize: 12 } },
+		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
+	};								
 
 	opts.title = 'Now';
 	chart1.draw(
@@ -70,6 +83,7 @@ function drawCharts(dt /* datatable */)
 		opts);
 
 	opts.title = 'This Week';
+	opts.chartArea.width = 1210; // single chart at bottom
 	chart3.draw(
 		groupWindData(dt, 5 * 24 * 60 /* 5 days */, 2 * 60 /* 2 hours */), 
 		opts);	
@@ -165,9 +179,17 @@ google.charts.setOnLoadCallback(function () {
 	<link rel="stylesheet" href="styles.css">
   </head>
   <body id="body">
-	<div id="chart1"></div>
-	<div id="chart2"></div>
-	<div id="chart3"></div>
+	<div id="charts">
+		<div id="chart1_chart2">
+			<div id="chart1"></div>
+			<div id="chart2"></div>
+		</div>
+		&nbsp;
+		<div id="chart3_chart4">
+			<div id="chart3"></div>
+			<div id="chart4"></div>
+		</div>
+	</div>
 	<div id="footer">
 		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">
 			<option value="mph">Miles per hour</option>

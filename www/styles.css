@@ -33,20 +33,24 @@ body, div, td {
 }	
 
 /* sized to fit on 720p screen: 1280x720 */
+#charts {
+	width: 100%;
+}
 #chart1 {
-	width: 640; 
-	height: 348;
+	height: 330;
+    width: 50%; 
+	float: left;
 }
 #chart2 {
-	width: 640; 
-	height: 348;
-	position: absolute;
-	top: 0;
-	left: 640;
+	height: 330;
+    width: 50%; 
+	float: right;
 }
 #chart3 {
-	width: 1280; 
-	height: 348;
+	height: 330;
+    width: 100%;  	
+}
+#chart4 {
 }
 #footer {
 	margin: 10;
