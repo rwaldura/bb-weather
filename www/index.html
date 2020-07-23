@@ -39,7 +39,7 @@ function getChartArea()
 	return { 
 		top: 40, 
 		left: 40,
-		height: 260,
+		height: 276,
 		width: 570,
 	};
 }
@@ -83,7 +83,6 @@ function drawCharts(dt /* datatable */)
 		opts);
 
 	opts.title = 'This Week';
-	opts.chartArea.width = 1210; // single chart at bottom
 	chart3.draw(
 		groupWindData(dt, 5 * 24 * 60 /* 5 days */, 2 * 60 /* 2 hours */), 
 		opts);	
@@ -180,15 +179,10 @@ google.charts.setOnLoadCallback(function () {
   </head>
   <body id="body">
 	<div id="charts">
-		<div id="chart1_chart2">
-			<div id="chart1"></div>
-			<div id="chart2"></div>
-		</div>
-		&nbsp;
-		<div id="chart3_chart4">
-			<div id="chart3"></div>
-			<div id="chart4"></div>
-		</div>
+		<div id="chart1"></div>
+		<div id="chart2"></div>
+		<div id="chart3"></div>
+		<div id="chart4"></div>
 	</div>
 	<div id="footer">
 		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">

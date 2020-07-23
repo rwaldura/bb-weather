@@ -33,29 +33,33 @@ body, div, td {
 }	
 
 /* sized to fit on 720p screen: 1280x720 */
-#charts {
-	width: 100%;
-}
 #chart1 {
-	height: 330;
-    width: 50%; 
-	float: left;
+	width: 50%; 
+	height: 348;	
 }
 #chart2 {
-	height: 330;
-    width: 50%; 
-	float: right;
+	position: absolute;
+	top: 0; 
+	left: 50%;
+	right: 0; 
+	bottom: 348; 
 }
 #chart3 {
-	height: 330;
-    width: 100%;  	
+	width: 50%; 
+	height: 348;	
 }
 #chart4 {
+	position: absolute; 
+	top: 348; 
+	left: 50%; 
+	right: 0; 
+	bottom: 0; 
 }
 #footer {
-	margin: 10;
+	margin-left: 8;
+	margin-right: 8;
+	height: 24;	
 	font-size: 12;
-	height: 24;
 	text-align: center;
 }
 #clock {
