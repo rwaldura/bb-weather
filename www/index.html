@@ -34,21 +34,11 @@ function debug(dt)
 }
 
 /****************************************************************************/
-function getChartArea()
-{
-	return { 
-		top: 40, 
-		left: 40,
-		height: 276,
-		width: 570,
-	};
-}
-
-/****************************************************************************/
 function drawCharts(dt /* datatable */)
 {
 	if (dt)
 	{
+		// cache the datatable so we can quickly re-draw it later
 		G.currentDataTable = dt;
 	} 
 	else 
@@ -60,8 +50,11 @@ function drawCharts(dt /* datatable */)
 		legend: 'none',
 		colors: ['#cccccc'], 
 		backgroundColor: G.color,
-		chartArea: getChartArea(),
-		// theme: "maximized", // bof
+		chartArea: { 
+			top: 40, 
+			left: 40,
+			height: '80%',  // 276
+			width: '90%' }, // 570
 		titleTextStyle: { fontSize: 16 },
 		lineWidth: 0,
 		pointsVisible: true,
@@ -92,19 +85,19 @@ function drawCharts(dt /* datatable */)
 function updateClock()
 {
 	const f = new google.visualization.DateFormat({ pattern: "EEEE MMMM d, YYYY h:mm aa" });
-	const now = f.formatValue(new Date());	
-	
 	const clock = document.getElementById('clock');
-	clock.textContent = now;
+	clock.textContent = f.formatValue(new Date());
 }
 
 /****************************************************************************/
 function updateInstantMetrics(dt)
 {
-	// find current max, mean, min
-	
+	const mins = 10; // minutes
+	const i = getInstantMetrics(dt, mins);	
 	const instant = document.getElementById('instant');
-	instant.textContent = "xxx";
+	instant.textContent = `Min: ${formatSpeed(i.min, mins)} 
+		— Avg: ${formatSpeed(i.avg, mins)} 
+		— Max: ${formatSpeed(i.max, mins)} (last 10 minutes)`;
 }
 
 /****************************************************************************/
@@ -116,7 +109,6 @@ function updateAll(json)
 		
 		const dt = new google.visualization.DataTable(json);
 		drawCharts(dt);
-		
 		updateInstantMetrics(dt);
 		updateClock();
 	}

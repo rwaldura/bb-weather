@@ -41,7 +41,7 @@ function windSpeed(dt, row, col, T)
 // column index 3
 // id: "revs",
 // type: "number"		
-function groupWindData(dt, lookback, period)
+function groupWindData(dt, lookback /* minutes */, period /* minutes */)
 {
 	lookback *= 60;	// to seconds
 	period *= 60;	// to seconds
@@ -97,6 +97,33 @@ function groupWindData(dt, lookback, period)
 			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period / 60) } } ]);
 
 	return view;
+}
+
+/***************************************************************************
+ * Get min, max, avg in the last timeperiod
+ */
+function getInstantMetrics(dt, lookback /* minutes */)
+{
+	period = 1 * 60; // group by minute
+	
+	const grouped = google.visualization.data.group(
+		dt,
+		// group by minute 
+		[{ column: 0,
+			modifier: function(t) { return period * Math.floor(t / period) }, 
+			type: 'number' }],
+		// aggregate columns: MIN(period), AVG(dir), SUM(revs)
+		[ { column: 3,
+			aggregation: google.visualization.data.min, 
+			type: 'number' },
+		{ column: 3,
+			aggregation: google.visualization.data.avg, 
+			type: 'number' },
+		{ column: 3, 
+			aggregation: google.visualization.data.max, 
+			type: 'number' } ]);
+		
+	return { min: 1000, max: 3000, avg: 2000 };
 }
 
 /***************************************************************************/

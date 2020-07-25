@@ -34,28 +34,33 @@ body, div, td {
 
 /* sized to fit on 720p screen: 1280x720 */
 #chart1 {
+/*	background-color: purple;*/
 	width: 50%; 
 	height: 348;	
 }
 #chart2 {
+/*	background-color: yellow;*/
 	position: absolute;
 	top: 0; 
 	left: 50%;
-	right: 0; 
-	bottom: 348; 
+	width: 50%;
+	height: 348; 
 }
 #chart3 {
+/*	background-color: red;*/
 	width: 50%; 
 	height: 348;	
 }
 #chart4 {
+/*	background-color: blue;*/
 	position: absolute; 
 	top: 348; 
 	left: 50%; 
-	right: 0; 
-	bottom: 0; 
+	width: 50%;
+	height: 348; 
 }
 #footer {
+/*	background-color: green;*/
 	margin-left: 8;
 	margin-right: 8;
 	height: 24;	
