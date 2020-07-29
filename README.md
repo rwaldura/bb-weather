@@ -27,7 +27,7 @@ crontab -e
 `rc.local`, executed at startup, starts `collect-wind-data.sh`.
 This program runs the sensor reader `anemometer.js` and writes its output
 to (a) files in `/var/weather/log` (for permanent archival), and 
-(b) `populate-wind-db.sh`.
+(b) the program `populate-wind-db.sh`.
 
 The latter inserts wind data into a local SQL database 
 `/var/weather/weather.db` for indexed retrieval, and further processing.
@@ -35,8 +35,8 @@ The latter inserts wind data into a local SQL database
 `anemometer.js` is a BoneScript ([docs](http://beagleboard.org/bonescript), 
 [source](https://github.com/jadonk/bonescript)) program that continuously reads the
 wind sensor, and outputs
-the state of the sensor at regular time intervals, summarized over the past time period. 
-E.g. the vane direction, the wind speed. 
+the state of the sensor at regular time intervals. 
+I.e. the vane direction, the wind speed. 
 
 Periodically, this data is aggregated further by `update-db.sh`. This program 
 reads wind data, and groups it by longer time periods, 

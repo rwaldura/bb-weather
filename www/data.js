@@ -152,7 +152,13 @@ function newDataTableRequest()
 /***************************************************************************/
 function loadChartData()
 {
-	G.request.open("GET", "getDataTable.json", true);
+	var lookback = 7; // days
+	lookback *= 24 * 60 * 60; // to secs
+	
+	const start = Math.floor(Date.now() / 1000) - lookback;
+	const end = ''; // left undefined, means "now"
+	
+	G.request.open("GET", `getDataTable.cgi?start=${start}&end=${end}`, true);
 	G.request.send();
 	// the XHR onload handler is called next
 }

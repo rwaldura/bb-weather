@@ -97,7 +97,7 @@ function updateInstantMetrics(dt)
 	const instant = document.getElementById('instant');
 	instant.textContent = `Min: ${formatSpeed(i.min, mins)} 
 		— Avg: ${formatSpeed(i.avg, mins)} 
-		— Max: ${formatSpeed(i.max, mins)} (last 10 minutes)`;
+		— Max: ${formatSpeed(i.max, mins)} (last ${mins} minutes)`;
 }
 
 /****************************************************************************/
