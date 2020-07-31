@@ -7,4 +7,8 @@ if [ "$1" = start ]
 then
 	setpriv --reuid=$WEATHER_USER --groups=i2c,iio,spi,pwm,gpio --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
+elif [ "$1" = stop ]
+then
+	# only need to kill the first segment of the pipeline
+	pkill --echo --full anemometer.js
 fi
