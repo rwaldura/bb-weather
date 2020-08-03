@@ -19,8 +19,8 @@ var P = 0 // count of pulses
 const MS = 1000 // milliseconds 
 	
 // pins used
-const GPIO7 = 'P9_42'	// pulse for wind speed
 const AIN1 = 'P9_40'	// analog read of wind direction
+const GPIO0_7 = 'P9_42'	// pulse for wind speed
 
 // our circuit uses a voltage divider to deliver half of 3.3V (max) to the 
 // ADC (analog reader)
@@ -39,7 +39,7 @@ setInterval(collectWindDirection, TT * MS)
 const bonescript = require('bonescript')
 
 bonescript.pinMode(
-	GPIO7, 
+	GPIO0_7, 
 	bonescript.INPUT, 
 	7, // magic mux mode
 	'pullup', // spinning cups open a switch (current drops) when revolving
@@ -49,7 +49,7 @@ bonescript.pinMode(
 			debug("pinMode: failed " + err)
 		else 
 			bonescript.attachInterrupt(
-				GPIO7, 
+				GPIO0_7, 
 				true, // always call handler upon interrupt event
 				bonescript.FALLING, 
 				countRevolutions) } )
