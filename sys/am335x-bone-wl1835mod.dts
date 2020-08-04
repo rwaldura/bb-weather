@@ -1,0 +1,41 @@
+/*
+ * Compile and Install This Device Tree
+ *
+ * $ cp am335x-bone-wl1835mod.dts /opt/source/dtb-4.19-ti
+ * $ cd /opt/source/dtb-4.19-ti 
+ * $ make
+ * $ sudo cp src/arm/am335x-bone-wl1835mod.dtb /boot/dtbs/4.19.94-ti-r45
+ *
+ * Comment nearly everything out of U-Boot config: cape_mgr, uboot overlays, etc.
+ * 
+ * $ grep -v '^#' /boot/uEnv.txt
+ * uname_r=4.19.94-ti-r45
+ * dtb=am335x-bone-wl1835mod.dtb
+ * cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100
+ */
+ 
+/dts-v1/;
+
+#include "am33xx.dtsi"
+#include "am335x-bone-common-no-capemgr.dtsi"
+
+/ {
+	model = "TI AM335x BeagleBone";
+	compatible = "ti,am335x-bone", "ti,am33xx";
+};
+
+&ldo3_reg {
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <3300000>;
+	regulator-always-on;
+};
+
+&mmc1 {
+	vmmc-supply = <&ldo3_reg>;
+};
+
+&sgx {
+	status = "okay";
+};
+
+#include "am335x-boneblack-wl1835mod-cape.dtsi"
