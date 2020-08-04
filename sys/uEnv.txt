@@ -1,0 +1,30 @@
+uname_r=4.19.94-ti-r45
+
+# To run CircuitCo WL1835MOD cape on BeagleBone (classic, white)
+# a- compile+install custom device tree
+# b- load it via hacked boot process (this file)
+# 
+# By default, the uSD card is at /dev/mmcblk0. In fact, at the start 
+# of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
+#
+# For a reason I do not understand, my custom device tree moves it to
+# /dev/mmcblk1. I therefore have to "fixup" (i.e. hack) the boot process to
+# find it there. After my device tree loads, the root FS no longer matches
+# where U-Boot found it.
+#
+# There are probably better ways to fix this...
+
+dtb=am335x-bone-wl1835mod.dtb
+
+# awful hak: override the "root" variable definition
+args_mmc_old=setenv bootargs console=${console} ${optargs} root=${awfulhak_root} ro rootfstype=${mmcrootfstype} ${cmdline}
+
+# previously:
+#args_mmc_old=setenv bootargs console=${console} ${optargs} ${cape_disable} ${cape_enable} ${cape_uboot} root=${oldroot} ro rootfstype=${mmcrootfstype} ${uboot_detected_capes} ${cmdline}
+
+awfulhak_root=/dev/mmcblk1p1
+optargs=ipv6.disable=1
+
+# copied from original /boot/uEnv.txt
+cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100 
+
