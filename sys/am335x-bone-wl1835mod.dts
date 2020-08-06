@@ -1,5 +1,9 @@
 /*
- * Compile and Install This Device Tree
+ * This device tree enables the WL1835MOD cape on Beaglebone White (classic).
+ * It does not enable the operations implemented by Bonescript, e.g.
+ * analogRead(), attachInterrupt(), etc. 
+ *
+ *** Compile and Install This Device Tree
  *
  * d=/opt/source/dtb-4.19-ti
  * cp am335x-bone-wl1835mod.dts $d/src/arm
@@ -7,7 +11,8 @@
  * make
  * sudo cp src/arm/am335x-bone-wl1835mod.dtb /boot/dtbs/4.19.94-ti-r45
  *
- * Comment nearly everything out of U-Boot config: cape_mgr, uboot overlays, etc.
+ * Edit /boot/uEnv.txt. Comment nearly everything out of U-Boot config: 
+ * cape_mgr, uboot overlays, etc.
  * 
  * $ grep -v '^#' /boot/uEnv.txt
  * uname_r=4.19.94-ti-r45

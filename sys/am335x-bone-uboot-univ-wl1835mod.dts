@@ -1,3 +1,16 @@
+/*
+ * This device tree enables the WL1835MOD cape on Beaglebone White (classic).
+ * Additionally, it enables the operations implemented by Bonescript, e.g.
+ * analogRead(), attachInterrupt(), etc. 
+ *
+ * Note, however, that the WL1835 cape grabs some pins for its own usage; 
+ * those pins cannot be used for anything else. 
+ * 
+ ***
+ * See also
+ * https://octavosystems.com/app_notes/enabling-iot-with-osd335x/#_Toc382081444
+ */
+ 
 /dts-v1/;
 
 #include "am33xx.dtsi"

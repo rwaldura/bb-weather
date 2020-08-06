@@ -30,7 +30,7 @@ to (a) files in `/var/weather/log` (for permanent archival), and
 (b) the program `populate-wind-db.sh`.
 
 The latter inserts wind data into a local SQL database 
-`/var/weather/weather.db` for indexed retrieval, and further processing.
+`/var/weather/weather.db` for querying, and further processing.
 
 `anemometer.js` is a BoneScript ([docs](http://beagleboard.org/bonescript), 
 [source](https://github.com/jadonk/bonescript)) program that continuously reads the
@@ -53,7 +53,9 @@ What a hassle! Truly, I recommend buying the
 [BeagleBone Wireless](https://beagleboard.org/black-wireless).
 Otherwise, here's what I did:
 
-1. Find a USB Wifi adapter that is compatible. Still looking...
+1. Find a Wifi adapter that is compatible. After trying out 3 different USB adapters, I finally located and bought a WL1835MOD cape off eBay. 
+1. Craft and compile a custom device tree to support this cape, plus the layer used by Bonescript. Find it in the `sys` directory. 
+1. Edit `/boot/uEnv.txt` to load this custom device tree, plus associated random patches to get things to work right. Under `sys` also. 
 1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
 1. Edit `/etc/network/interfaces` and add:
 
@@ -68,13 +70,13 @@ iface wlan0 inet dhcp
 ## Dependencies
 
 * [BeagleBone White](https://beagleboard.org/bone-original)
+* [WL1835MOD cape](https://github.com/CircuitCo/WL1835MOD) — no longer sold. 
 * Wind sensor: [Davis Instruments Anemometer](https://www.amazon.com/Davis-Instruments-Anemometer-Vantage-Pro2/dp/B004GK9MFO/)
 
 what | version
 ------------ | -------------
 OS | beaglebone 4.19.94-ti-r45 armv7l GNU/Linux
 Distro | Debian GNU/Linux 10.4 ; BeagleBoard.org Debian Buster IoT Image 2020-04-06
-gcc | gcc (Debian 8.3.0-6) 8.3.0
 node | 10.19.0
 bonescript | 0.7.3
 
