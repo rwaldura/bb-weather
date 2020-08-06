@@ -1,10 +1,11 @@
 /*
  * Compile and Install This Device Tree
  *
- * $ cp am335x-bone-wl1835mod.dts /opt/source/dtb-4.19-ti
- * $ cd /opt/source/dtb-4.19-ti 
- * $ make
- * $ sudo cp src/arm/am335x-bone-wl1835mod.dtb /boot/dtbs/4.19.94-ti-r45
+ * d=/opt/source/dtb-4.19-ti
+ * cp am335x-bone-wl1835mod.dts $d/src/arm
+ * cd $d
+ * make
+ * sudo cp src/arm/am335x-bone-wl1835mod.dtb /boot/dtbs/4.19.94-ti-r45
  *
  * Comment nearly everything out of U-Boot config: cape_mgr, uboot overlays, etc.
  * 
