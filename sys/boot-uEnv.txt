@@ -3,6 +3,7 @@
 uname_r=4.19.94-ti-r45
 #uuid=
 #dtb=
+uboot_base_dtb_univ=am335x-bone-uboot-univ-wl1835mod.dtb
 
 ###U-Boot Overlays###
 ###Documentation: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
@@ -35,7 +36,7 @@ enable_uboot_overlays=1
 ###pru_rproc (4.14.x-ti kernel)
 #uboot_overlay_pru=/lib/firmware/AM335X-PRU-RPROC-4-14-TI-00A0.dtbo
 ###pru_rproc (4.19.x-ti kernel)
-uboot_overlay_pru=/lib/firmware/AM335X-PRU-RPROC-4-19-TI-00A0.dtbo
+#uboot_overlay_pru=/lib/firmware/AM335X-PRU-RPROC-4-19-TI-00A0.dtbo
 ###pru_uio (4.14.x-ti, 4.19.x-ti & mainline/bone kernel)
 #uboot_overlay_pru=/lib/firmware/AM335X-PRU-UIO-00A0.dtbo
 ###
@@ -52,7 +53,7 @@ enable_uboot_cape_universal=1
 #uboot_fdt_buffer=0x60000
 ###U-Boot Overlays###
 
-cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100 quiet
+cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100
 
 #In the event of edid real failures, uncomment this next line:
 #cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100 quiet video=HDMI-A-1:1024x768@60e
@@ -60,4 +61,21 @@ cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100 
 ##enable Generic eMMC Flasher:
 ##make sure, these tools are installed: dosfstools rsync
 #cmdline=init=/opt/scripts/tools/eMMC/init-eMMC-flasher-v3.sh
+
+# ren@waldura.org 2020-08-05
+#
+# By default, the uSD card is at /dev/mmcblk0. In fact, at the start 
+# of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
+#
+# For a reason I do not understand, my custom device tree moves it to
+# /dev/mmcblk1. I therefore have to "fixup" (i.e. hack) the boot process to
+# find it there. After my device tree loads, the root FS no longer matches
+# where U-Boot found it.
+#
+# There are probably better ways to fix this...
+
+# awful hak: override the "root" variable definition
+args_mmc_old=setenv bootargs console=${console} ${optargs} ${cape_disable} ${cape_enable} ${cape_uboot} root=${awfulhak_root} ro rootfstype=${mmcrootfstype} ${uboot_detected_capes} ${cmdline}
+
+awfulhak_root=/dev/mmcblk1p1
 
