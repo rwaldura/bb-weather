@@ -1,7 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0-only
-/*
- * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
- */
 /dts-v1/;
 
 #include "am33xx.dtsi"
@@ -12,10 +8,6 @@
 	model = "TI AM335x BeagleBone";
 	compatible = "ti,am335x-bone", "ti,am33xx";
 
-	chosen {
-		base_dtb = "am335x-bone-uboot-univ.dts";
-		base_dtb_timestamp = __TIMESTAMP__;
-	};
 };
 
 &sgx {
@@ -31,3 +23,6 @@
 &mmc1 {
 	vmmc-supply = <&ldo3_reg>;
 };
+
+#include "am335x-boneblack-wl1835mod-cape.dtsi"
+
