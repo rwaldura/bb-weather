@@ -26,10 +26,10 @@ enable_uboot_overlays=1
 #dtb_overlay=/lib/firmware/<file8>.dtbo
 ###
 ###Disable auto loading of virtual capes (emmc/video/wireless/adc)
-#disable_uboot_overlay_emmc=1
-#disable_uboot_overlay_video=1
-#disable_uboot_overlay_audio=1
-#disable_uboot_overlay_wireless=1
+disable_uboot_overlay_emmc=1
+disable_uboot_overlay_video=1
+disable_uboot_overlay_audio=1
+disable_uboot_overlay_wireless=1
 #disable_uboot_overlay_adc=1
 ###
 ###PRUSS OPTIONS
@@ -62,7 +62,10 @@ cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100
 ##make sure, these tools are installed: dosfstools rsync
 #cmdline=init=/opt/scripts/tools/eMMC/init-eMMC-flasher-v3.sh
 
-# ren@waldura.org 2020-08-05
+# disable IPv6, not useful on my tiny network
+optargs=ipv6.disable=1
+
+# rwaldura 2020-08-05
 #
 # By default, the uSD card is at /dev/mmcblk0. In fact, at the start 
 # of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
