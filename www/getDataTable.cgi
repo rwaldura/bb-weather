@@ -17,6 +17,7 @@ ouput_json_rows()
 	now=$( date +%s )
 	
 	sql="
+		-- per-minute data points for the last day
 		SELECT 
 			tstamp, 
 			period,
@@ -28,6 +29,7 @@ ouput_json_rows()
 			period = 1
 			AND tstamp >= ($now - 25 * 60 * 60) -- 1 day ago
 		UNION ALL
+		-- per-hour aggregates for the last month
 		SELECT 
 			tstamp, 
 			period,
