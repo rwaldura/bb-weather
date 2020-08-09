@@ -4,10 +4,13 @@
 # Note we always *overwrite* any existing data. I.e. the input is source of
 # truth.
 #
+# In practice, we update (or create) the last aggregate only; i.e. the 
+# aggregate for the current time period. 
+#
 
 readonly SQLITE_FUNCS=/usr/lib/libsqlitefunctions.so
 test -r $SQLITE_FUNCS || {
-	echo "$SQLITE_FUNCS: does not exist, or not readable"
+	echo "$SQLITE_FUNCS: must be readable"
 	exit 1
 }
 

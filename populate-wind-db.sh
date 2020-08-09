@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Two distinct processes write to the database: this one, and
-# the aggregator update-db.sh. This database may get therefore quite busy.
+# the aggregator update-db.sh. This database may therefore get busy.
 # If a lock is encountered when trying to write, keep on re-trying for ~10 sec.
 # See https://www.sqlite.org/c3ref/busy_timeout.html
 readonly BUSY_TIMEOUT=11111
