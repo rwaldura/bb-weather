@@ -41,7 +41,7 @@ function windSpeed(dt, row, col, T /* minutes */)
 // column index 3
 // id: "revs",
 // type: "number"		
-function groupWindData(dt, lookback /* minutes */, period /* minutes */)
+function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 {
 	const view = new google.visualization.DataView(dt);
 
