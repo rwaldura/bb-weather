@@ -136,3 +136,74 @@ function loadChartData()
 	G.request.send();
 	// the XHR onload handler is called next
 }
+
+/*************************************************************************
+ * Group wind data to create the wind rose.
+ * Example:
+angle,speed,percent
+10,2 - 5,0.244
+10,5 - 7,0.411
+10,7 - 10,0.423
+10,10 - 15,0.573
+10,15 - 20,0.118
+10,20+,0.028
+20,2 - 5,0.227
+20,5 - 7,0.326
+20,7 - 10,0.341
+20,10 - 15,0.466
+20,15 - 20,0.099
+ */
+function prepWindRoseData(dt)
+{
+	function quantizeDirection(dir)
+	{
+		// slot the angle "dir" into 10-degree buckets:
+		// returns 10, 20, 30, 40, etc...
+		return 10 * Math.floor(dir / 10);
+	}
+
+	function quantizeSpeed(revs)
+	{
+		// @todo make it work for units other the native unit: mph
+		v = wind_speed(revs, 60 * 60);
+		if (v <=  5) return  "0 – 5" ;
+		if (v <= 10) return  "5 – 10";
+		if (v <= 15) return "10 – 15";
+		if (v <= 20) return "15 – 20";	
+		/* else */ return "20+";	
+	}
+
+	function aggregateWindTime(hours)
+	{
+		// we receive the list of hours that the wind was blowing with a given
+		// force (speed), and a given direction
+		console.log("hours = " + hours.length);
+		return hours.length / totalHours; // proportion of this wind
+	}
+
+	const view = new google.visualization.DataView(dt);
+
+	view.setRows( view.getFilteredRows([
+		{ column: 1, value: 60 } ])); // where period=60
+	
+	const range = view.getColumnRange(0);
+	const totalHours = (range.max - range.min) / (60 * 60); // length of this time window in hours
+	console.log("total hours = " + totalHours)
+	
+	const grouped = google.visualization.data.group(
+		view,
+        [ { column: 2,
+			modifier: quantizeDirection,
+            type: 'number' },
+		{ column: 3,
+			modifier: quantizeSpeed,
+            type: 'string' }],
+		// aggregate column: 
+		[ { column: 0,
+			aggregation: aggregateWindTime, 
+			type: 'number' }]);
+
+	// more tbd
+	debugTable(grouped);
+}
+

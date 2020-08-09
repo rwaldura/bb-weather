@@ -77,6 +77,7 @@ function drawCharts(dt /* datatable */)
 		opts);	
 
 	// chart3 is undefined
+	prepWindRoseData(dt);
 }
 
 /****************************************************************************/
@@ -173,6 +174,7 @@ google.charts.setOnLoadCallback(function () {
 		<div id="chart2"></div>
 		<div id="chart3">
 			<div class="chart_title">This Month</div>
+			<div id="chart_body"></div>
 		</div>
 	</div>
 	<div id="footer">
