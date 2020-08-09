@@ -66,19 +66,17 @@ function drawCharts(dt /* datatable */)
 	};								
 
 	opts.title = 'Now';
-	chart1.draw(
-		groupWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
-		opts);
-
-	opts.title = 'Today';
 	chart2.draw(
-		groupWindData(dt, 26 * 60 /* ~1 day */, 60 /* 1 hour */), 
+		prepWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
 		opts);
 
 	opts.title = 'This Week';
-	chart3.draw(
-		groupWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
+	opts.chartArea.width = '95%';
+	chart1.draw(
+		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
 		opts);	
+
+	// chart3 is undefined
 }
 
 /****************************************************************************/
@@ -161,8 +159,8 @@ google.charts.setOnLoadCallback(function () {
 		document.getElementById('chart1'));
 	chart2 = new google.visualization.AreaChart(
 		document.getElementById('chart2'));
-	chart3 = new google.visualization.AreaChart(
-		document.getElementById('chart3'));
+	// chart3 = new google.visualization.AreaChart(
+	// 	document.getElementById('chart3'));
 
 	loadChartData();
 });	
@@ -173,8 +171,9 @@ google.charts.setOnLoadCallback(function () {
 	<div id="charts">
 		<div id="chart1"></div>
 		<div id="chart2"></div>
-		<div id="chart3"></div>
-		<div id="chart4"></div>
+		<div id="chart3">
+			<div class="chart_title">This Month</div>
+		</div>
 	</div>
 	<div id="footer">
 		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">
