@@ -30,8 +30,8 @@ INSERT OR REPLACE INTO wind
 	FROM
 		wind
 	WHERE
-		tstamp >= (10 * 60) * (strftime('%s', 'now') / (10 * 60))  -- current timeperiod only
-		AND period = 1
+		period = 1
+		AND tstamp >= (10 * 60) * (strftime('%s', 'now') / (10 * 60))  -- current timeperiod only
 	GROUP BY 1;
 
 -- compute 1-hour aggregate
@@ -44,8 +44,8 @@ INSERT OR REPLACE INTO wind
 	FROM
 		wind
 	WHERE
-		tstamp >= (60 * 60) * (strftime('%s', 'now') / (60 * 60))  -- current timeperiod only
-		AND period = 1		
+		period = 1		
+		AND tstamp >= (60 * 60) * (strftime('%s', 'now') / (60 * 60))  -- current timeperiod only
 	GROUP BY 1;
 _SQL_
 
