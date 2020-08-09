@@ -123,7 +123,10 @@ function getInstantMetrics(dt, lookback /* minutes */)
 			aggregation: google.visualization.data.max, 
 			type: 'number' } ]);
 		
-	return { min: 1000, max: 3000, avg: 2000 };
+	return { 
+		min: grouped.getValue(0, 0), 
+		avg: grouped.getValue(0, 1), 
+		max: grouped.getValue(0, 2) };
 }
 
 /***************************************************************************/
@@ -152,13 +155,8 @@ function newDataTableRequest()
 /***************************************************************************/
 function loadChartData()
 {
-	var lookback = 7; // days
-	lookback *= 24 * 60 * 60; // to secs
-	
-	const start = Math.floor(Date.now() / 1000) - lookback;
-	const end = ''; // left undefined, means "now"
-	
-	G.request.open("GET", `getDataTable.cgi?start=${start}&end=${end}`, true);
+	// we pass no parameters: the CGI knows to return exactly the data we want
+	G.request.open("GET", "getDataTable.cgi", true);
 	G.request.send();
 	// the XHR onload handler is called next
 }
