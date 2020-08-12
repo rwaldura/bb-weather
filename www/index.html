@@ -1,12 +1,12 @@
 <html>
   <head>
-	<meta charset="UTF-8" />
-	
+	<meta charset="UTF-8" />	
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="https://code.jscharting.com/latest/jscharting.js"></script>
+
 	<script type="text/javascript" src="uom.js"></script>	
 	<script type="text/javascript" src="data.js"></script>	
 	<script type="text/javascript" src="styling.js"></script>	
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
 	<script type="text/javascript">
 /*
  * Functions that manipulate DOM elements.
@@ -70,15 +70,82 @@ function drawCharts(dt /* datatable */)
 		prepWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
 		opts);
 
-	opts.title = 'This Week';
 	opts.chartArea.width = '95%';
+	opts.title = 'This Week';
 	chart1.draw(
 		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
 		opts);	
-
-	// chart3 is undefined
-	prepWindRoseData(dt);
+		
+	drawWindRose(dt);
 }
+
+/****************************************************************************/
+function drawWindRose(dt)
+{
+	const data1 = prepWindRoseData(dt);
+	console.log("d1 = ", data1);
+	
+	const data2 = JSC.nest() 
+      .key('speed') 
+      .key('angle') 
+      .rollup('percent') 
+      .series(data1) 
+	  .reverse();
+  	console.log("d2 = ", data2);
+	
+	renderWindRose(data2);
+}
+
+/****************************************************************************/
+function renderWindRose(data) 
+{ 
+  return JSC.chart('chart3', { 
+    debug: true, 
+    type: 'radar column', 
+	  title: { 
+      label_text: 'This Month', 
+      position: 'left'
+    }, 
+    legend: { 
+      title_label_text: 'Wind Speed (in mph)', 
+      position: 'right', 
+      template: '%icon %name', 
+      reversed: false
+    }, 
+    defaultSeries_shape_padding: 0.02, 
+    yAxis: { 
+      defaultTick_label_text: '%value%', 
+      scale: { type: 'stacked' }, 
+      alternateGridFill: 'none'
+    }, 
+    xAxis: { 
+      scale: { range: [0, 360], interval: 45 }, 
+      customTicks: [ 
+        { value: 360, label_text: 'North' }, 
+        { value: 45, label_text: 'NE' }, 
+        { value: 90, label_text: 'East' }, 
+        { value: 135, label_text: 'SE' }, 
+        { value: 180, label_text: 'South' }, 
+        { value: 225, label_text: 'SW' }, 
+        { value: 270, label_text: 'West' }, 
+        { value: 315, label_text: 'NW' } 
+      ] 
+    }, 
+    palette: [ 
+      '#c62828', 
+      '#ff7043', 
+      '#fff176', 
+      '#aed581', 
+      '#80cbc4', 
+      '#bbdefb'
+    ], 
+    defaultPoint: { 
+      tooltip: 
+        '<b>%seriesName</b> %xValue° %yValue%'
+    }, 
+    series: data
+  }); 
+} 
 
 /****************************************************************************/
 function updateClock()
@@ -160,22 +227,19 @@ google.charts.setOnLoadCallback(function () {
 		document.getElementById('chart1'));
 	chart2 = new google.visualization.AreaChart(
 		document.getElementById('chart2'));
-	// chart3 = new google.visualization.AreaChart(
-	// 	document.getElementById('chart3'));
+	chart3 = new google.visualization.ColumnChart(
+		document.getElementById('chart3'));
 
 	loadChartData();
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">
   </head>
-  <body id="body">
+  <body>
 	<div id="charts">
 		<div id="chart1"></div>
 		<div id="chart2"></div>
-		<div id="chart3">
-			<div class="chart_title">This Month</div>
-			<div id="chart_body"></div>
-		</div>
+		<div id="chart3"></div>
 	</div>
 	<div id="footer">
 		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">

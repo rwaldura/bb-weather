@@ -155,11 +155,46 @@ angle,speed,percent
  */
 function prepWindRoseData(dt)
 {
+	const grouped = groupWindRoseData(dt);
+	// console.log(grouped);
+	// debugTable(grouped);
+	
+	const result = dataTable2JSChartArray(grouped);	
+	// console.log("js chart array = " + result);
+	
+	return result;
+}
+
+/*************************************************************************
+ * Transform a dataTable into an JavaScript array that can be groked
+ * by JSChart.  
+ */
+function dataTable2JSChartArray(dt)
+{
+	const result = [];
+	
+	const cols = [...Array(dt.getNumberOfColumns()).keys()]; // column indices
+	result.columns = cols.map(i => dt.getColumnId(i));
+	result.types = cols.map(i => dt.getColumnType(i));
+	
+	for (var i = 0; i < dt.getNumberOfRows(); i++)
+	{
+		const row = {};
+		cols.map(j => row[result.columns[j]] = dt.getValue(i, j));
+		result.push(row);
+	}
+	
+	return result;
+}
+
+/*************************************************************************
+ */
+function groupWindRoseData(dt)
+{
 	function quantizeDirection(dir)
 	{
-		// slot the angle "dir" into 10-degree buckets:
-		// returns 10, 20, 30, 40, etc...
-		return 10 * Math.floor(dir / 10);
+		// slot the angle "dir" into buckets:
+		return 20 * Math.floor(dir / 20);
 	}
 
 	function quantizeSpeed(revs)
@@ -177,8 +212,7 @@ function prepWindRoseData(dt)
 	{
 		// we receive the list of hours that the wind was blowing with a given
 		// force (speed), and a given direction
-		console.log("hours = " + hours.length);
-		return hours.length / totalHours; // proportion of this wind
+		return 100 * (hours.length * 60 * 60) / totalTime; // proportion of this wind
 	}
 
 	const view = new google.visualization.DataView(dt);
@@ -186,24 +220,24 @@ function prepWindRoseData(dt)
 	view.setRows( view.getFilteredRows([
 		{ column: 1, value: 60 } ])); // where period=60
 	
-	const range = view.getColumnRange(0);
-	const totalHours = (range.max - range.min) / (60 * 60); // length of this time window in hours
-	console.log("total hours = " + totalHours)
+	const timeRange = view.getColumnRange(0);
+	const totalTime = timeRange.max - timeRange.min; // length of this time window in seconds
 	
 	const grouped = google.visualization.data.group(
 		view,
         [ { column: 2,
+			id: 'angle',
 			modifier: quantizeDirection,
             type: 'number' },
 		{ column: 3,
+			id: 'speed',
 			modifier: quantizeSpeed,
-            type: 'string' }],
+            type: 'string' } ],
 		// aggregate column: 
 		[ { column: 0,
+			id: 'percent',
 			aggregation: aggregateWindTime, 
-			type: 'number' }]);
+			type: 'number' } ] );
 
-	// more tbd
-	debugTable(grouped);
+	return grouped;
 }
-
