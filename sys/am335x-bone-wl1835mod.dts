@@ -1,6 +1,6 @@
 /*
  * This device tree enables the WL1835MOD cape on Beaglebone White (classic).
- * It does not enable the operations implemented by Bonescript, e.g.
+ * It does NOT support the operations implemented by Bonescript, e.g.
  * analogRead(), attachInterrupt(), etc. 
  *
  *** Compile and Install This Device Tree
