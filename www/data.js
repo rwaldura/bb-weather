@@ -166,16 +166,16 @@ function prepWindRoseData(dt)
 }
 
 /*************************************************************************
- * Transform a dataTable into an JavaScript array that can be groked
- * by JSChart.  
+ * Transform a Google Charts dataTable into an JavaScript array that can
+ * be groked by JSCharts.  
  */
 function dataTable2JSChartArray(dt)
 {
 	const result = [];
 	
 	const cols = [...Array(dt.getNumberOfColumns()).keys()]; // column indices
-	result.columns = cols.map(i => dt.getColumnId(i));
-	result.types = cols.map(i => dt.getColumnType(i));
+	result.types = cols.map(j => dt.getColumnType(j));
+	result.columns = cols.map(j => dt.getColumnId(j));
 	
 	for (var i = 0; i < dt.getNumberOfRows(); i++)
 	{
@@ -191,10 +191,12 @@ function dataTable2JSChartArray(dt)
  */
 function groupWindRoseData(dt)
 {
+	const ANGLE_QUANTUM = 20;
+	
 	function quantizeDirection(dir)
 	{
-		// slot the angle "dir" into buckets:
-		return 20 * Math.floor(dir / 20);
+		// slot the angle "dir" into 20-degree buckets:
+		return ANGLE_QUANTUM * Math.floor(dir / ANGLE_QUANTUM);
 	}
 
 	function quantizeSpeed(revs)
@@ -208,7 +210,7 @@ function groupWindRoseData(dt)
 		/* else */ return "20+";	
 	}
 
-	function aggregateWindTime(hours)
+	function windTimePercent(hours)
 	{
 		// we receive the list of hours that the wind was blowing with a given
 		// force (speed), and a given direction
@@ -236,7 +238,7 @@ function groupWindRoseData(dt)
 		// aggregate column: 
 		[ { column: 0,
 			id: 'percent',
-			aggregation: aggregateWindTime, 
+			aggregation: windTimePercent, 
 			type: 'number' } ] );
 
 	return grouped;
