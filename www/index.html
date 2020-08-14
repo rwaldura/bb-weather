@@ -40,6 +40,14 @@ function drawCharts(dt /* datatable */)
 {
 	if (dt)
 	{
+		if (!G.currentDataTable) // currentDataTable has never been set
+		{
+			// only draw the wind rose the first time: 
+			// 1- it doesn't change that much, and 
+			// 2- it leaks (crashes Chromecast after a few hours)
+			drawWindRose(dt);		
+		}
+
 		// cache the datatable so we can quickly re-draw it later
 		G.currentDataTable = dt;
 	} 
@@ -78,14 +86,14 @@ function drawCharts(dt /* datatable */)
 		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
 		opts);	
 		
-	drawWindRose(dt);
+	console.log("drawn all charts");
 }
 
 /****************************************************************************/
 function drawWindRose(dt)
 {
 	const data1 = prepWindRoseData(dt);
-	console.log("d1 = ", data1);
+	// console.log("d1 = ", data1);
 	
 	const data2 = JSC.nest() 
       .key('speed') 
@@ -96,6 +104,8 @@ function drawWindRose(dt)
   	// console.log("d2 = ", data2);
 	
 	renderWindRose(data2);
+	
+	console.log("rendered wind rose");
 }
 
 /****************************************************************************/
@@ -114,7 +124,7 @@ function renderWindRose(data)
 			position: 'left' }, 
 		legend: { 
 			style_fontFamily: 'Google Sans',
-			title_label_text: 'Wind Speed (in mph)', 
+			title_label_text: 'Wind Speed', 
 			position: 'right', 
 			template: '%icon %name', 
 			reversed: false }, 
@@ -128,13 +138,13 @@ function renderWindRose(data)
 			scale_range: [0, 360], 
 			scale_interval: 45, 
 			customTicks: [ 
-				{ value: 360, label_text: 'North', label_style_fontFamily: 'Google Sans' }, 
-				{ value:  45, label_text: 'NE',    label_style_fontFamily: 'Google Sans' }, 
-				{ value:  90, label_text: 'East',  label_style_fontFamily: 'Google Sans' }, 
-				{ value: 135, label_text: 'SE',    label_style_fontFamily: 'Google Sans' }, 
-				{ value: 180, label_text: 'South', label_style_fontFamily: 'Google Sans' }, 
-				{ value: 225, label_text: 'SW',    label_style_fontFamily: 'Google Sans' }, 
-				{ value: 270, label_text: 'West',  label_style_fontFamily: 'Google Sans' }, 
+				{ value: 360, label_text: 'North', label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#ff0000' }, 
+				{ value:  45, label_text: 'NE',    label_style_fontFamily: 'Google Sans' },
+				{ value:  90, label_text: 'East',  label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#eeee00' }, 
+				{ value: 135, label_text: 'SE',    label_style_fontFamily: 'Google Sans' },
+				{ value: 180, label_text: 'South', label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#00ff00' },
+				{ value: 225, label_text: 'SW',    label_style_fontFamily: 'Google Sans' },
+				{ value: 270, label_text: 'West',  label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#0000ff' },
 				{ value: 315, label_text: 'NW',    label_style_fontFamily: 'Google Sans' } ] }, 
 		palette: [ 
 			'#c62828', 
