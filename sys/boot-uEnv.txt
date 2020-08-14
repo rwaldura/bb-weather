@@ -71,9 +71,9 @@ optargs=ipv6.disable=1
 # of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
 #
 # For a reason I do not understand, my custom device tree moves it to
-# /dev/mmcblk1. I therefore have to "fixup" (i.e. hack) the boot process to
-# find it there. After my device tree loads, the root FS no longer matches
-# where U-Boot found it.
+# /dev/mmcblk1. After my device tree loads, the root FS no longer matches
+# where U-Boot found it. I therefore have to "fixup" (i.e. hack) the boot
+# process to find it there.
 #
 # There are probably better ways to fix this...
 
