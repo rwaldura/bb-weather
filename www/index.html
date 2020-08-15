@@ -40,15 +40,7 @@ function drawCharts(dt /* datatable */)
 {
 	if (dt)
 	{
-		if (!G.currentDataTable) // currentDataTable has never been set
-		{
-			// only draw the wind rose the first time: 
-			// 1- it doesn't change that much, and 
-			// 2- it leaks (crashes Chromecast after a few hours)
-			drawWindRose(dt);		
-		}
-
-		// cache the datatable so we can quickly re-draw it later
+		// cache the datatable so we can quickly re-draw it on a unit change
 		G.currentDataTable = dt;
 	} 
 	else 
@@ -86,12 +78,24 @@ function drawCharts(dt /* datatable */)
 		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
 		opts);	
 		
+	drawWindRose(dt);		
+
 	console.log("drawn all charts");
 }
 
 /****************************************************************************/
 function drawWindRose(dt)
-{
+{	
+	// only draw the wind rose once: 
+	// 1- it doesn't change that much, and 
+	// 2- it seems to leak (crashes Chromecast after a few hours)
+	const chart3 = document.getElementById('chart3');
+	if (chart3 && chart3.hasChildNodes()) 
+	{
+		console.log("wind rose already rendered, skipping");
+		return;
+	}
+	
 	const data1 = prepWindRoseData(dt);
 	// console.log("d1 = ", data1);
 	
@@ -116,21 +120,20 @@ function renderWindRose(data)
 		debug: false, 
 		box_fill: G.color,
 		type: 'radar column', 
+		box_style_fontFamily: 'Google Sans',
 		title: { 
-			label_style_fontFamily: 'Google Sans',
 			label_text: 'This Month', 
 			label_style_fontSize: 16, 
 			label_style_fontWeight: 'bold',
 			position: 'left' }, 
 		legend: { 
-			style_fontFamily: 'Google Sans',
 			title_label_text: 'Wind Speed', 
-			position: 'right', 
+			position: 'right',
+			offset: '-50,0',
 			template: '%icon %name', 
 			reversed: false }, 
 		defaultSeries_shape_padding: 0.02, 
 		yAxis: { 
-			defaultTick_label_style_fontFamily: 'Google Sans',
 			defaultTick_label_text: '%value%', 
 			scale_type: 'stacked', 
 			alternateGridFill: 'none' }, 
@@ -138,14 +141,14 @@ function renderWindRose(data)
 			scale_range: [0, 360], 
 			scale_interval: 45, 
 			customTicks: [ 
-				{ value: 360, label_text: 'North', label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#ff0000' }, 
-				{ value:  45, label_text: 'NE',    label_style_fontFamily: 'Google Sans' },
-				{ value:  90, label_text: 'East',  label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#eeee00' }, 
-				{ value: 135, label_text: 'SE',    label_style_fontFamily: 'Google Sans' },
-				{ value: 180, label_text: 'South', label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#00ff00' },
-				{ value: 225, label_text: 'SW',    label_style_fontFamily: 'Google Sans' },
-				{ value: 270, label_text: 'West',  label_style_fontFamily: 'Google Sans', label_style_fontWeight: 'bold', label_style_color: '#0000ff' },
-				{ value: 315, label_text: 'NW',    label_style_fontFamily: 'Google Sans' } ] }, 
+				{ value: 360, label_text: 'North', label_style_fontWeight: 'bold', label_style_color: '#ff0000' }, 
+				{ value:  45, label_text: 'NE' },
+				{ value:  90, label_text: 'East',  label_style_fontWeight: 'bold', label_style_color: '#eeee00' }, 
+				{ value: 135, label_text: 'SE' },
+				{ value: 180, label_text: 'South', label_style_fontWeight: 'bold', label_style_color: '#00ff00' },
+				{ value: 225, label_text: 'SW' },
+				{ value: 270, label_text: 'West',  label_style_fontWeight: 'bold', label_style_color: '#0000ff' },
+				{ value: 315, label_text: 'NW' } ] }, 
 		palette: [ 
 			'#c62828', 
 			'#ff7043', 

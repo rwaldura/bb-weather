@@ -214,7 +214,9 @@ function groupWindRoseData(dt)
 	{
 		// we receive the list of hours that the wind was blowing with a given
 		// force (speed), and a given direction
-		return 100 * (hours.length * 60 * 60) / totalTime; // proportion of this wind
+		const seconds = hours.length * 60 * 60;
+		totalAggrTime += seconds;
+		return 100 * seconds / totalTime; // proportion of this wind
 	}
 
 	const view = new google.visualization.DataView(dt);
@@ -224,6 +226,7 @@ function groupWindRoseData(dt)
 	
 	const timeRange = view.getColumnRange(0);
 	const totalTime = timeRange.max - timeRange.min; // length of this time window in seconds
+	var totalAggrTime = 0;
 	
 	const grouped = google.visualization.data.group(
 		view,
@@ -240,6 +243,8 @@ function groupWindRoseData(dt)
 			id: 'percent',
 			aggregation: windTimePercent, 
 			type: 'number' } ] );
+
+	console.log("wind rose data aggregation: " + totalAggrTime / totalTime);
 
 	return grouped;
 }
