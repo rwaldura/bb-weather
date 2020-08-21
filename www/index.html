@@ -53,11 +53,10 @@ function drawCharts(dt /* datatable */)
 		colors: ['#cccccc'], 
 		backgroundColor: G.color,
 		chartArea: { 
-			top: 40, 
-			left: 40,
-			height: '80%',  // 276
-			width: '90%' }, // 570
-		titleTextStyle: { fontSize: 16 },
+			top: 10, 
+			left: 25,
+			height: '90%',
+			width: '90%' },
 		lineWidth: 0,
 		pointsVisible: true,
 		pointSize: 20,
@@ -67,29 +66,27 @@ function drawCharts(dt /* datatable */)
 		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
 	};								
 
-	opts.title = 'Now';
 	chart2.draw(
-		prepWindData(dt, 20 /* 20 minutes */, 1 /* minute */), 
+		prepWindData(dt, 15 /* minutes */, 1 /* minute */), 
 		opts);
 
 	opts.chartArea.width = '95%';
-	opts.title = 'This Week';
 	chart1.draw(
-		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */), 
-		opts);	
+		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */),
+		opts);
 		
-	drawWindRose(dt);		
+	drawWindRose(dt, 'chart4_area');		
 
 	console.log("drawn all charts");
 }
 
 /****************************************************************************/
-function drawWindRose(dt)
+function drawWindRose(dt, elementID)
 {	
 	// only draw the wind rose once: 
 	// 1- it doesn't change that much, and 
 	// 2- it seems to leak (crashes Chromecast after a few hours)
-	const chart3 = document.getElementById('chart3');
+	const chart3 = document.getElementById(elementID);
 	if (chart3 && chart3.hasChildNodes()) 
 	{
 		console.log("wind rose already rendered, skipping");
@@ -107,29 +104,24 @@ function drawWindRose(dt)
 	  .reverse();
   	// console.log("d2 = ", data2);
 	
-	renderWindRose(data2);
+	renderWindRose(data2, elementID);
 	
 	console.log("rendered wind rose");
 }
 
 /****************************************************************************/
-function renderWindRose(data) 
+function renderWindRose(data, elementID) 
 { 
-	return JSC.chart('chart3', { 
+	return JSC.chart(elementID, { 
 		series: data,
 		debug: false, 
 		box_fill: G.color,
 		type: 'radar column', 
 		box_style_fontFamily: 'Google Sans',
-		title: { 
-			label_text: 'This Month', 
-			label_style_fontSize: 16, 
-			label_style_fontWeight: 'bold',
-			position: 'left' }, 
 		legend: { 
-			title_label_text: 'Wind Speed', 
+			title_label_text: 'MPH', 
 			position: 'right',
-			offset: '-50,0',
+			offset: '0,-90',
 			template: '%icon %name', 
 			reversed: false }, 
 		defaultSeries_shape_padding: 0.02, 
@@ -237,11 +229,11 @@ google.charts.load('current', { 'packages': ['corechart', 'table'] });
 var chart1, chart2, chart3;
 google.charts.setOnLoadCallback(function () {
 	chart1 = new google.visualization.AreaChart(
-		document.getElementById('chart1'));
+		document.getElementById('chart1_area'));
 	chart2 = new google.visualization.AreaChart(
-		document.getElementById('chart2'));
+		document.getElementById('chart2_area'));
 	chart3 = new google.visualization.ColumnChart(
-		document.getElementById('chart3'));
+		document.getElementById('chart3_area'));
 
 	loadChartData();
 });	
@@ -250,9 +242,22 @@ google.charts.setOnLoadCallback(function () {
   </head>
   <body>
 	<div id="charts">
-		<div id="chart1"></div>
-		<div id="chart2"></div>
-		<div id="chart3"></div>
+		<div id="chart1">
+			<div id="chart1_area"></div>
+			<div id="chart1_title" class="chart_title">This Week</div>
+		</div>
+		<div id="chart2">
+			<div id="chart2_area"></div>
+			<div id="chart2_title" class="chart_title">Now</div>
+		</div>
+		<div id="chart3">
+			<div id="chart3_area">.</div>
+			<div id="chart3_title" class="chart_title">Other</div>
+		</div>
+		<div id="chart4">
+			<div id="chart4_area"></div>
+			<div id="chart4_title" class="chart_title">This Month</div>
+		</div>
 	</div>
 	<div id="footer">
 		<select id="speed_unit" onchange="changeSpeedUnit(this.value)">

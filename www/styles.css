@@ -17,9 +17,8 @@ body, div, td {
 }	
 
 .chart_title {
-	font-size: 16;
+	font-size: 18;
 	font-weight: bold;
-	padding-top: 10px;
 }
 
 #chart_errors {
@@ -39,23 +38,60 @@ body, div, td {
 }	
 
 /* sized to fit on 720p screen: 1280x720 */
-#chart1 {
-/*	background-color: purple;*/
-	width: 100%; 
+#chart1_area {
 	height: 348;	
+	width: 1280; 
 }
-#chart2 {
-/*	background-color: red;*/
-	width: 50%; 
+#chart1_title {
+	position: absolute;
+	top: 15; 
+	left: 40;
+}
+
+#chart2_area {
 	height: 348;	
+	width: 512; 
 }
+#chart2_title {
+	position: absolute;
+	top: 363; 
+	left: 40;
+}
+
 #chart3 {
 /*	background-color: yellow;*/
-	position: absolute;
+	position: fixed;
 	top: 348; 
-	left: 50%;
-	width: 50%;
+	left: 512;
+}
+#chart3_area {
+/*	background-color: pink;*/
 	height: 348; 
+	width: 384;
+}
+#chart3_title {
+/*	background-color: red;*/
+	position: absolute;
+	top: 15; 
+	left: 40;
+}
+
+#chart4 {
+/*	background-color: green;*/
+	position: fixed;
+	top: 348; 
+	right: 0;
+}
+#chart4_area {
+/*	background-color: blue;*/
+	height: 348;
+	width: 384;
+}
+#chart4_title {
+/*	background-color: grey;*/
+	position: absolute;
+	top: 15; 
+	left: 5;
 }
 
 #footer {
