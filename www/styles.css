@@ -21,14 +21,22 @@ body, div, td {
 	font-weight: bold;
 }
 
+.bg_spinner {
+    background-image: url("spinner.gif");	
+	background-repeat: no-repeat; 
+	background-position: center; 	
+}
+
 #chart_errors {
 	position: absolute;
-	top: 200;
-	left: 0;
-	width: 100%;
+	top: 100;
+	left: 40%;
 	font-size: 18;
+	font-style: italic;
 	color: red;
 	text-align: center;
+	border: 1px solid red;
+	padding: 10;
 }	
 
 #speed_unit {
@@ -40,7 +48,7 @@ body, div, td {
 /* sized to fit on 720p screen: 1280x720 */
 #chart1_area {
 	height: 348;	
-	width: 1280; 
+	width: 100%; 
 }
 #chart1_title {
 	position: absolute;
