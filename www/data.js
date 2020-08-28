@@ -45,7 +45,7 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 {
 	var view = new google.visualization.DataView(dt);
 
-	if (period == 1 || period == 60)
+	if (period == 1 || period == 60) // no need to group
 	{
 		view.setRows( view.getFilteredRows( [
 			{ column: 1, value: period },
@@ -53,8 +53,10 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 	}
 	else // further grouping is necessary
 	{
+		const basePeriod = (period < 60) ? 1 : 60;
+		
 		view.setRows( view.getFilteredRows( [
-			{ column: 1, value: 1 },
+			{ column: 1, value: basePeriod },
 			{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
 
 		view = groupWindData(view, period * 60);		
@@ -227,7 +229,7 @@ function dataTable2JSChartArray(dt)
  */
 function groupWindRoseData(dt)
 {
-	const ANGLE_QUANTUM = 10;
+	const ANGLE_QUANTUM = 20;
 	
 	function quantizeDirection(dir)
 	{

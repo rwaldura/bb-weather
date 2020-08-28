@@ -66,13 +66,17 @@ function drawCharts(dt /* datatable */)
 		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
 	};								
 
-	chart2.draw(
+	chart_hour.draw(
 		prepWindData(dt, 60 /* minutes */, 3 /* minute */), 
 		opts);
 
+	chart_day.draw(
+		prepWindData(dt, 25 * 60 /* minutes */, 60 /* minute */), 
+		opts);
+
 	opts.chartArea.width = '95%';
-	chart1.draw(
-		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 60 /* 1 hour */),
+	chart_week.draw(
+		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 2 * 60 /* 1 hour */),
 		opts);
 		
 	drawWindRose(dt, 'chart4_area');		
@@ -86,8 +90,8 @@ function drawWindRose(dt, elementID)
 	// only draw the wind rose once: 
 	// 1- it doesn't change that much, and 
 	// 2- it seems to leak (crashes Chromecast after a few hours)
-	const chart3 = document.getElementById(elementID);
-	if (chart3 && chart3.hasChildNodes()) 
+	const chart_rose = document.getElementById(elementID);
+	if (chart_rose && chart_rose.hasChildNodes()) 
 	{
 		console.log("wind rose already rendered, skipping");
 		return;
@@ -163,7 +167,7 @@ function updateClock()
 /****************************************************************************/
 function updateInstantMetrics(dt)
 {
-	const mins = 10; // minutes
+	const mins = 60; // minutes
 	const i = getInstantMetrics(dt, mins);	
 	const instant = document.getElementById('instant');
 	instant.textContent = `Min: ${formatSpeed(i.min, 1)} 
@@ -226,14 +230,14 @@ G.request = newDataTableRequest(); // defined in data.js
 setInterval(loadChartData, 66666 /* ms */);
 
 google.charts.load('current', { 'packages': ['corechart', 'table'] });
-var chart1, chart2, chart3;
+var chart_week, chart_day, chart_hour;
 google.charts.setOnLoadCallback(function () {
-	chart1 = new google.visualization.AreaChart(
+	chart_week = new google.visualization.AreaChart(
 		document.getElementById('chart1_area'));
-	chart2 = new google.visualization.AreaChart(
+	chart_day = new google.visualization.AreaChart(
 		document.getElementById('chart2_area'));
-	chart3 = new google.visualization.ColumnChart(
-		document.getElementById('chart3_area'));
+	chart_hour = new google.visualization.AreaChart(
+		document.getElementById('chart5_area'));
 
 	loadChartData();
 });	
@@ -248,7 +252,7 @@ google.charts.setOnLoadCallback(function () {
 		</div>
 		<div id="chart2">
 			<div id="chart2_area" class="bg_spinner"></div>
-			<div id="chart2_title" class="chart_title">Hour</div>
+			<div id="chart2_title" class="chart_title">Day</div>
 		</div>
 		<div id="chart3">
 			<div id="chart3_area"></div>
@@ -258,9 +262,9 @@ google.charts.setOnLoadCallback(function () {
 			<div id="chart4_area" class="bg_spinner"></div>
 			<div id="chart4_title" class="chart_title">Month</div>
 		</div>
-		<div id="chart5">
+		<div id="chart5" class="bg_spinner">
 			<div id="chart5_area"></div>
-			<div id="chart5_title" class="chart_title">.</div>
+			<div id="chart5_title" class="chart_title">Hour</div>
 		</div>
 	</div>
 	<div id="footer">

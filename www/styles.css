@@ -102,10 +102,12 @@ body, div, td {
 	left: 5;
 }
 
-#chart5_area {
-/*	background-color: yellow;*/
+#chart5 {
+	/*	background-color: yellow;*/
 	height: 232;	
-	width: 512; 
+	width: 512; 	
+}
+#chart5_area {
 }
 #chart5_title {
 	position: absolute;
