@@ -43,11 +43,22 @@ function windSpeed(dt, row, col, T /* minutes */)
 // type: "number"		
 function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 {
-	const view = new google.visualization.DataView(dt);
+	var view = new google.visualization.DataView(dt);
 
-	view.setRows( view.getFilteredRows( [
-		{ column: 1, value: period },
-		{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
+	if (period == 1 || period == 60)
+	{
+		view.setRows( view.getFilteredRows( [
+			{ column: 1, value: period },
+			{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
+	}
+	else // further grouping is necessary
+	{
+		view.setRows( view.getFilteredRows( [
+			{ column: 1, value: 1 },
+			{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
+
+		view = groupWindData(view, period * 60);		
+	}
 
 	view.setColumns([
 		{ id: 'date_time', // timestamp, as a Date object
@@ -68,6 +79,31 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period) } } ]);
 
 	return view;
+}
+
+function groupWindData(dt, period /* seconds */)
+{	
+	const grouped = google.visualization.data.group(
+		dt,
+		// group by timestamp over the period given
+		[ { column: 0,
+			modifier: function(t) { return period * Math.floor(t / period) }, 
+			type: 'number' } ],
+		// aggregate columns: MIN(period), AVG(dir), SUM(revs)
+		// MIN(period) isn't actually used, it's there merely to preserve column indices
+		[ { column: 1,
+			aggregation: google.visualization.data.min, 
+			type: 'number' },
+		{ column: 2,
+			aggregation: google.visualization.data.avg, 
+			type: 'number' },
+		{ column: 3, 
+			aggregation: google.visualization.data.sum, 
+			type: 'number' } ]);
+
+	// debugTable(grouped);
+			
+	return new google.visualization.DataView(grouped);	
 }
 
 /***************************************************************************
@@ -132,7 +168,7 @@ function newDataTableRequest()
 function loadChartData()
 {
 	// we pass no parameters: the CGI knows to return exactly the data we want
-	G.request.open("GET", "getDataTable.json", true);
+	G.request.open("GET", "getDataTable3.json", true);
 	G.request.send();
 	// the XHR onload handler is called next
 }
@@ -191,7 +227,7 @@ function dataTable2JSChartArray(dt)
  */
 function groupWindRoseData(dt)
 {
-	const ANGLE_QUANTUM = 20;
+	const ANGLE_QUANTUM = 10;
 	
 	function quantizeDirection(dir)
 	{

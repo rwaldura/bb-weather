@@ -55,7 +55,7 @@ function drawCharts(dt /* datatable */)
 		chartArea: { 
 			top: 10, 
 			left: 25,
-			height: '90%',
+			height: '80%',
 			width: '90%' },
 		lineWidth: 0,
 		pointsVisible: true,
@@ -67,7 +67,7 @@ function drawCharts(dt /* datatable */)
 	};								
 
 	chart2.draw(
-		prepWindData(dt, 15 /* minutes */, 1 /* minute */), 
+		prepWindData(dt, 60 /* minutes */, 3 /* minute */), 
 		opts);
 
 	opts.chartArea.width = '95%';
@@ -244,19 +244,23 @@ google.charts.setOnLoadCallback(function () {
 	<div id="charts">
 		<div id="chart1">
 			<div id="chart1_area" class="bg_spinner"></div>
-			<div id="chart1_title" class="chart_title">This Week</div>
+			<div id="chart1_title" class="chart_title">Week</div>
 		</div>
 		<div id="chart2">
 			<div id="chart2_area" class="bg_spinner"></div>
-			<div id="chart2_title" class="chart_title">Now</div>
+			<div id="chart2_title" class="chart_title">Hour</div>
 		</div>
 		<div id="chart3">
 			<div id="chart3_area"></div>
-			<div id="chart3_title" class="chart_title">Other</div>
+			<div id="chart3_title" class="chart_title">.</div>
 		</div>
 		<div id="chart4">
 			<div id="chart4_area" class="bg_spinner"></div>
-			<div id="chart4_title" class="chart_title">This Month</div>
+			<div id="chart4_title" class="chart_title">Month</div>
+		</div>
+		<div id="chart5">
+			<div id="chart5_area"></div>
+			<div id="chart5_title" class="chart_title">.</div>
 		</div>
 	</div>
 	<div id="footer">
