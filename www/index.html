@@ -76,7 +76,7 @@ function drawCharts(dt /* datatable */)
 
 	opts.chartArea.width = '95%';
 	chart_week.draw(
-		prepWindData(dt, 5 * 24 * 60 /* 5 days */, 2 * 60 /* 1 hour */),
+		prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 1 hour */),
 		opts);
 		
 	drawWindRose(dt, 'chart4_area');		
