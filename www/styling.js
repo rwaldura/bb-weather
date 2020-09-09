@@ -69,8 +69,11 @@ function dir2color(dir /* degrees */)
  * Style the datapoint to indicate wind direction.
  * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
  */
-function dir2style(dt, row, col, period /* minutes */)
+function dir2style(dt, row, col, period /* minutes */, col1)
 {
+	const revs = dt.getValue(row, col1);
+	if (revs == 0) return "point { size: 0 }";
+		
 	const dir = dt.getValue(row, col);
 	const color = dir2color(dir);
 	return `point { 

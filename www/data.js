@@ -64,20 +64,20 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 
 	view.setColumns([
 		{ id: 'date_time', // timestamp, as a Date object
-			type: 'datetime', 
-			calc: function(dt, row) { const t = dt.getValue(row, 0); return new Date(t * 1000) } }, 
-		{ id: 'speed_mph', 
+			type: 'datetime',
+			calc: function(dt, row) { const t = dt.getValue(row, 0); return new Date(t * 1000) } },
+		{ id: 'speed_mph',
 			label: 'Wind Speed',
-			type: 'number', 
-			calc: function(dt, row) { return windSpeed(dt, row, 3 /* revs */, period) } }, 
-		{ id: 'point_style', 
+			type: 'number',
+			calc: function(dt, row) { return windSpeed(dt, row, 3 /* revs */, period) } },
+		{ id: 'point_style',
 			role: 'style',
-			type: 'string', 
-			calc: function(dt, row) { return dir2style(dt, row, 2 /* dir */, period) } },
-		{ id: 'point_tooltip', 
-			role: 'tooltip', 
+			type: 'string',
+			calc: function(dt, row) { return dir2style(dt, row, 2 /* dir */, period, 3 /* revs */) } },
+		{ id: 'point_tooltip',
+			role: 'tooltip',
 			properties: { html: true },
-			type: 'string', 
+			type: 'string',
 			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period) } } ]);
 
 	return view;
