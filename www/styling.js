@@ -69,12 +69,10 @@ function dir2color(dir /* degrees */)
  * Style the datapoint to indicate wind direction.
  * See https://developers.google.com/chart/interactive/docs/points#customizing-individual-points
  */
-function dir2style(dt, row, col, period /* minutes */, col1)
+function dir2style(dir, revs, period /* minutes */)
 {
-	const revs = dt.getValue(row, col1);
 	if (revs == 0) return "point { size: 0 }";
 		
-	const dir = dt.getValue(row, col);
 	const color = dir2color(dir);
 	return `point { 
 		shape-type: star;
@@ -112,14 +110,14 @@ function formatSpeed(P, T /* minutes */)
  * Custom tooltip
  * See https://developers.google.com/chart/interactive/docs/customizing_tooltip_content#customizing-html-content
  */
-function tooltip(dt, row, ts_col, dir_col, revs_col, period /* minutes */)
+function tooltip(ts, dir, revs, period /* minutes */)
 {
-	const tstamp = formatTimestamp(dt.getValue(row, ts_col), period);
-	const dir = formatDirection(dt.getValue(row, dir_col));
-	const speed = formatSpeed(dt.getValue(row, revs_col), period);
+	const tstamp = formatTimestamp(ts, period);
+	const fdir = formatDirection(dir);
+	const speed = formatSpeed(revs, period);
 	return `<div class="tooltip">
 		<span class="timestamp">${tstamp}</span><br>
-		${dir}<br> 
+		${fdir}<br> 
 		${speed}
 		</div>`;
 }

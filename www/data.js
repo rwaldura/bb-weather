@@ -10,14 +10,12 @@
  */
 function wind_speed(P, T /* seconds */)
 {
-	const V = (9 * P) / (4 * T);
-	return V;
+	return (9 * P) / (4 * T);
 }
 
 /****************************************************************************/
-function windSpeed(dt, row, col, T /* minutes */)
+function windSpeed(P, T /* minutes */)
 {
-	const P = dt.getValue(row, col);
 	const V = wind_speed(P, T * 60);
 	return G.speed.convert(V);
 }
@@ -43,21 +41,26 @@ function windSpeed(dt, row, col, T /* minutes */)
 // type: "number"		
 function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 {
+	const TSTAMP_COL = 0;
+	const PERIOD_COL = 1;
+	const DIR_COL = 2;
+	const REVS_COL = 3;
+	
 	var view = new google.visualization.DataView(dt);
 
 	if (period == 1 || period == 60) // no need to group
 	{
 		view.setRows( view.getFilteredRows( [
-			{ column: 1, value: period },
-			{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
+			{ column: PERIOD_COL, value: period },
+			{ column: TSTAMP_COL, minValue: view.getColumnRange(TSTAMP_COL).max - lookback * 60 } ]));
 	}
 	else // further grouping is necessary
 	{
 		const basePeriod = (period < 60) ? 1 : 60;
 		
 		view.setRows( view.getFilteredRows( [
-			{ column: 1, value: basePeriod },
-			{ column: 0, minValue: view.getColumnRange(0).max - lookback * 60 } ]));
+			{ column: PERIOD_COL, value: basePeriod },
+			{ column: TSTAMP_COL, minValue: view.getColumnRange(TSTAMP_COL).max - lookback * 60 } ]));
 
 		view = groupWindData(view, period * 60);		
 	}
@@ -65,20 +68,25 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 	view.setColumns([
 		{ id: 'date_time', // timestamp, as a Date object
 			type: 'datetime',
-			calc: function(dt, row) { const t = dt.getValue(row, 0); return new Date(t * 1000) } },
+			calc: function(dt, row) { return new Date(1000 * dt.getValue(row, TSTAMP_COL)) } },
 		{ id: 'speed_mph',
 			label: 'Wind Speed',
 			type: 'number',
-			calc: function(dt, row) { return windSpeed(dt, row, 3 /* revs */, period) } },
+			calc: function(dt, row) { return windSpeed(dt.getValue(row, REVS_COL), period) } },
 		{ id: 'point_style',
 			role: 'style',
 			type: 'string',
-			calc: function(dt, row) { return dir2style(dt, row, 2 /* dir */, period, 3 /* revs */) } },
+			calc: function(dt, row) { return dir2style(dt.getValue(row, DIR_COL), /* dir */ 
+														dt.getValue(row, REVS_COL), /* revs */ 
+														period) } },
 		{ id: 'point_tooltip',
 			role: 'tooltip',
 			properties: { html: true },
 			type: 'string',
-			calc: function(dt, row) { return tooltip(dt, row, 0, 2, 3, period) } } ]);
+			calc: function(dt, row) { return tooltip(dt.getValue(row, TSTAMP_COL), /* timestamp */
+													dt.getValue(row, DIR_COL),  /* direction */
+													dt.getValue(row, REVS_COL),  /* revs */
+													period) } } ]);
 
 	return view;
 }
