@@ -76,16 +76,16 @@ function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 		{ id: 'point_style',
 			role: 'style',
 			type: 'string',
-			calc: function(dt, row) { return dir2style(dt.getValue(row, DIR_COL), /* dir */ 
-														dt.getValue(row, REVS_COL), /* revs */ 
-														period) } },
+			calc: function(dt, row) { return dir2style(dt.getValue(row, DIR_COL), /* direction */ 
+													dt.getValue(row, REVS_COL), /* revs */ 
+													period) } },
 		{ id: 'point_tooltip',
 			role: 'tooltip',
 			properties: { html: true },
 			type: 'string',
 			calc: function(dt, row) { return tooltip(dt.getValue(row, TSTAMP_COL), /* timestamp */
-													dt.getValue(row, DIR_COL),  /* direction */
-													dt.getValue(row, REVS_COL),  /* revs */
+													dt.getValue(row, DIR_COL), /* direction */
+													dt.getValue(row, REVS_COL), /* revs */
 													period) } } ]);
 
 	return view;
