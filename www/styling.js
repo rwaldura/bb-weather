@@ -72,10 +72,11 @@ function dir2color(dir /* degrees */)
 function dir2style(dir, revs, period /* minutes */)
 {
 	// don't show wind direction if less than 0.5 MPH
-	if (revs < 12 * period) return "point { size: 0 }";
+	const visible = (revs > 12 * period);
 
 	const color = dir2color(dir);
 	return `point { 
+		visible: ${visible};
 		shape-type: star;
 		shape-sides: 2;
 		shape-rotation: ${dir}; 
