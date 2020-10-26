@@ -1,0 +1,31 @@
+<html>
+<head>
+	<script src="sunrise-sunset.js"></script>
+</head>
+<body>
+	<pre id="times"></pre>
+</body>
+<script>
+// San Francisco is at 37°46′39″N 122°24′59″W
+// in decimal degrees: 
+const SF_LAT = 37.7775, SF_LONG = -122.416389;
+
+const now = Date.now();
+var times = "";
+
+for (var i = 0; i <= 7; i++)
+{
+	const day = new Date(now - i * 24*60*60*1000); // preceding day
+
+	const sunrise = SunriseSunsetJS.getSunrise(SF_LAT, SF_LONG, day);
+	const sunset  = SunriseSunsetJS.getSunset( SF_LAT, SF_LONG, day);
+	
+	times += day.toDateString() 
+		+ " -- sunrise " + sunrise.toLocaleTimeString('en-US') 
+		+ " -- sunset "  +  sunset.toLocaleTimeString('en-US') 
+		+ "\n";
+}
+
+document.getElementById('times').textContent = times;
+</script>
+</html>
