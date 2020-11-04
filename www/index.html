@@ -69,7 +69,7 @@ function drawCharts(dt /* datatable */)
 	};								
 
 	chart_hour.draw(
-		prepWindData(dt, 60 /* minutes */, 3 /* minute */), 
+		prepWindData(dt, 60 /* minutes */, 3 /* minutes */), 
 		opts);
 
 	chart_day.draw(
@@ -77,18 +77,29 @@ function drawCharts(dt /* datatable */)
 		opts);
 
 	// the weekly chart also displays sunrises and sunsets
-	const dt1 = prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 2 hours */);
-	const dt2 = dt1.toDataTable();
-	addSolarEvents(dt2);	// defined in data.js
-	debugTable(dt2);
-	
-	opts.chartArea.width = '95%';
-	chart_week.draw(dt2, opts);
-
+	drawWeeklyChart(dt, opts);
+		
 	// the wind rose is its own thing
 	drawWindRose(dt, 'chart4_area');		
 
 	console.log("drawn all charts");
+}
+
+/****************************************************************************/
+function drawWeeklyChart(dt, opts)
+{
+	const dv = prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 2 hours */);
+
+	const dt1 = dv.toDataTable();
+	addSolarEvents(dt1);	// defined in data.js
+	// debugTable(dt1);
+
+	// clamp the Y axis: sunset/sunrise values are arbitrarily extended to create vertical bands
+	opts.vAxis.viewWindow = { max: dt1.getColumnRange(1).max * 1.1 }; // +10%
+
+	opts.chartArea.width = '95%';
+		
+	chart_week.draw(dt1, opts);
 }
 
 /****************************************************************************/

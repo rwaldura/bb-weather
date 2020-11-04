@@ -178,7 +178,7 @@ function newDataTableRequest()
 function loadChartData()
 {
 	// we pass no parameters: the CGI knows to return exactly the data we want
-	G.request.open("GET", "getDataTable3.json", true);
+	G.request.open("GET", "getDataTable4.json", true);
 	G.request.send();
 	// the XHR onload handler is called next
 }
@@ -304,36 +304,35 @@ function addSolarEvents(dt /* datatable */)
 
 function calcSolarEvents(dt /* datatable */)
 {
-	const one_day_ms = 24 * 60 * 60 * 1000;
-	const events = [];
-
+	function nextDay(d /* Date */, days = 1)
+	{
+		const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+		return new Date(d.getTime() + days * ONE_DAY_MS);
+	}
+	
 	const low = 0;
-	const high = dt.getColumnRange(1).max;
+	const high = 2 * dt.getColumnRange(1).max; 
+	// arbitrary value: double the max wind speed; we will clamp the Y-axis later
 	
-	const start = dt.getColumnRange(TSTAMP_COL).min;
-	const end   = dt.getColumnRange(TSTAMP_COL).max;
-	console.log("solar range = " + start + " - " + end);
+	const start = nextDay(dt.getColumnRange(TSTAMP_COL).min);
+	const end   = nextDay(dt.getColumnRange(TSTAMP_COL).max);
+	console.log("solar events range = " + start + " - " + end);
 	
-	for (let t = start; t < end; /* t += 1 day */ t = new Date(t.getTime() + one_day_ms))
+	const events = [];
+	for (let t = start; t < end; /* t += 1 day */ t = nextDay(t))
 	{
 		const sunrise = SunriseSunsetJS.getSunrise(G.location.latitude, G.location.longitude, t);
 		const  sunset = SunriseSunsetJS.getSunset (G.location.latitude, G.location.longitude, t);
 	
-		console.log("t=" + t + " sunrise=" + sunrise + " sunset=" + sunset);
+		console.log("t=" + t + " sunset=" + sunset + " sunrise=" + sunrise);
 		
 		if (dt.getNumberOfColumns() != 5) throw new Error("Datatable must have 5 columns");
 		
-		if (start < sunset && sunset < end)
-		{
-			events.push([ new Date(sunset.getTime() - 1), null, null, null, low ]);
-			events.push([ sunset, null, null, null, high ]);
-		}
-	
-		if (start < sunrise && sunrise < end)
-		{
-			events.push([ new Date(sunrise.getTime() - 1), null, null, null, high ]);
-			events.push([ sunrise, null, null, null, low ]);			
-		}
+		events.push([ new Date(sunset.getTime() - 1), null, null, null, low ]);
+		events.push([ sunset, null, null, null, high ]);
+
+		events.push([ new Date(sunrise.getTime() - 1), null, null, null, high ]);
+		events.push([ sunrise, null, null, null, low ]);			
 	}
 
 	return events;
