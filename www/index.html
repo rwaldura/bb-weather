@@ -6,6 +6,8 @@
 	<script type="text/javascript" src="https://code.jscharting.com/latest/jscharting.js"></script>
 	<script type="text/javascript" src="https://code.jscharting.com/latest/modules/types.js"></script>
 
+	<script type="text/javascript" src="sunrise-sunset.js"></script>
+
 	<script type="text/javascript" src="uom.js"></script>	
 	<script type="text/javascript" src="data.js"></script>	
 	<script type="text/javascript" src="styling.js"></script>	
@@ -50,7 +52,7 @@ function drawCharts(dt /* datatable */)
 	
 	const opts = {
 		legend: 'none',
-		colors: ['#cccccc'], 
+		colors: ['#cccccc' /* for wind speed */, '#777777' /* for night hours */], 
 		backgroundColor: G.color,
 		chartArea: { 
 			top: 10, 
@@ -58,8 +60,8 @@ function drawCharts(dt /* datatable */)
 			height: '80%',
 			width: '90%' },
 		lineWidth: 0,
-		pointsVisible: true,
-		pointSize: 20,
+		// pointsVisible: true,
+		// pointSize: 20,
 		fontName: "Google Sans",
 		tooltip: { isHtml: true },
 		hAxis: { textStyle: { fontSize: 12 } },
@@ -74,11 +76,16 @@ function drawCharts(dt /* datatable */)
 		prepWindData(dt, 25 * 60 /* minutes */, 60 /* minute */), 
 		opts);
 
+	// the weekly chart also displays sunrises and sunsets
+	const dt1 = prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 2 hours */);
+	const dt2 = dt1.toDataTable();
+	addSolarEvents(dt2);	// defined in data.js
+	debugTable(dt2);
+	
 	opts.chartArea.width = '95%';
-	chart_week.draw(
-		prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 1 hour */),
-		opts);
-		
+	chart_week.draw(dt2, opts);
+
+	// the wind rose is its own thing
 	drawWindRose(dt, 'chart4_area');		
 
 	console.log("drawn all charts");
@@ -203,6 +210,7 @@ function parseSearchParameters()
 	const g = {
 		color: (params.get("colors") === "muted") ? "#C9B091" : "white",
 		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
+		location: SAN_FRANCISCO,
 	};
 
 	return g;

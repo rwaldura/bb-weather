@@ -39,13 +39,13 @@ function windSpeed(P, T /* minutes */)
 // column index 3
 // id: "revs",
 // type: "number"		
+const TSTAMP_COL = 0;
+const PERIOD_COL = 1;
+const DIR_COL = 2;
+const REVS_COL = 3;
+
 function prepWindData(dt, lookback /* minutes */, period /* minutes */)
 {
-	const TSTAMP_COL = 0;
-	const PERIOD_COL = 1;
-	const DIR_COL = 2;
-	const REVS_COL = 3;
-	
 	var view = new google.visualization.DataView(dt);
 
 	if (period == 1 || period == 60) // no need to group
@@ -293,4 +293,48 @@ function groupWindRoseData(dt)
 	console.log("wind rose data aggregation: " + totalAggrTime / totalTime);
 
 	return grouped;
+}
+
+/****************************************************************************/
+function addSolarEvents(dt /* datatable */)
+{
+	dt.addColumn('number', 'Sunrise/Sunset', 'sunrise_sunset');
+	dt.addRows(calcSolarEvents(dt));
+}
+
+function calcSolarEvents(dt /* datatable */)
+{
+	const one_day_ms = 24 * 60 * 60 * 1000;
+	const events = [];
+
+	const low = 0;
+	const high = dt.getColumnRange(1).max;
+	
+	const start = dt.getColumnRange(TSTAMP_COL).min;
+	const end   = dt.getColumnRange(TSTAMP_COL).max;
+	console.log("solar range = " + start + " - " + end);
+	
+	for (let t = start; t < end; /* t += 1 day */ t = new Date(t.getTime() + one_day_ms))
+	{
+		const sunrise = SunriseSunsetJS.getSunrise(G.location.latitude, G.location.longitude, t);
+		const  sunset = SunriseSunsetJS.getSunset (G.location.latitude, G.location.longitude, t);
+	
+		console.log("t=" + t + " sunrise=" + sunrise + " sunset=" + sunset);
+		
+		if (dt.getNumberOfColumns() != 5) throw new Error("Datatable must have 5 columns");
+		
+		if (start < sunset && sunset < end)
+		{
+			events.push([ new Date(sunset.getTime() - 1), null, null, null, low ]);
+			events.push([ sunset, null, null, null, high ]);
+		}
+	
+		if (start < sunrise && sunrise < end)
+		{
+			events.push([ new Date(sunrise.getTime() - 1), null, null, null, high ]);
+			events.push([ sunrise, null, null, null, low ]);			
+		}
+	}
+
+	return events;
 }

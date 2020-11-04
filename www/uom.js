@@ -17,3 +17,7 @@ const UNITS_OF_MEASUREMENT = {
 	"F": { label: "Fahrenheit", format: function(t) { return t + "&deg;F" }, convert: function(t) { return 32 + (t * 9/5) } },
 };
 
+// San Francisco is at 37°46′39″N 122°24′59″W
+// in decimal degrees: 
+const SF_LAT = 37.7775, SF_LONG = -122.416389;
+const SAN_FRANCISCO = { latitude: SF_LAT, longitude: SF_LONG };

@@ -77,6 +77,7 @@ function dir2style(dir, revs, period /* minutes */)
 	const color = dir2color(dir);
 	return `point { 
 		visible: ${visible};
+		size: 12;
 		shape-type: star;
 		shape-sides: 2;
 		shape-rotation: ${dir}; 
