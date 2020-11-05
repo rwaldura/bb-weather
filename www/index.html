@@ -52,8 +52,8 @@ function drawCharts(dt /* datatable */)
 	
 	const opts = {
 		legend: 'none',
-		colors: ['#cccccc' /* for wind speed */, '#777777' /* for night hours */], 
-		backgroundColor: G.color,
+		colors: [ G.colors.wind /* for wind speed */, G.colors.night /* for night hours */], 
+		backgroundColor: G.colors.background,
 		chartArea: { 
 			top: 10, 
 			left: 25,
@@ -137,7 +137,7 @@ function renderWindRose(data, elementID)
 	return JSC.chart(elementID, { 
 		series: data,
 		debug: false, 
-		box_fill: G.color,
+		box_fill: G.colors.background,
 		type: 'radar column', 
 		box_style_fontFamily: 'Google Sans',
 		legend: { 
@@ -219,10 +219,12 @@ function parseSearchParameters()
 	const params = new URLSearchParams(window.location.search);
 	
 	const g = {
-		color: (params.get("colors") === "muted") ? "#C9B091" : "white",
+		colors: { 
+			background: (params.get("colors") === "muted") ? "#C9B091" : "white",
+			wind: '#CCCCCC', 
+			night: '#999999' },
 		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
-		location: SAN_FRANCISCO,
-	};
+		location: SAN_FRANCISCO };
 
 	return g;
 }
@@ -302,7 +304,7 @@ google.charts.setOnLoadCallback(function () {
   <script>
 	clearError();
 	  
-  	document.body.style.backgroundColor = G.color;
+  	document.body.style.backgroundColor = G.colors.background;
 
 	// initialize the selector on page load
 	const speedUnitSelector = document.getElementById('speed_unit');

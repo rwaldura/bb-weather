@@ -223,7 +223,7 @@ function dataTable2JSChartArray(dt)
 	result.types = cols.map(j => dt.getColumnType(j));
 	result.columns = cols.map(j => dt.getColumnId(j));
 	
-	for (var i = 0; i < dt.getNumberOfRows(); i++)
+	for (let i = 0; i < dt.getNumberOfRows(); i++)
 	{
 		const row = {};
 		cols.map(j => row[result.columns[j]] = dt.getValue(i, j));
