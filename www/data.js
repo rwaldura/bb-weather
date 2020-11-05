@@ -175,10 +175,14 @@ function newDataTableRequest()
 }
 
 /***************************************************************************/
+// this is a URL, relative to the page that calls it: index.html (same origin)
+const GET_DATATABLE_URL = "getDataTable.cgi";
+
 function loadChartData()
 {
-	// we pass no parameters: the CGI knows to return exactly the data we want
-	G.request.open("GET", "getDataTable4.json", true);
+	// we pass no parameters: this CGI program knows to return
+	// exactly the data we want
+	G.request.open("GET", GET_DATATABLE_URL, true /* async */);
 	G.request.send();
 	// the XHR onload handler is called next
 }
