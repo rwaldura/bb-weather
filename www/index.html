@@ -94,8 +94,9 @@ function drawWeeklyChart(dt, opts)
 	addSolarEvents(dt1);	// defined in data.js
 	// debugTable(dt1);
 
-	// clamp the Y axis: sunset/sunrise values are arbitrarily extended to create vertical bands
-	opts.vAxis.viewWindow = { max: dt1.getColumnRange(1).max * 1.1 }; // +10%
+	// clamp the Y axis: sunset/sunrise values were arbitrarily extended to create vertical bands
+	// see #note12
+	opts.vAxis.viewWindow = { max: dt1.getColumnRange(1).max };
 
 	opts.chartArea.width = '95%';
 		

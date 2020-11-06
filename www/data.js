@@ -3,10 +3,10 @@
  */
 
 /***************************************************************************
- * From a number of revolutions per time period,
- * calculate wind speed in miles per hour according to:
+ * From a number of revolutions P per time period T,
+ * calculate wind speed V in miles per hour:
  * V = 9P / 4T
- * per wind sensor manufacturer
+ * As defined by wind sensor manufacturer.
  */
 function wind_speed(P, T /* seconds */)
 {
@@ -175,8 +175,8 @@ function newDataTableRequest()
 }
 
 /***************************************************************************/
-// this is a URL, relative to the page that calls it: index.html (same origin)
-const GET_DATATABLE_URL = "getDataTable.cgi";
+// this is a URL, relative to the page that calls it; index.html here (same origin)
+const GET_DATATABLE_URL = "getDataTable4.json";
 
 function loadChartData()
 {
@@ -316,14 +316,14 @@ function calcSolarEvents(dt /* datatable */)
 	
 	const low = 0;
 	const high = 2 * dt.getColumnRange(1).max; 
-	// arbitrary value: double the max wind speed; we will clamp the Y-axis later
+	// #note12: arbitrarily double the max wind speed; we will clamp the Y-axis later
 	
 	const start = nextDay(dt.getColumnRange(TSTAMP_COL).min);
 	const end   = nextDay(dt.getColumnRange(TSTAMP_COL).max);
 	console.log("solar events range = " + start + " - " + end);
 	
 	const events = [];
-	for (let t = start; t < end; /* t += 1 day */ t = nextDay(t))
+	for (let t = start; t < end; t = nextDay(t) /* t += 1 day */)
 	{
 		const sunrise = SunriseSunsetJS.getSunrise(G.location.latitude, G.location.longitude, t);
 		const  sunset = SunriseSunsetJS.getSunset (G.location.latitude, G.location.longitude, t);
