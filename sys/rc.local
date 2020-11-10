@@ -3,17 +3,21 @@
 readonly WEATHER_USER=debian
 readonly WEATHER_HOME=/home/debian/bb-weather
 
+# WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
+BT_EN=/sys/class/gpio/gpio44
+
 if [ "$1" = start ]
 then
 	setpriv --reuid=$WEATHER_USER --groups=i2c,iio,spi,pwm,gpio --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
+
+	# disable BlueTooth: 1- I don't need it, and 2- it's a nice visual indicator
+	# that things got started: the blue LED is turned off
+	test -r $BT_EN && echo out > $BT_EN/direction
+
 elif [ "$1" = stop ]
 then
 	# only need to kill the first segment of the pipeline
 	pkill --echo --full anemometer.js
 fi
 
-# WL1835MOD cape: turn Bluetooth OFF
-# this pin is defined in BB-BONE-WL1835MOD-00A0.dts
-BT_EN=/sys/class/gpio/gpio44
-test -r $BT_EN && echo out > $BT_EN/direction
