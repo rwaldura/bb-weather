@@ -1,6 +1,6 @@
 /*
- * For CircuitCo WL1835MOD cape.
- * https://github.com/CircuitCo/WL1835MOD 
+ * For CircuitCo WL1835MOD cape, see https://github.com/CircuitCo/WL1835MOD 
+ * This file adapted from am335x-boneblack-wl1835mod-cape.dtsi
  */
  
 /dts-v1/;
@@ -9,7 +9,6 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/am33xx.h>
 #include <dt-bindings/interrupt-controller/irq.h>
-
 #include <dt-bindings/board/am335x-bbw-bbb-base.h>
 
 / {

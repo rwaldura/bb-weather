@@ -54,8 +54,10 @@ What a hassle! Truly, I recommend buying the
 Otherwise, here's what I did:
 
 1. Find a Wifi adapter that is compatible. After trying out 3 different USB adapters, I finally located and bought a WL1835MOD cape off eBay. 
-1. Craft and compile a custom device tree to support this cape, plus the layer used by Bonescript. Find it in the `sys` directory. 
-1. Edit `/boot/uEnv.txt` to load this custom device tree, plus associated random patches to get things to work right. Under `sys` also. 
+1. Craft and compile a device tree overlay to support this cape:
+1.1. cp sys/BB-BONE-WL1835MOD-00A0.dts /opt/source/bb.org-overlays/src/arm
+1.1. cd /opt/source/bb.org-overlays ; make && make install
+1. Edit `/boot/uEnv.txt` to load this overlay, plus associated random patches to get things to work right. Under `sys` also. 
 1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
 1. Edit `/etc/network/interfaces` and add:
 
