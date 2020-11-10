@@ -3,7 +3,6 @@
 uname_r=4.19.94-ti-r45
 #uuid=
 #dtb=
-uboot_base_dtb_univ=am335x-bone-uboot-univ-wl1835mod.dtb
 
 ###U-Boot Overlays###
 ###Documentation: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
@@ -11,9 +10,9 @@ uboot_base_dtb_univ=am335x-bone-uboot-univ-wl1835mod.dtb
 enable_uboot_overlays=1
 ###
 ###Overide capes with eeprom
-uboot_overlay_addr0=/lib/firmware/BB-I2C1-BME280.dtbo
-uboot_overlay_addr1=/lib/firmware/BB-UART5-00A0.dtbo
-#uboot_overlay_addr2=/lib/firmware/<file2>.dtbo
+uboot_overlay_addr0=/lib/firmware/BB-BONE-WL1835MOD-00A0.dtbo
+uboot_overlay_addr1=/lib/firmware/BB-I2C1-BME280.dtbo
+uboot_overlay_addr2=/lib/firmware/BB-UART5-00A0.dtbo
 #uboot_overlay_addr3=/lib/firmware/<file3>.dtbo
 ###
 ###Additional custom capes
@@ -63,7 +62,8 @@ cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100
 #cmdline=init=/opt/scripts/tools/eMMC/init-eMMC-flasher-v3.sh
 
 # disable IPv6, not useful on my tiny network
-optargs=ipv6.disable=1
+# and auto-repair root filesystem
+optargs=ipv6.disable=1 fsck.repair=yes
 
 # rwaldura 2020-08-05
 #
