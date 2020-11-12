@@ -8,8 +8,8 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/am33xx.h>
-#include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 
 / {
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
