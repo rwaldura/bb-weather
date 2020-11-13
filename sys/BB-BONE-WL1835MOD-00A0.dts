@@ -28,13 +28,13 @@
 		"P8.05",	/* GPIO1_2 (MMC2) */
 		"P8.06",	/* GPIO1_3 (MMC2) */
 
-		"P8.35",	/* UART4_RTS (UART4) */
-		"P8.33",	/* UART4_CTS (UART4) */
-		"P9.11",	/* UART4_RX (UART4) */
-		"P9.13",	/* UART4_TX (UART4) */
+		"P8.35",	/* UART4_RTS */
+		"P8.33",	/* UART4_CTS */
+		"P9.11",	/* UART4_RXD */
+		"P9.13",	/* UART4_TXD */
 
-		"P9.19",	/* I2C2_SCL (I2C) */
-		"P9.20",	/* I2C2_SDA (I2C) */
+		"P9.19",	/* I2C2_SCL */
+		"P9.20",	/* I2C2_SDA */
 
 		"P9.41",	/* CLKOUT2 */
 
@@ -71,8 +71,6 @@
 	fragment@1 {
 		target = <&ocp>;
 		__overlay__ {
-			P8_12_pinmux { status = "disabled"; };	/* GPIO1_12: BT_EN */
-
 			P8_21_pinmux { status = "disabled"; };	/* GPIO1_30: MMC2 */
 			P8_20_pinmux { status = "disabled"; };	/* GPIO1_31: MMC2 */
 			P8_25_pinmux { status = "disabled"; };	/* GPIO1_0: MMC2 */
@@ -80,17 +78,18 @@
 			P8_05_pinmux { status = "disabled"; };	/* GPIO1_2: MMC2 */
 			P8_06_pinmux { status = "disabled"; };	/* GPIO1_3: MMC2 */
 
+			P8_12_pinmux { status = "disabled"; };	/* GPIO1_12: BT_EN */
 			P8_14_pinmux { status = "disabled"; };	/* GPIO0_26: WL_EN */
 			P8_17_pinmux { status = "disabled"; };	/* GPIO0_27: WL_IRQ */
 			P8_26_pinmux { status = "disabled"; };	/* GPIO1_29: BF_EN */
 
-			P8_35_pinmux { status = "disabled"; };	/* UART4_RTS: UART4 */
-			P8_33_pinmux { status = "disabled"; };	/* UART4_CTS: UART4 */
-			P9_11_pinmux { status = "disabled"; };	/* UART4_RX: UART4 */
-			P9_13_pinmux { status = "disabled"; };	/* UART4_TX: UART4 */
+			P8_35_pinmux { status = "disabled"; };	/* UART4_RTS */
+			P8_33_pinmux { status = "disabled"; };	/* UART4_CTS */
+			P9_11_pinmux { status = "disabled"; };	/* UART4_RXD */
+			P9_13_pinmux { status = "disabled"; };	/* UART4_TXD */
 
-			P9_19_pinmux { status = "disabled"; };	/* I2C2_SCL: I2C */
-			P9_20_pinmux { status = "disabled"; };	/* I2C2_SDA: I2C */
+			P9_19_pinmux { status = "disabled"; };	/* I2C2_SCL */
+			P9_20_pinmux { status = "disabled"; };	/* I2C2_SDA */
 
 			P9_41_pinmux { status = "disabled"; };	/* CLKOUT2 */
 			P8_15_pinmux { status = "disabled"; };	/* GPIO1_15: reserved */
