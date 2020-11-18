@@ -2,6 +2,11 @@
  * Core functions that manipulate raw weather data. 
  */
 
+// Raw weather data generator, a CGI program
+// this value is a URL, relative to the page that calls it; 
+// index.html in this case (same origin)
+const GET_DATATABLE_URL = "getDataTable.cgi";
+
 /***************************************************************************
  * From a number of revolutions P per time period T,
  * calculate wind speed V in miles per hour:
@@ -175,9 +180,6 @@ function newDataTableRequest()
 }
 
 /***************************************************************************/
-// this is a URL, relative to the page that calls it; index.html here (same origin)
-const GET_DATATABLE_URL = "getDataTable4.json";
-
 function loadChartData()
 {
 	// we pass no parameters: this CGI program knows to return
@@ -299,28 +301,40 @@ function groupWindRoseData(dt)
 	return grouped;
 }
 
-/****************************************************************************/
-function addSolarEvents(dt /* datatable */)
+/***************************************************************************
+ * Compute solar events (sunrise, sunset) over the given time range.
+ * 
+ * We want to show daylight hours in the charts, using dark vertical bands.
+ * To achieve this effect, we create a dataset of solar events aligned with
+ * the max wind value.
+ */
+function getSolarEvents(timeRange, windRange)
 {
-	dt.addColumn('number', 'Sunrise/Sunset', 'sunrise_sunset');
-	dt.addRows(calcSolarEvents(dt));
+	const events = calcSolarEvents(timeRange, windRange);
+
+	const dt = new google.visualization.DataTable();
+	dt.addColumn('datetime', null, 'tstamp');	
+	dt.addColumn('number', null, 'sunrise_sunset');	
+	dt.addRows(events);
+	return dt;
 }
 
-function calcSolarEvents(dt /* datatable */)
+function calcSolarEvents(timeRange, windRange)
 {
-	function nextDay(d /* Date */, days = 1)
+	function nextDay(d /* Date, or seconds */, days = 1)
 	{
 		const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-		return new Date(d.getTime() + days * ONE_DAY_MS);
+		const t = (d instanceof Date) ? d.getTime() : d * 1000;
+		return new Date(t + days * ONE_DAY_MS);
 	}
 	
 	const low = 0;
-	const high = 2 * dt.getColumnRange(1).max; 
-	// #note12: arbitrarily double the max wind speed; we will clamp the Y-axis later
+	const high = windRange.max; 
+	// #note12: line up solar and wind data; we will clamp the Y-axis later
 	
-	const start = nextDay(dt.getColumnRange(TSTAMP_COL).min);
-	const end   = nextDay(dt.getColumnRange(TSTAMP_COL).max);
-	console.log("solar events range = " + start + " - " + end);
+	const start = nextDay(timeRange.min);
+	const end   = nextDay(timeRange.max, 2);
+	console.log("solar events from: " + timeRange.min + "/" + start + " to: " + timeRange.max + "/" + end);
 	
 	const events = [];
 	for (let t = start; t < end; t = nextDay(t) /* t += 1 day */)
@@ -328,16 +342,50 @@ function calcSolarEvents(dt /* datatable */)
 		const sunrise = SunriseSunsetJS.getSunrise(G.location.latitude, G.location.longitude, t);
 		const  sunset = SunriseSunsetJS.getSunset (G.location.latitude, G.location.longitude, t);
 	
-		console.log("t=" + t + " sunset=" + sunset + " sunrise=" + sunrise);
+		// console.log("t=" + t + " sunset=" + sunset + " sunrise=" + sunrise);
 		
-		if (dt.getNumberOfColumns() != 5) throw new Error("Datatable must have 5 columns");
-		
-		events.push([ new Date(sunset.getTime() - 1), null, null, null, low ]);
-		events.push([ sunset, null, null, null, high ]);
+		events.push([ new Date(sunset.getTime() - 1), low ]);
+		events.push([ sunset, high ]);
 
-		events.push([ new Date(sunrise.getTime() - 1), null, null, null, high ]);
-		events.push([ sunrise, null, null, null, low ]);			
+		events.push([ new Date(sunrise.getTime() - 1), high ]);
+		events.push([ sunrise, low ]);			
 	}
 
 	return events;
+}
+
+/***************************************************************************
+ * dt1 += dt2
+ * Add dt2 into dt1; add all columns and rows from dt2, to dt1. 
+ * The first column MUST be of an identical type in both tables. 
+ */
+function combineTables(dt1, dt2)
+{	
+	const cols1 = dt1.getNumberOfColumns() - 1;
+
+	// add all table2 columns to table1
+	// note we skip the first column
+	for (let c = 1; c < dt2.getNumberOfColumns(); c++)
+	{
+		const c1 = dt1.addColumn(dt2.getColumnType(c), dt2.getColumnLabel(c), dt2.getColumnId(c));
+		// console.log("added new column " + c1);
+	}
+
+	// foreach row in dt2
+	for (let r = 0; r < dt2.getNumberOfRows(); r++)
+	{
+		const r1 = dt1.addRow();
+		// console.log("added new row " + r1);
+		
+		// merge column 0 values
+		dt1.setValue(r1, 0, dt2.getValue(r, 0));
+		// console.log("added new value @" + r1 + "," + 0);
+		
+		// foreach col in dt2
+		for (let c = 1; c < dt2.getNumberOfColumns(); c++)
+		{
+			dt1.setValue(r1, cols1 + c, dt2.getValue(r, c));
+			// console.log("added new value @" + r1 + "," + cols1 + c);
+		}		
+	}
 }

@@ -38,16 +38,16 @@ function debugTable(dt)
 }
 
 /****************************************************************************/
-function drawCharts(dt /* datatable */)
+function drawCharts(wind /* datatable */, solar /* datatable */)
 {
-	if (dt)
+	if (wind)
 	{
-		// cache the datatable so we can quickly re-draw it on a unit change
-		G.currentDataTable = dt;
+		// cache the datatable so we can quickly re-draw it on unit change
+		G.currentDataTable = wind;
 	} 
 	else 
 	{
-		dt = G.currentDataTable;
+		wind = G.currentDataTable;
 	}
 	
 	const opts = {
@@ -68,39 +68,39 @@ function drawCharts(dt /* datatable */)
 		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
 	};								
 
-	chart_hour.draw(
-		prepWindData(dt, 60 /* minutes */, 3 /* minutes */), 
-		opts);
+	drawWindChart(chart_hour, wind, solar, opts,
+		60 /* past hour */, 
+		3 /* minutes */);
 
-	chart_day.draw(
-		prepWindData(dt, 25 * 60 /* minutes */, 60 /* minute */), 
-		opts);
+	drawWindChart(chart_day, wind, solar, opts,
+		25 * 60 /* past day */, 
+		60 /* 1 hour */);
 
-	// the weekly chart also displays sunrises and sunsets
-	drawWeeklyChart(dt, opts);
-		
+	opts.chartArea.width = '95%';
+	drawWindChart(chart_week, wind, solar, opts,
+		7 * 24 * 60 /* past week */, 
+		2 * 60 /* 2 hours */);
+	
 	// the wind rose is its own thing
-	drawWindRose(dt, 'chart4_area');		
+	drawWindRose(wind, 'chart4_area');		
 
 	console.log("drawn all charts");
 }
 
 /****************************************************************************/
-function drawWeeklyChart(dt, opts)
+function drawWindChart(chart, wind, solar, opts, timeRange, timePeriod)
 {
-	const dv = prepWindData(dt, 7 * 24 * 60 /* 7 days */, 2 * 60 /* 2 hours */);
+	const dv = prepWindData(wind, timeRange, timePeriod);
 
-	const dt1 = dv.toDataTable();
-	addSolarEvents(dt1);	// defined in data.js
-	// debugTable(dt1);
+	const dt = dv.toDataTable();
+	combineTables(dt, solar); // dt += solar 
+	// debugTable(dt);
 
-	// clamp the Y axis: sunset/sunrise values were arbitrarily extended to create vertical bands
-	// see #note12
-	opts.vAxis.viewWindow = { max: dt1.getColumnRange(1).max };
+	// clamp the axes: see #note12
+	opts.hAxis.viewWindow = { min: dv.getColumnRange(0).min, max: dv.getColumnRange(0).max };
+	opts.vAxis.viewWindow = { max: dv.getColumnRange(1).max };
 
-	opts.chartArea.width = '95%';
-		
-	chart_week.draw(dt1, opts);
+	chart.draw(dt, opts);
 }
 
 /****************************************************************************/
@@ -201,9 +201,13 @@ function updateAll(json)
 	{
 		clearError();
 		
-		const dt = new google.visualization.DataTable(json);
-		drawCharts(dt);
-		updateInstantMetrics(dt);
+		const wind = new google.visualization.DataTable(json);
+
+		// compute solar events (sunset, sunrise) over the wind data
+		const solar = getSolarEvents(wind.getColumnRange(0), wind.getColumnRange(1));
+		
+		drawCharts(wind, solar);
+		updateInstantMetrics(wind);
 		updateClock();
 	}
 	catch (e)
