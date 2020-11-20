@@ -49,16 +49,10 @@ with [Google Charts](https://developers.google.com/chart).
 
 ## Wifi
 
-What a hassle! Truly, I recommend buying the 
-[BeagleBone Wireless](https://beagleboard.org/black-wireless).
-Otherwise, here's what I did:
+Without a [BeagleBone Wireless](https://beagleboard.org/black-wireless), here's what I did:
 
 1. Find a Wifi adapter that is compatible. After trying out 3 different USB adapters, I finally located and bought a WL1835MOD cape off eBay. 
-1. Craft and compile a device tree overlay to support this cape:
-	1. `cd /opt/source/bb.org-overlays`
-	1. `cp .../sys/BB-BONE-WL1835MOD-00A0.dts src/arm`
-	1. `make && make install`
-1. Edit `/boot/uEnv.txt` to load this overlay, plus associated random patches to get things to work right. Under `sys` also. 
+1. Edit `/boot/uEnv.txt` to load the overlay BB-BONE-WL1835MOD-00A0, plus associated random patches to get things to work right: see `sys/boot-uEnv.txt`. 
 1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
 1. Edit `/etc/network/interfaces` and add:
 
@@ -73,12 +67,13 @@ iface wlan0 inet dhcp
 ## Dependencies
 
 * [BeagleBone White](https://beagleboard.org/bone-original)
-* [WL1835MOD cape](https://github.com/CircuitCo/WL1835MOD) — no longer sold. 
+* [WL1835MOD cape](https://github.com/CircuitCo/WL1835MOD) — no longer available. 
 * Wind sensor: [Davis Instruments Anemometer](https://www.amazon.com/Davis-Instruments-Anemometer-Vantage-Pro2/dp/B004GK9MFO/)
+* Particulate Matter sensor: Sensirion SPS30
 
 what | version
 ------------ | -------------
-OS | beaglebone 4.19.94-ti-r45 armv7l GNU/Linux
+OS | beaglebone 4.19.94-ti-r55 armv7l GNU/Linux
 Distro | Debian GNU/Linux 10.4 ; BeagleBoard.org Debian Buster IoT Image 2020-04-06
 node | 10.19.0
 bonescript | 0.7.3
