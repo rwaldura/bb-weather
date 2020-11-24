@@ -95,7 +95,7 @@ function formatTimestamp(ts /* Unix timestamp */, period /* minutes */)
 	if (period < 60) // show minutes
 		format = "h:mm aa";
 	else // show day of week and hour
-		format = "EEE MMM d, h aa";
+		format = "EEEE M/d, h aa";
 
 	const f = new google.visualization.DateFormat({ pattern: format });
 	return f.formatValue(date);

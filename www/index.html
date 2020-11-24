@@ -76,7 +76,11 @@ function drawCharts(wind /* datatable */, solar /* datatable */)
 		25 * 60 /* past day */, 
 		60 /* 1 hour */);
 
+	// special options for weekly chart
 	opts.chartArea.width = '95%';
+	opts.hAxis.format = "EEEE";	// day of week name
+	// see https://developers.google.com/chart/interactive/docs/reference#dateformatter
+	
 	drawWindChart(chart_week, wind, solar, opts,
 		7 * 24 * 60 /* past week */, 
 		2 * 60 /* 2 hours */);
