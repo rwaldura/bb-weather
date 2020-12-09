@@ -33,7 +33,7 @@ do
 	echo "INSERT INTO particles VALUES(
 		$tstamp, 
 		2,		-- 2-min sample 
-		NULL,	-- pm05_mc is never defined
+		NULL,	-- pm05_mc is never captured
 		$pm1_mc,
 		$pm25_mc,
 		$pm4_mc,

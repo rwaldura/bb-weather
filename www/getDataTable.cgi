@@ -17,7 +17,7 @@ ouput_json_rows()
 	now=$( date +%s )
 	
 	sql="
-		-- per-minute data points for the last day
+		-- per-minute wind data for the last day
 		SELECT 
 			tstamp, 
 			period,
@@ -29,7 +29,7 @@ ouput_json_rows()
 			period = 1
 			AND tstamp >= ($now - 25 * 60 * 60) -- 1 day ago
 		UNION ALL
-		-- per-hour aggregates for the last month
+		-- per-hour aggregated wind data, for the last month
 		SELECT 
 			tstamp, 
 			period,
@@ -39,7 +39,7 @@ ouput_json_rows()
 			wind
 		WHERE
 			period = 60
-			AND tstamp >= ($now - 31 * 24 * 60 * 60) -- 1 month ago
+			AND tstamp >= ($now - 32 * 24 * 60 * 60) -- 1 month ago
 	"
 
 	IFS="|" # SQLite column separator
