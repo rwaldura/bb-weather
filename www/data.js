@@ -157,7 +157,7 @@ function getInstantMetrics(dt, lookback /* minutes */)
 }
 
 /***************************************************************************/
-function newDataTableRequest()
+function newDataTableRequest(handleJson)
 {
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = "json";
@@ -168,7 +168,8 @@ function newDataTableRequest()
 		if (xhr.status == 200 // HTTP OK
 			&& xhr.response) // JSON parsed successfully
 		{
-			updateAll(xhr.response);
+			console.log("Chart data loaded, calling JSON handler; status=" + xhr.status + " resp=" + xhr.response);
+			handleJson(xhr.response);
 		}
 		else
 		{
@@ -180,11 +181,11 @@ function newDataTableRequest()
 }
 
 /***************************************************************************/
-function loadChartData()
+function loadChartData(url = GET_DATATABLE_URL)
 {
 	// we pass no parameters: this CGI program knows to return
 	// exactly the data we want
-	G.request.open("GET", GET_DATATABLE_URL, true /* async */);
+	G.request.open("GET", url, true /* async */);
 	G.request.send();
 	// the XHR onload handler is called next
 }

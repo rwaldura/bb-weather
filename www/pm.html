@@ -1,0 +1,130 @@
+<html>
+  <head>
+	<meta charset="UTF-8" />	
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	
+	<script type="text/javascript" src="uom.js"></script>	
+	<script type="text/javascript" src="data.js"></script>	
+	<script type="text/javascript" src="styling.js"></script>	
+	<script type="text/javascript">
+/*
+ * Functions that manipulate DOM elements.
+ */
+		
+/****************************************************************************/
+function showError(message)
+{
+	console.error(message);
+	const e = document.getElementById('chart_errors');	
+	e.textContent = message;
+	e.style.display = 'block';
+}
+
+function clearError()
+{
+	const e = document.getElementById('chart_errors');
+	e.style.display = 'none';
+}
+
+function debugTable(dt)
+{
+	const t = new google.visualization.Table(document.getElementById('data_debug'));
+	t.draw(dt, { showRowNumber: true });
+}
+
+/****************************************************************************/
+function drawChart(dt /* datatable */)
+{	
+	const opts = {
+		legend: 'none',
+		colors: [ G.colors.wind /* for wind speed */, G.colors.night /* for night hours */], 
+		backgroundColor: G.colors.background,
+		chartArea: { 
+			top: 10, 
+			left: 25,
+			height: '80%',
+			width: '90%' },
+		lineWidth: 0,
+		// pointsVisible: true,
+		// pointSize: 20,
+		fontName: "Google Sans",
+		tooltip: { isHtml: true },
+		hAxis: { textStyle: { fontSize: 12 } },
+		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
+	};								
+
+	chart_pm.draw(dt, opts);
+}
+
+/****************************************************************************/
+function updateChart(json)
+{
+	try
+	{
+		clearError();
+		
+		const dt = new google.visualization.DataTable(json);
+		
+		console.log("drawing chart");
+		drawChart(dt);
+	}
+	catch (e)
+	{
+		showError("Drawing charts: " + e);
+	}	
+}
+
+/***************************************************************************
+ * UNITS_OF_MEASUREMENT is defined in uom.js
+ */
+function parseSearchParameters()
+{
+	const params = new URLSearchParams(window.location.search);
+	
+	const g = {
+		colors: { 
+			background: (params.get("colors") === "muted") ? "#C9B091" : "white",
+			wind: '#CCCCCC', 
+			night: '#AAAAAA' },
+		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
+		location: SAN_FRANCISCO };
+
+	return g;
+}
+
+/***************************************************************************
+ * main()
+ */
+// global settings 
+const G = parseSearchParameters();
+G.request = newDataTableRequest(updateChart); // defined in data.js
+
+// refresh charts every minute
+// loadChartData() is defined in data.js
+setInterval(loadChartData, 66666 /* ms */);
+
+google.charts.load('current', { 'packages': ['corechart', 'table'] });
+var chart_week, chart_day, chart_hour;
+google.charts.setOnLoadCallback(function () {
+	chart_pm = new google.visualization.AreaChart(
+		document.getElementById('chart1_area'));
+
+	loadChartData("getPMDataTable0.json");
+});	
+	</script>
+	<link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+	<div id="charts">
+		<div id="chart1">
+			<div id="chart1_area" class="bg_spinner"></div>
+			<div id="chart1_title" class="chart_title">Particulate Matter</div>
+		</div>
+	</div>
+	<div id="chart_errors">Loading... Please wait</div>
+	<div id="data_debug"></div>
+  </body>
+  <script>
+	clearError();	
+  </script>
+</html>

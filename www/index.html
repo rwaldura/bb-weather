@@ -19,7 +19,7 @@
 /****************************************************************************/
 function showError(message)
 {
-	console.log("*** ERROR " + message);
+	console.error(message);
 	const e = document.getElementById('chart_errors');	
 	e.textContent = message;
 	e.style.display = 'block';
@@ -253,7 +253,7 @@ function changeSpeedUnit(speedUnit)
  */
 // global settings 
 const G = parseSearchParameters();
-G.request = newDataTableRequest(); // defined in data.js
+G.request = newDataTableRequest(updateAll); // defined in data.js
 
 // refresh charts every minute
 // loadChartData() is defined in data.js
@@ -269,7 +269,7 @@ google.charts.setOnLoadCallback(function () {
 	chart_hour = new google.visualization.AreaChart(
 		document.getElementById('chart5_area'));
 
-	loadChartData();
+	loadChartData("getDataTable5.json");
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">
