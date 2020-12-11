@@ -73,7 +73,7 @@ output_datatable()
 # main
 
 # output entire document
-echo 'Content-type: application/json
+echo 'Content-type: application/json; charset=UTF-8
 
 {
 	"cols": [ 
@@ -89,52 +89,52 @@ echo 'Content-type: application/json
 		},
 		{
 			"id": "pm05_mc",
-			"label": "PM0.5 mass concentration (µg/m3)",
+			"label": "PM0.5 mass concentration (µg/㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm1_mc",
-			"label": "PM1.0 mass concentration (µg/m3)",
+			"label": "PM1.0 mass concentration (µg/㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm25_mc",
-			"label": "PM2.5 mass concentration (µg/m3)",
+			"label": "PM2.5 mass concentration (µg/㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm4_mc",
-			"label": "PM4.0 mass concentration (µg/m3)",
+			"label": "PM4.0 mass concentration (µg/㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm10_mc",
-			"label": "PM10 mass concentration (µg/m3)",
+			"label": "PM10 mass concentration (µg/㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm05_nc",
-			"label": "PM0.5 number concentration (#/cm3)",
+			"label": "PM0.5 number concentration (#/c㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm1_nc",
-			"label": "PM1.0 number concentration (#/cm3)",
+			"label": "PM1.0 number concentration (#/c㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm25_nc",
-			"label": "PM2.5 number concentration (#/cm3)",
+			"label": "PM2.5 number concentration (#/c㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm4_nc",
-			"label": "PM4.0 number concentration (#/cm3)",
+			"label": "PM4.0 number concentration (#/c㎥)",
 			"type": "number"
 		},
 		{
 			"id": "pm10_nc",
-			"label": "PM10 number concentration (#/cm3)",
+			"label": "PM10 number concentration (#/c㎥)",
 			"type": "number"
 		},		
 		{

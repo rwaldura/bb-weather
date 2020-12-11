@@ -37,30 +37,31 @@ function debugTable(dt)
 function drawChart(dt /* datatable */)
 {		
 	const opts = {
+		fontName: G.font.name,
+		textStyle: { fontSize: G.font.size },
 		legend: { 
-			position: "in",
-			textStyle: { fontSize: 12 } },
+			textStyle: { fontSize: G.font.size }, 
+			position: "in" },
 		series: {
-			0: { labelInLegend: "PM1.0", color: "red" }, 
-			1: { labelInLegend: "PM2.5", color: "orange" }, 
-			2: { labelInLegend: "PM4", color: "LightBlue" }, 
-			3: { labelInLegend: "PM10", color: "LightGreen" }, 
+			0: { labelInLegend: "PM1.0", color: "orange" }, 
+			1: { labelInLegend: "PM2.5", color: "red" }, 
+			2: { labelInLegend: "PM4.0", color: "LightBlue" }, 
+			3: { labelInLegend: "PM10",  color: "LightGreen" }, 
 			4: { labelInLegend: "Typical Particle Size", 
-				targetAxisIndex: 1, 
-				// see https://developers.google.com/chart/interactive/docs/lines#dashed
-				lineDashStyle: [4, 4],
-				color: "fuchsia" } }, // use right axis for TPS
+				targetAxisIndex: 1,		// use right axis for TPS
+				lineDashStyle: [4, 4],	// see https://developers.google.com/chart/interactive/docs/lines#dashed
+				color: "fuchsia" } },	
 		backgroundColor: G.colors.background,
 		// chartArea: {
 		// 	top: 10,
 		// 	left: 25 },
-		fontName: "Google Sans",
-		hAxis: { textStyle: { fontSize: 12 } },
-		vAxis: { 
-			textStyle: { fontSize: 12 },
-			0: { title: "Mass Concentration" },
-			1: { title: "Particle Size" } }
-	};								
+		hAxis: { textStyle: { fontSize: G.font.size } }, 
+		vAxis: { textStyle: { fontSize: G.font.size } }, 
+		vAxes: { // vAxEs, plural, _not_ vAxis
+			0: { title: "Mass Concentration",
+				titleTextStyle: { fontSize: G.font.size } }, 
+			1: { title: "Particle Size",
+				titleTextStyle: { fontSize: G.font.size } } } }; 
 
 	const v = prepParticleData(dt, 7*24*60, 60);
 	// debugTable(v);
@@ -89,26 +90,26 @@ function updateChart(json)
 /***************************************************************************
  * UNITS_OF_MEASUREMENT is defined in uom.js
  */
-function parseSearchParameters()
+function loadDefaults()
 {
-	const params = new URLSearchParams(window.location.search);
-	
 	const g = {
+		font: { size: 12, name: "Google Sans" },
 		colors: { 
-			background: (params.get("colors") === "muted") ? "#C9B091" : "white",
+			background: "white",
 			wind: '#CCCCCC', 
 			night: '#AAAAAA' },
-		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
+		speed: UNITS_OF_MEASUREMENT["mph"],
 		location: SAN_FRANCISCO };
-
-	return g;
+	
+	return g;	
 }
 
 /***************************************************************************
  * main()
  */
 // global settings 
-const G = parseSearchParameters();
+const G = loadDefaults();
+
 G.request = newDataTableRequest(updateChart); // defined in data.js
 
 // refresh charts every minute
@@ -121,7 +122,7 @@ google.charts.setOnLoadCallback(function () {
 	chart_pm = new google.visualization.LineChart(
 		document.getElementById('chart1_area'));
 
-	loadChartData("getPMDataTable.cgi");
+	loadChartData("getPMDataTable0.json");
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">

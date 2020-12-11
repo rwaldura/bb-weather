@@ -69,7 +69,7 @@ output_datatable()
 # main
 
 # output entire document
-echo 'Content-type: application/json
+echo 'Content-type: application/json; charset=UTF-8
 
 {
 	"cols": [ 

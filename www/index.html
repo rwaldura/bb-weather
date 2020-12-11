@@ -51,6 +51,8 @@ function drawCharts(wind /* datatable */, solar /* datatable */)
 	}
 	
 	const opts = {
+		fontName: G.font.name,
+		textStyle: { fontSize: G.font.size },
 		legend: 'none',
 		colors: [ G.colors.wind /* for wind speed */, G.colors.night /* for night hours */], 
 		backgroundColor: G.colors.background,
@@ -62,11 +64,9 @@ function drawCharts(wind /* datatable */, solar /* datatable */)
 		lineWidth: 0,
 		// pointsVisible: true,
 		// pointSize: 20,
-		fontName: "Google Sans",
 		tooltip: { isHtml: true },
-		hAxis: { textStyle: { fontSize: 12 } },
-		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
-	};								
+		hAxis: { textStyle: { fontSize: G.font.size } }, 
+		vAxis: { textStyle: { fontSize: G.font.size } } };
 
 	drawWindChart(chart_hour, wind, solar, opts,
 		60 /* past hour */, 
@@ -101,7 +101,7 @@ function drawWindChart(chart, wind, solar, opts, timeRange, timePeriod)
 	// debugTable(dt);
 
 	// clamp the axes: see #note12
-	opts.hAxis.viewWindow = { min: dv.getColumnRange(0).min, max: dv.getColumnRange(0).max };
+	opts.hAxis.viewWindow = { max: dv.getColumnRange(0).max, min: dv.getColumnRange(0).min };
 	opts.vAxis.viewWindow = { max: dv.getColumnRange(1).max };
 
 	chart.draw(dt, opts);
@@ -144,7 +144,7 @@ function renderWindRose(data, elementID)
 		debug: false, 
 		box_fill: G.colors.background,
 		type: 'radar column', 
-		box_style_fontFamily: 'Google Sans',
+		box_style_fontFamily: G.font.name,
 		legend: { 
 			title_label_text: 'MPH', 
 			position: 'right',
@@ -223,18 +223,33 @@ function updateAll(json)
 /***************************************************************************
  * UNITS_OF_MEASUREMENT is defined in uom.js
  */
-function parseSearchParameters()
+function loadDefaults()
+{
+	const g = {
+		font: { size: 12, name: "Google Sans" },
+		colors: { 
+			background: "white",
+			wind: '#CCCCCC', 
+			night: '#AAAAAA' },
+		speed: UNITS_OF_MEASUREMENT["mph"],
+		location: SAN_FRANCISCO };
+	
+	return g;	
+}
+
+/***************************************************************************
+ * Override defaults with so-called URL "search" parameters
+ */
+function loadSearchParameters(g)
 {
 	const params = new URLSearchParams(window.location.search);
 	
-	const g = {
-		colors: { 
-			background: (params.get("colors") === "muted") ? "#C9B091" : "white",
-			wind: '#CCCCCC', 
-			night: '#AAAAAA' },
-		speed: UNITS_OF_MEASUREMENT[params.get("speed") || "mph"],
-		location: SAN_FRANCISCO };
-
+	if (params.get("colors") === "muted")
+		g.colors.background = "#C9B091";
+	
+	if (params.get("speed"))
+		g.speed = UNITS_OF_MEASUREMENT[params.get("speed")];
+	
 	return g;
 }
 
@@ -252,7 +267,9 @@ function changeSpeedUnit(speedUnit)
  * main()
  */
 // global settings 
-const G = parseSearchParameters();
+const G = loadDefaults();
+loadSearchParameters(G);
+
 G.request = newDataTableRequest(updateAll); // defined in data.js
 
 // refresh charts every minute
