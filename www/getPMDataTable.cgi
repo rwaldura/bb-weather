@@ -79,6 +79,12 @@ echo 'Content-type: application/json
 	"cols": [ 
 		{
 			"id": "tstamp",
+			"label": "Timestamp (seconds)",
+			"type": "number"
+		},
+		{
+			"id": "period",
+			"label": "Period (minutes)",
 			"type": "number"
 		},
 		{

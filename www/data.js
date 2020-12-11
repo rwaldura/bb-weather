@@ -157,7 +157,7 @@ function getInstantMetrics(dt, lookback /* minutes */)
 }
 
 /***************************************************************************/
-function newDataTableRequest(handleJson)
+function newDataTableRequest(processJSON)
 {
 	const xhr = new XMLHttpRequest();
 	xhr.responseType = "json";
@@ -169,7 +169,7 @@ function newDataTableRequest(handleJson)
 			&& xhr.response) // JSON parsed successfully
 		{
 			console.log("Chart data loaded, calling JSON handler; status=" + xhr.status + " resp=" + xhr.response);
-			handleJson(xhr.response);
+			processJSON(xhr.response);
 		}
 		else
 		{
@@ -187,6 +187,7 @@ function loadChartData(url = GET_DATATABLE_URL)
 	// exactly the data we want
 	G.request.open("GET", url, true /* async */);
 	G.request.send();
+	console.log("requested " + url);
 	// the XHR onload handler is called next
 }
 

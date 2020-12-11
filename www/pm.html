@@ -5,6 +5,7 @@
 	
 	<script type="text/javascript" src="uom.js"></script>	
 	<script type="text/javascript" src="data.js"></script>	
+	<script type="text/javascript" src="pmdata.js"></script>	
 	<script type="text/javascript" src="styling.js"></script>	
 	<script type="text/javascript">
 /*
@@ -34,26 +35,34 @@ function debugTable(dt)
 
 /****************************************************************************/
 function drawChart(dt /* datatable */)
-{	
+{		
 	const opts = {
-		legend: 'none',
-		colors: [ G.colors.wind /* for wind speed */, G.colors.night /* for night hours */], 
+		legend: { 
+			position: "in",
+			textStyle: { fontSize: 12 } },
+		series: {
+			0: { labelInLegend: "PM1.0", color: "red" }, 
+			1: { labelInLegend: "PM2.5", color: "orange" }, 
+			2: { labelInLegend: "PM4", color: "blue" }, 
+			3: { labelInLegend: "PM10", color: "green" }, 
+			4: { labelInLegend: "Typical Particle Size", 
+				targetAxisIndex: 1, color: "grey", lineDashStyle: [4, 4] } }, // use right axis for TPS
 		backgroundColor: G.colors.background,
-		chartArea: { 
-			top: 10, 
-			left: 25,
-			height: '80%',
-			width: '90%' },
-		lineWidth: 0,
-		// pointsVisible: true,
-		// pointSize: 20,
+		// chartArea: {
+		// 	top: 10,
+		// 	left: 25 },
 		fontName: "Google Sans",
-		tooltip: { isHtml: true },
 		hAxis: { textStyle: { fontSize: 12 } },
-		vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
+		vAxis: { 
+			textStyle: { fontSize: 12 },
+			0: { title: "Mass Concentration" },
+			1: { title: "Particle Size" } }
 	};								
 
-	chart_pm.draw(dt, opts);
+	const v = prepParticleData(dt, 7*24*60, 60);
+	debugTable(v);
+	
+	chart_pm.draw(v, opts);
 }
 
 /****************************************************************************/
@@ -101,12 +110,12 @@ G.request = newDataTableRequest(updateChart); // defined in data.js
 
 // refresh charts every minute
 // loadChartData() is defined in data.js
-setInterval(loadChartData, 66666 /* ms */);
+// setInterval(loadChartData, 66666 /* ms */);
 
 google.charts.load('current', { 'packages': ['corechart', 'table'] });
 var chart_week, chart_day, chart_hour;
 google.charts.setOnLoadCallback(function () {
-	chart_pm = new google.visualization.AreaChart(
+	chart_pm = new google.visualization.LineChart(
 		document.getElementById('chart1_area'));
 
 	loadChartData("getPMDataTable0.json");
