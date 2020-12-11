@@ -11,7 +11,7 @@ July 2020: wind only, speed and direction.
 ```
 cd sys
 sudo ln -s $PWD/rc.local /etc
-sudo ln -s $PWD/mini_httpd.conf /etc
+sudo ln -s $PWD/mini-httpd.conf /etc
 sudo $VISUAL /etc/default/mini-httpd # change to START=1
 
 gcc -fPIC -lm -shared -o libsqlfunctions.so sqlite-extension-functions.c
