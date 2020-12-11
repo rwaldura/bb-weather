@@ -43,10 +43,13 @@ function drawChart(dt /* datatable */)
 		series: {
 			0: { labelInLegend: "PM1.0", color: "red" }, 
 			1: { labelInLegend: "PM2.5", color: "orange" }, 
-			2: { labelInLegend: "PM4", color: "blue" }, 
-			3: { labelInLegend: "PM10", color: "green" }, 
+			2: { labelInLegend: "PM4", color: "LightBlue" }, 
+			3: { labelInLegend: "PM10", color: "LightGreen" }, 
 			4: { labelInLegend: "Typical Particle Size", 
-				targetAxisIndex: 1, color: "grey", lineDashStyle: [4, 4] } }, // use right axis for TPS
+				targetAxisIndex: 1, 
+				// see https://developers.google.com/chart/interactive/docs/lines#dashed
+				lineDashStyle: [4, 4],
+				color: "fuchsia" } }, // use right axis for TPS
 		backgroundColor: G.colors.background,
 		// chartArea: {
 		// 	top: 10,
@@ -60,7 +63,7 @@ function drawChart(dt /* datatable */)
 	};								
 
 	const v = prepParticleData(dt, 7*24*60, 60);
-	debugTable(v);
+	// debugTable(v);
 	
 	chart_pm.draw(v, opts);
 }
@@ -118,7 +121,7 @@ google.charts.setOnLoadCallback(function () {
 	chart_pm = new google.visualization.LineChart(
 		document.getElementById('chart1_area'));
 
-	loadChartData("getPMDataTable0.json");
+	loadChartData("getPMDataTable.cgi");
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">
