@@ -39,8 +39,7 @@ ouput_json_rows()
 			wind
 		WHERE
 			period = 60
-			AND tstamp >= ($now - 32 * 24 * 60 * 60) -- 1 month ago
-	"
+			AND tstamp >= ($now - 32 * 24 * 60 * 60) -- 1 month ago"
 
 	IFS="|" # SQLite column separator
 	sqlite3 "$db" "$sql" | while read ts per dir revs

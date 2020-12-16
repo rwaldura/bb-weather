@@ -29,7 +29,7 @@ function prepParticleData(dt, lookback /* minutes */, period /* minutes */)
 		{ id: 'date_time', // timestamp, as a Date object
 			type: 'datetime',
 			calc: function(dt, row) { return new Date(1000 * dt.getValue(row, 0)) } },
-		2, 3, 4, 5, 6 ]);
+		1, 2, 3 ]);
 
 	return view;
 }
@@ -43,18 +43,8 @@ function groupParticleData(dt, period /* seconds */)
 		[ { column: 0,
 			modifier: function(t) { return period * Math.floor(t / period) }, 
 			type: 'number' } ],
-		// aggregate columns: MIN(period), AVG(pm*_mc), AVG(tps)
-		// MIN(period) isn't actually used, it's there merely to preserve column indices
-		[ { column: 1,
-			aggregation: google.visualization.data.min, 
-			type: 'number' },
-		{ column: 3, // pm1_mc
-			aggregation: google.visualization.data.avg, 
-			type: 'number' },
-		{ column: 4, // pm25_mc
-			aggregation: google.visualization.data.avg, 
-			type: 'number' },
-		{ column: 5, // pm4_mc
+		// aggregate columns: AVG(pm*_mc), AVG(tps)
+		[ { column: 4, // pm25_mc
 			aggregation: google.visualization.data.avg, 
 			type: 'number' },
 		{ column: 6, // pm10_mc

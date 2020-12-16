@@ -15,7 +15,7 @@ ouput_json_rows()
 	now=$( date +%s )
 	
 	sql="
-		-- particle matter for the last week
+		-- particulate matter for the last week
 		SELECT 
 			tstamp,
 			period,
@@ -34,8 +34,7 @@ ouput_json_rows()
 			particles
 		WHERE
 			period = 2
-			AND tstamp >= ($now - 8 * 24 * 60 * 60) -- 1 week ago
-	"
+			AND tstamp >= ($now - 8 * 24 * 60 * 60) -- 1 week ago"
 
 	IFS="|" # SQLite column separator
 	sqlite3 "$db" "$sql" | while read ts period pm05_mc pm1_mc pm25_mc pm4_mc pm10_mc pm05_nc pm1_nc pm25_nc pm4_nc pm10_nc tps
