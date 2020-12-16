@@ -42,6 +42,7 @@ function drawChart(dt /* datatable */)
 		legend: { 
 			textStyle: { fontSize: G.font.size }, 
 			position: "in" },
+		lineWidth: 2,
 		series: {
 			0: { labelInLegend: "PM1.0", color: "orange" }, 
 			1: { labelInLegend: "PM2.5", color: "red" }, 
@@ -49,19 +50,19 @@ function drawChart(dt /* datatable */)
 			3: { labelInLegend: "PM10",  color: "LightGreen" }, 
 			4: { labelInLegend: "Typical Particle Size", 
 				targetAxisIndex: 1,		// use right axis for TPS
-				lineDashStyle: [4, 4],	// see https://developers.google.com/chart/interactive/docs/lines#dashed
-				color: "fuchsia" } },	
+				lineDashStyle: [ 4, 2 ],	// per https://developers.google.com/chart/interactive/docs/lines#dashed
+				color: "purple" } },	
 		backgroundColor: G.colors.background,
-		// chartArea: {
-		// 	top: 10,
-		// 	left: 25 },
+		chartArea: {
+			top: 10,
+			left: 45 },
 		hAxis: { textStyle: { fontSize: G.font.size } }, 
 		vAxis: { textStyle: { fontSize: G.font.size } }, 
 		vAxes: { // vAxEs, plural, _not_ vAxis
-			0: { title: "Mass Concentration",
+			0: { title: "Concentration",
 				titleTextStyle: { fontSize: G.font.size } }, 
-			1: { title: "Particle Size",
-				titleTextStyle: { fontSize: G.font.size } } } }; 
+			1: { title: "Size", 
+				titleTextStyle: { fontSize: G.font.size, color: "purple" } } } }; 
 
 	const v = prepParticleData(dt, 7*24*60, 60);
 	// debugTable(v);
@@ -122,7 +123,7 @@ google.charts.setOnLoadCallback(function () {
 	chart_pm = new google.visualization.LineChart(
 		document.getElementById('chart1_area'));
 
-	loadChartData("getPMDataTable.cgi");
+	loadChartData("getPMDataTable1.json");
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">
