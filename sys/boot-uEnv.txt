@@ -67,7 +67,7 @@ optargs=ipv6.disable=1 fsck.repair=yes
 
 # rwaldura 2020-08-05
 #
-# By default, the uSD card is at /dev/mmcblk0. In fact, at the start 
+# By default, the µSD card is at /dev/mmcblk0. In fact, at the start 
 # of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
 #
 # For a reason I do not understand, my custom device tree moves it to
