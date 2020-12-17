@@ -2,15 +2,18 @@
 
 readonly WEATHER_USER=debian
 readonly WEATHER_HOME=/home/debian/bb-weather
-readonly WEATHER_GROUPS=i2c,iio,spi,pwm,gpio
+readonly WEATHER_GROUPS=i2c,iio,spi,pwm,gpio,dialout
 
 # WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
 readonly BT_EN=/sys/class/gpio/gpio44
 
-readonly LOG="logger -p local0"
+readonly LOG="logger --tag=weather-station --priority=local0"
 
 if [ "$1" = start ]
 then
+	$LOG.info "waiting 1m for boot to settle..."
+	sleep 60
+
 	# record wind data 
 	setpriv --reuid=$WEATHER_USER --groups=$WEATHER_GROUPS --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
