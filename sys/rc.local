@@ -11,27 +11,31 @@ readonly LOG="logger --tag=weather-station --priority=local0"
 
 if [ "$1" = start ]
 then
+	# this is merely so our log output doesn't get mixed up with a bunch of
+	# "system" messages at boot -- i.e. it's entirely optional
 	$LOG.info "waiting 1m for boot to settle..."
 	sleep 60
 
 	# record wind data 
 	setpriv --reuid=$WEATHER_USER --groups=$WEATHER_GROUPS --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
-	$LOG.info "started wind data collector"
+	$LOG.info "started wind data collector PID $!"
 
 	# record Particulate Matter data 
 	setpriv --reuid=$WEATHER_USER --groups=$WEATHER_GROUPS --reset-env \
 		$WEATHER_HOME/collect-pm-data.sh & 
-	$LOG.info "started PM data collector"
+	$LOG.info "started PM data collector PID $!"
 
-	# disable Bluetooth: (1) we don't need it, and (2) it's a nice visual indicator
-	# that things got started: the bright blue LED is turned off
+	# disable Bluetooth in hardware: (1) we don't need it, (2) it's disabled
+	# in the device tree anyway, and (3) doing so here is a nice visual indicator
+	# that things got started: the bright blue LED goes off
 	if test -w $BT_EN/value
 	then
 		echo out > $BT_EN/direction
 		echo   0 > $BT_EN/value
+		$LOG.info "turned off WL1835MOD Bluetooth"
 	else
-		$LOG.warn "failed to turn off Bluetooth: cannot write $BT_EN/value"
+		$LOG.warn "unable to turn off WL1835MOD Bluetooth: cannot write $BT_EN/value"
 	fi
 elif [ "$1" = stop ]
 then
