@@ -12,9 +12,12 @@ readonly LOG="logger --tag=weather-station --priority=local0"
 if [ "$1" = start ]
 then
 	# this is merely so our log output doesn't get mixed up with a bunch of
-	# "system" messages at boot -- i.e. it's entirely optional
-	$LOG.info "waiting 1m for boot to settle..."
-	sleep 60
+	# "system" messages during boot -- i.e. it's entirely optional
+	if test -z "$DEBUG" # DEBUG is undefined
+	then
+		$LOG.info "waiting 1m for things to settle..."
+		sleep 60
+	fi
 
 	# record wind data 
 	setpriv --reuid=$WEATHER_USER --groups=$WEATHER_GROUPS --reset-env \
