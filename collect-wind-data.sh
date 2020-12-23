@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export NODE_PATH=/usr/local/lib/node_modules:/opt/node-red/lib/node_modules/beaglebone-io/node_modules
+export NODE_PATH=/usr/local/lib/node_modules
 
 readonly WEATHER_HOME=/home/debian/bb-weather
 
