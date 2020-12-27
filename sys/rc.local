@@ -4,10 +4,37 @@ readonly WEATHER_USER=debian
 readonly WEATHER_HOME=/home/debian/bb-weather
 readonly WEATHER_GROUPS=i2c,iio,spi,pwm,gpio,dialout
 
+readonly LOG="logger --tag=weather-station --priority=local0"
+
 # WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
 readonly BT_EN=/sys/class/gpio/gpio44
 
-readonly LOG="logger --tag=weather-station --priority=local0"
+set_bt()
+{
+	if ! test -w $BT_EN/value
+	then
+		$LOG.warn "unable to control WL1835MOD Bluetooth: cannot write $BT_EN/value"
+	elif [ $1 = 1 ]
+	then
+		echo out > $BT_EN/direction
+		echo   1 > $BT_EN/value
+		$LOG.info "enabled WL1835MOD Bluetooth"
+	else
+		echo out > $BT_EN/direction
+		echo   0 > $BT_EN/value
+		$LOG.info "disabled WL1835MOD Bluetooth"
+	fi
+}
+
+enable_bt()
+{
+	set_bt 1
+}
+
+disable_bt()
+{
+	set_bt 0
+}
 
 if [ "$1" = start ]
 then
@@ -32,14 +59,8 @@ then
 	# disable Bluetooth in hardware: (1) we don't need it, (2) it's disabled
 	# in the device tree anyway, and (3) doing so here is a nice visual indicator
 	# that things got started: the bright blue LED goes off
-	if test -w $BT_EN/value
-	then
-		echo out > $BT_EN/direction
-		echo   0 > $BT_EN/value
-		$LOG.info "turned off WL1835MOD Bluetooth"
-	else
-		$LOG.warn "unable to turn off WL1835MOD Bluetooth: cannot write $BT_EN/value"
-	fi
+	disable_bt
+	
 elif [ "$1" = stop ]
 then
 	# only need to kill the first segment of the pipelines
@@ -48,5 +69,7 @@ then
 
 	pkill --echo --full sps30_example_usage &&
 		$LOG.info "stopped PM data generator"
+		
+	enable_bt
 fi
 
