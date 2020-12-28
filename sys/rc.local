@@ -14,15 +14,11 @@ set_bt()
 	if ! test -w $BT_EN/value
 	then
 		$LOG.warn "unable to control WL1835MOD Bluetooth: cannot write $BT_EN/value"
-	elif [ $1 = 1 ]
+	elif [ $# = 1 ]
 	then
 		echo out > $BT_EN/direction
-		echo   1 > $BT_EN/value
-		$LOG.info "enabled WL1835MOD Bluetooth"
-	else
-		echo out > $BT_EN/direction
-		echo   0 > $BT_EN/value
-		$LOG.info "disabled WL1835MOD Bluetooth"
+		echo $1 > $BT_EN/value
+		$LOG.info "set WL1835MOD Bluetooth to: $1"
 	fi
 }
 
@@ -38,14 +34,6 @@ disable_bt()
 
 if [ "$1" = start ]
 then
-	# this is merely so our log output doesn't get mixed up with a bunch of
-	# "system" messages during boot -- i.e. it's entirely optional
-	if test -z "$DEBUG" # DEBUG is undefined
-	then
-		$LOG.info "waiting 1m for things to settle..."
-		sleep 60
-	fi
-
 	# record wind data 
 	setpriv --reuid=$WEATHER_USER --groups=$WEATHER_GROUPS --reset-env \
 		$WEATHER_HOME/collect-wind-data.sh &
