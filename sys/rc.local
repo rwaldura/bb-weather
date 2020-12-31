@@ -6,11 +6,11 @@ readonly WEATHER_GROUPS=i2c,iio,spi,pwm,gpio,dialout
 
 readonly LOG="logger --tag=weather-station --priority=local0"
 
-# WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
-readonly BT_EN=/sys/class/gpio/gpio44
-
 set_bt()
 {
+	# WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
+	readonly BT_EN=/sys/class/gpio/gpio44
+
 	if ! test -w $BT_EN/value
 	then
 		$LOG.warn "unable to control WL1835MOD Bluetooth: cannot write $BT_EN/value"
