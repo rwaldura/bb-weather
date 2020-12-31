@@ -1,6 +1,6 @@
 #Docs: http://elinux.org/Beagleboard:U-boot_partitioning_layout_2.0
 
-uname_r=4.19.94-ti-r45
+uname_r=4.19.94-ti-r57
 #uuid=
 #dtb=
 
@@ -11,15 +11,15 @@ enable_uboot_overlays=1
 ###
 ###Overide capes with eeprom
 uboot_overlay_addr0=/lib/firmware/BB-BONE-WL1835MOD-00A0.dtbo
-uboot_overlay_addr1=/lib/firmware/BB-I2C1-00A0.dtbo
-uboot_overlay_addr2=/lib/firmware/BB-I2C1-BME280.dtbo
-uboot_overlay_addr3=/lib/firmware/BB-UART5-00A0.dtbo
+#uboot_overlay_addr1=/lib/firmware/<file1>.dtbo
+#uboot_overlay_addr2=/lib/firmware/<file2>.dtbo
+#uboot_overlay_addr3=/lib/firmware/<file3>.dtbo
 ###
 ###Additional custom capes
-#uboot_overlay_addr4=/lib/firmware/<file4>.dtbo
-#uboot_overlay_addr5=/lib/firmware/<file5>.dtbo
-#uboot_overlay_addr6=/lib/firmware/<file6>.dtbo
-#uboot_overlay_addr7=/lib/firmware/<file7>.dtbo
+uboot_overlay_addr4=/lib/firmware/BB-I2C2-00A0.dtbo
+uboot_overlay_addr5=/lib/firmware/BB-UART5-00A0.dtbo
+#uboot_overlay_addr6=/lib/firmware/BB-I2C2-BME280.dtbo
+#uboot_overlay_addr7=
 ###
 ###Custom Cape
 #dtb_overlay=/lib/firmware/<file8>.dtbo
@@ -63,7 +63,8 @@ cmdline=coherent_pool=1M net.ifnames=0 lpj=1990656 rng_core.default_quality=100
 
 # disable IPv6, not useful on my tiny network
 # and auto-repair root filesystem
-optargs=ipv6.disable=1 fsck.repair=yes
+# and auto-reboot on panic (e.g. FS errors)
+optargs=ipv6.disable=1 fsck.repair=yes panic=10
 
 # rwaldura 2020-08-05
 #
