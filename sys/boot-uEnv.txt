@@ -69,17 +69,18 @@ optargs=ipv6.disable=1 fsck.repair=yes panic=10
 # rwaldura 2020-08-05
 #
 # By default, the µSD card is at /dev/mmcblk0. In fact, at the start 
-# of the boot process, it is: that's how we load this file, /boot/uEnv.txt.
+# of the boot process, it is: that's how U-Boot loads this very file.
 #
-# For a reason I do not understand, the WL1835MOD overlay "moves it" to
-# /dev/mmcblk1. After the overlay loads, the root filesystem no longer matches
-# where U-Boot found it, and the boot fails miserably (root FS not found). 
-# I have to "fixup" (i.e. hack) the boot process to find it in its new location. 
+# For a reason I do not understand, /dev/mmcblk0 becomes /dev/mmcblk1 after
+# loading the WL1835MOD overlay. The root filesystem is no longer where
+# U-Boot originally found it, and the boot fails: root FS is not found.
+# I have to "fix up" (i.e. hack) the boot process to identify its
+# "new" location, /dev/mmcblk1p1. 
 # There are probably better ways to fix this...
 #
 # Unfortunate side-effect: a successful boot now depends on the presence of
-# this cape, and the overlay being loaded. (Otherwise we haved "fixed up" things
-# for nothing, and the boot fails to find a root FS.)
+# a WL1835MOD cape, and its overlay being loaded. (Otherwise we have "fixed
+# up" things for nothing, and the boot fails to find a root FS.)
 
 # awful hak: override the "root" variable definition
 args_mmc_old=setenv bootargs console=${console} ${optargs} ${cape_disable} ${cape_enable} ${cape_uboot} root=${awfulhak_root} ro rootfstype=${mmcrootfstype} ${uboot_detected_capes} ${cmdline}
