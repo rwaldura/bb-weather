@@ -9,5 +9,23 @@ echo "PRAGMA busy_timeout = $BUSY_TIMEOUT;"
 
 while read tstamp dir revs ill hum press temp
 do
-	echo "INSERT INTO wind VALUES($tstamp, 1, $dir, $revs, $ill, $hum, $press, $temp);"
+	echo "INSERT INTO weather(
+		tstamp,
+		period,
+		direction,
+		revolutions,
+		illuminance,
+		int_humidity,
+		int_pressure,
+		int_temperature)
+	VALUES(
+		$tstamp, 
+		1, 
+		$dir, 
+		$revs, 
+		$ill, 
+		$hum, 
+		$press, 
+		$temp
+		);"
 done

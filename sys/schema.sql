@@ -12,7 +12,7 @@ CREATE TABLE weather(
 	ext_pressure INTEGER,		-- millibars
 	ext_temperature INTEGER		-- millidegrees Celsius
 );
-CREATE UNIQUE INDEX wind_tstamp_period ON wind(tstamp, period);
+CREATE UNIQUE INDEX weather_tstamp_period ON weather(tstamp, period);
 
 -- Particulate Matter data
 CREATE TABLE particles(
@@ -37,15 +37,15 @@ CREATE VIEW weather_hourly AS
 	SELECT 
 		strftime('%Y-%m-%d %H:00', tstamp, 'unixepoch', 'localtime') AS date, 
 		ROUND(9 * SUM(revolutions) / (4 * 60 * 60.0), 1) AS wind_mph, 
-		AVERAGE(direction) AS wind_dir, 
+		ROUND(AVG(direction)) AS wind_dir, 
 		ROUND(AVG(illuminance)) AS illuminance, 
 		ROUND(AVG(int_humidity)) AS int_humidity,
 		ROUND(AVG(int_pressure)) AS int_pressure,
-		ROUND(AVG(int_temperature)) AS int_temperature,
+		ROUND(AVG(int_temperature) / 1000, 1) AS int_temperature,
 		ROUND(AVG(ext_humidity)) AS ext_humidity,
 		ROUND(AVG(ext_pressure)) AS ext_pressure,
-		ROUND(AVG(ext_temperature)) AS ext_temperature	
-	FROM wind 
+		ROUND(AVG(ext_temperature) / 1000, 1) AS ext_temperature	
+	FROM weather 
 		WHERE period = 1
 	GROUP BY 1;
 
