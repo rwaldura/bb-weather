@@ -154,52 +154,59 @@ function debug(mesg)
 /**************************************************************************/
 function readIlluminance()
 {
-	// Filesystem constants: these special files are created by kernel modules
-	// loaded from /etc/modules. Those modules themselves communicate to
-	// hardware sensors via a device tree overlay: BB-BONE-WTHR-01-00B0.dts
 	const ILLUMINANCE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0039/lux1_input'
-	const result = readSensor(ILLUMINANCE_INPUT)
-	return result
+	const v = readSensorValue(ILLUMINANCE_INPUT)
+	return v
 }
 
 function readHumidity()
 {
 	const HUMIDITY_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_humidityrelative_input'
-	const result = readSensor(HUMIDITY_INPUT)
-	return Number.toFixed(result / 1000, 1)
+	const v = readSensorValue(HUMIDITY_INPUT)
+	return Math.round(v / 1000) // to percent
 }
 
 function readPressure()
 {
 	const PRESSURE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_pressure_input'
-	const result = readSensor(PRESSURE_INPUT)
-	return Number.toFixed(result, 1)
+	const v = readSensorValue(PRESSURE_INPUT)
+	return Math.round(v * 10) // to millibars
 }
 
 function readTemperature()
 {
-	// not clear which sensor I should use
+	// not clear which sensor I should use, so average both
 	const TEMP1_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_temp_input'
 	const TEMP2_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_temp_input'
-	const temp1 = readSensor(TEMP1_INPUT)
-	const temp2 = readSensor(TEMP2_INPUT)
-	const result = average([temp1, temp2]) / 1000
-	return Number.toFixed(result, 1)
+	const t1 = readSensorValue(TEMP1_INPUT)
+	const t2 = readSensorValue(TEMP2_INPUT)
+	const v = average([t1, t2])
+	return Math.round(v)
 }
 
-function readSensor(file)
+/*************************************************************************
+ * Read a sensor value from its input file, and return a float.
+ *
+ * Input files are created by kernel modules loaded from /etc/modules. 
+ * Modules themselves communicate with hardware sensors via a device tree 
+ * overlay: BB-BONE-WTHR-01-00B0.dts.
+ */
+function readSensorValue(file)
 {
-	const fs = require('fs')
-	const readable = fs.accessSync(file, fs.constants.R_OK)
-	
-	var data;
-	if (readable) {
-		data = bonescript.readTextFile(file)
-		debug("readSensor: read >" + data + "< from: " + file)
-	} else {
-		debug("readSensor: not readable: " + file)
-		if (DEBUG) process.exit(1);
+	var result;
+
+	try {
+		const fs = require('fs')
+		fs.accessSync(file, fs.constants.R_OK)
+
+		const data = bonescript.readTextFile(file)
+		debug("readSensorValue: read >" + data + "< from: " + file)
+		result = Number.parseFloat(data) // strip final newline
+	} catch (e) {
+		debug("readSensorValue: not readable: " + file + "; error: " + e)
+		if (DEBUG) process.exit(1)
 	}
-	
-	return data;
+
+	return result;
 }
+

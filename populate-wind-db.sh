@@ -10,11 +10,20 @@ cat <<_SQL_
 -- deal with concurrency issues by re-trying
 PRAGMA busy_timeout = $BUSY_TIMEOUT;
 
-CREATE TABLE IF NOT EXISTS wind(tstamp TIMESTAMP NOT NULL, period INTEGER NOT NULL, direction INTEGER, revolutions INTEGER);
+CREATE TABLE IF NOT EXISTS wind(
+	tstamp TIMESTAMP NOT NULL, 	-- seconds since epoch
+	period INTEGER NOT NULL, 	-- minutes
+	direction INTEGER,		-- degrees
+	revolutions INTEGER,		-- number per timeperiod
+	illuminance INTEGER,		-- lux
+	humidity INTEGER,		-- %RH, relative humidity
+	pressure INTEGER,		-- millibars
+	temperature INTEGER		-- millidegrees Celsius
+);
 CREATE UNIQUE INDEX IF NOT EXISTS wind_tstamp_period ON wind(tstamp, period);
 _SQL_
 
-while read tstamp dir revs
+while read tstamp dir revs ill hum press temp
 do
-	echo "INSERT INTO wind VALUES($tstamp, 1, $dir, $revs);"
+	echo "INSERT INTO wind VALUES($tstamp, 1, $dir, $revs, $ill, $hum, $press, $temp);"
 done
