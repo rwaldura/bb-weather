@@ -28,7 +28,7 @@ const GPIO0_7 = 'P9_42'	// pulse for wind speed
 const MAX_VOLTAGE_PERCENT = (3.3 / 2) / 1.8
 	
 // every T seconds, output wind parameters
-setInterval(printWindData, T * MS)
+setInterval(printWeatherData, T * MS)
 
 // sample wind direction every 8 seconds, such that we take 7 samples per minute,
 // and there's a clear median value
@@ -59,7 +59,7 @@ const directions = [] // list of samples
 
 function collectWindDirection()
 {
-	const dir = getWindDirection()
+	const dir = readWindDirection()
 	debug("wind dir sample #" + directions.length + " = " + dir)
 	directions.push(dir)
 }
@@ -100,7 +100,7 @@ function median(values)
 }
 
 /**************************************************************************/
-function printWindData()
+function printWeatherData()
 {
 	// timestamp in seconds
 	const ts = Math.floor(Date.now() / MS)
@@ -112,7 +112,7 @@ function printWindData()
 	// V = 9P / 4T
 	
 	// output the lot
-	const data = [ts, dir, P]
+	const data = [ts, dir, P, readIlluminance(), readHumidity(), readPressure(), readTemperature()]
 	process.stdout.write(data.join("\t") + "\n")
 	
 	P = 0 // reset revolution counter
@@ -133,14 +133,14 @@ function countRevolutions(err, x)
 }
 
 /**************************************************************************/
-function getWindDirection()
+function readWindDirection()
 {
 	const value = bonescript.analogRead(AIN1)
-	debug("getWindDirection: analog read %val = " + value.toFixed(2))
+	debug("readWindDirection: analog read %val = " + value.toFixed(2))
 	
 	// we just read a percentile value; map it to a direction in degrees
 	const dir = bonescript.map(value, 0, MAX_VOLTAGE_PERCENT, 0, 359)
-	debug("getWindDirection: dir = " + dir.toFixed(2))
+	debug("readWindDirection: dir = " + dir.toFixed(2))
 	
 	return Math.round(dir) % 360
 }
@@ -149,4 +149,57 @@ function getWindDirection()
 function debug(mesg)
 {
 	if (DEBUG) process.stderr.write(mesg + "\n")
+}
+
+/**************************************************************************/
+function readIlluminance()
+{
+	// Filesystem constants: these special files are created by kernel modules
+	// loaded from /etc/modules. Those modules themselves communicate to
+	// hardware sensors via a device tree overlay: BB-BONE-WTHR-01-00B0.dts
+	const ILLUMINANCE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0039/lux1_input'
+	const result = readSensor(ILLUMINANCE_INPUT)
+	return result
+}
+
+function readHumidity()
+{
+	const HUMIDITY_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_humidityrelative_input'
+	const result = readSensor(HUMIDITY_INPUT)
+	return Number.toFixed(result / 1000, 1)
+}
+
+function readPressure()
+{
+	const PRESSURE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_pressure_input'
+	const result = readSensor(PRESSURE_INPUT)
+	return Number.toFixed(result, 1)
+}
+
+function readTemperature()
+{
+	// not clear which sensor I should use
+	const TEMP1_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_temp_input'
+	const TEMP2_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_temp_input'
+	const temp1 = readSensor(TEMP1_INPUT)
+	const temp2 = readSensor(TEMP2_INPUT)
+	const result = average([temp1, temp2]) / 1000
+	return Number.toFixed(result, 1)
+}
+
+function readSensor(file)
+{
+	const fs = require('fs')
+	const readable = fs.accessSync(file, fs.constants.R_OK)
+	
+	var data;
+	if (readable) {
+		data = bonescript.readTextFile(file)
+		debug("readSensor: read >" + data + "< from: " + file)
+	} else {
+		debug("readSensor: not readable: " + file)
+		if (DEBUG) process.exit(1);
+	}
+	
+	return data;
 }
