@@ -112,7 +112,9 @@ function printWeatherData()
 	// V = 9P / 4T
 	
 	// output the lot
-	const data = [ts, dir, P, readIlluminance(), readHumidity(), readPressure(), readTemperature()]
+	const data = [ts, dir, P, 
+		readIlluminance(), readHumidity(), readPressure(), readTemperature(),	// internal values
+		readHumidity(0), readPressure(0), readTemperature(0)]	// external values
 	process.stdout.write(data.join("\t") + "\n")
 	
 	P = 0 // reset revolution counter
@@ -151,45 +153,67 @@ function debug(mesg)
 	if (DEBUG) process.stderr.write(mesg + "\n")
 }
 
+/*************************************************************************
+ * Sensor input files are created by kernel modules loaded from 
+ * /etc/modules. Modules themselves communicate with hardware sensors via
+ * device tree overlays, e.g. BB-BONE-WTHR-01-00B0.dts.
+ *
+ * Our system has multiple sensors: 5 internal sensors on a cape, inside
+ * the sealed enclosure. Three external sensors, mounted outside the
+ * enclosure. 
+ */
+const I2C_DEV = '/sys/bus/i2c/devices/i2c-2/2-00'
+
+// TSL2550 illuminance sensor on Weather cape
+const  ILLUMINANCE_INPUT = I2C_DEV + '39/lux1_input'
+
+// HTU21 humidity/temp sensor on Weather cape
+const INT_HUMIDITY_INPUT = I2C_DEV + '40/iio:device1/in_humidityrelative_input'
+const    INT_TEMP1_INPUT = I2C_DEV + '40/iio:device1/in_temp_input'
+
+// BMP085 pressure/temp sensor on Weather cape
+const INT_PRESSURE_INPUT = I2C_DEV + '77/iio:device2/in_pressure_input'
+const    INT_TEMP2_INPUT = I2C_DEV + '77/iio:device2/in_temp_input'
+
+// BME280 external sensors: temp/pressure/humidity
+const EXT_HUMIDITY_INPUT = I2C_DEV + '76/iio:device2/in_humidityrelative_input'
+const EXT_PRESSURE_INPUT = I2C_DEV + '76/iio:device2/in_pressure_input'
+const     EXT_TEMP_INPUT = I2C_DEV + '76/iio:device2/in_temp_input'
+
 /**************************************************************************/
 function readIlluminance()
 {
-	const ILLUMINANCE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0039/lux1_input'
-	const v = readSensorValue(ILLUMINANCE_INPUT)
-	return v
+	return readSensorValue(ILLUMINANCE_INPUT)
 }
 
-function readHumidity()
+function readHumidity(internal = 1)
 {
-	const HUMIDITY_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_humidityrelative_input'
-	const v = readSensorValue(HUMIDITY_INPUT)
+	const v = readSensorValue(internal ? INT_HUMIDITY_INPUT : EXT_HUMIDITY_INPUT)
 	return Math.round(v / 1000) // to percent
 }
 
-function readPressure()
+function readPressure(internal = 1)
 {
-	const PRESSURE_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_pressure_input'
-	const v = readSensorValue(PRESSURE_INPUT)
+	const v = readSensorValue(internal ? INT_PRESSURE_INPUT : EXT_PRESSURE_INPUT)
 	return Math.round(v * 10) // to millibars
 }
 
-function readTemperature()
+function readTemperature(internal = 1)
 {
-	// not clear which sensor I should use, so average both
-	const TEMP1_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0040/iio:device1/in_temp_input'
-	const TEMP2_INPUT = '/sys/bus/i2c/devices/i2c-2/2-0077/iio:device2/in_temp_input'
-	const t1 = readSensorValue(TEMP1_INPUT)
-	const t2 = readSensorValue(TEMP2_INPUT)
-	const v = average([t1, t2])
-	return Math.round(v)
+	var v;
+	if (internal) {
+		v = readSensorValue(EXT_TEMP_INPUT)
+	} else {
+		// not clear which sensor I should use, so average both
+		const t1 = readSensorValue(INT_TEMP1_INPUT)
+		const t2 = readSensorValue(INT_TEMP2_INPUT)
+		v = Math.round(average([t1, t2]))		
+	}
+	return v
 }
 
 /*************************************************************************
  * Read a sensor value from its input file, and return a float.
- *
- * Input files are created by kernel modules loaded from /etc/modules. 
- * Modules themselves communicate with hardware sensors via a device tree 
- * overlay: BB-BONE-WTHR-01-00B0.dts.
  */
 function readSensorValue(file)
 {
@@ -201,7 +225,7 @@ function readSensorValue(file)
 
 		const data = bonescript.readTextFile(file)
 		debug("readSensorValue: read >" + data + "< from: " + file)
-		result = Number.parseFloat(data) // strip final newline
+		result = Number.parseFloat(data) // convert to number
 	} catch (e) {
 		debug("readSensorValue: not readable: " + file + "; error: " + e)
 		if (DEBUG) process.exit(1)
