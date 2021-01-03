@@ -7,7 +7,7 @@
 readonly BUSY_TIMEOUT=11111
 echo "PRAGMA busy_timeout = $BUSY_TIMEOUT;"
 
-while read tstamp dir revs ill hum press temp
+while read tstamp dir revs ill ihum ipress itemp ehum epress etemp
 do
 	echo "INSERT INTO weather(
 		tstamp,
@@ -17,15 +17,21 @@ do
 		illuminance,
 		int_humidity,
 		int_pressure,
-		int_temperature)
+		int_temperature,
+		ext_humidity,
+		ext_pressure,
+		ext_temperature)
 	VALUES(
 		$tstamp, 
 		1, 
 		$dir, 
 		$revs, 
 		$ill, 
-		$hum, 
-		$press, 
-		$temp
+		$ihum, 
+		$ipress, 
+		$itemp,
+		$ehum, 
+		$epress, 
+		$etemp		
 		);"
 done
