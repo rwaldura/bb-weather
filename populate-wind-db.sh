@@ -9,7 +9,7 @@ echo "PRAGMA busy_timeout = $BUSY_TIMEOUT;"
 
 while read tstamp dir revs ill ihum ipress itemp ehum epress etemp
 do
-	echo "INSERT INTO weather(
+	echo "INSERT INTO wind(
 		tstamp,
 		period,
 		direction,

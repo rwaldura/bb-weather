@@ -18,7 +18,7 @@ uboot_overlay_addr0=/lib/firmware/BB-BONE-WL1835MOD-00A0.dtbo
 ###Additional custom capes
 uboot_overlay_addr4=/lib/firmware/BB-I2C2-00A0.dtbo
 uboot_overlay_addr5=/lib/firmware/BB-UART5-00A0.dtbo
-#uboot_overlay_addr6=/lib/firmware/BB-I2C2-BME280.dtbo
+uboot_overlay_addr6=/lib/firmware/BB-I2C2-BME280.dtbo
 #uboot_overlay_addr7=
 ###
 ###Custom Cape

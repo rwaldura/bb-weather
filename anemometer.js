@@ -112,10 +112,11 @@ function printWeatherData()
 	// V = 9P / 4T
 	
 	// output the lot
-	const data = [ts, dir, P, 
+	const values = [ts, dir, P, 
 		readIlluminance(), readHumidity(), readPressure(), readTemperature(),	// internal values
 		readHumidity(0), readPressure(0), readTemperature(0)]	// external values
-	process.stdout.write(data.join("\t") + "\n")
+	const s = formatValues(values)
+	process.stdout.write(s + "\n")
 	
 	P = 0 // reset revolution counter
 	directions.length = 0 // reset wind directions
@@ -153,6 +154,15 @@ function debug(mesg)
 	if (DEBUG) process.stderr.write(mesg + "\n")
 }
 
+/**************************************************************************/
+function formatValues(v)
+{
+	const vv = v.map(d => Number.isInteger(d) ? d.toString() : "NULL")
+	const result = vv.join("\t")
+	debug("output: " + result)
+	return result
+}
+
 /*************************************************************************
  * Sensor input files are created by kernel modules loaded from 
  * /etc/modules. Modules themselves communicate with hardware sensors via
@@ -172,8 +182,8 @@ const INT_HUMIDITY_INPUT = I2C_DEV + '40/iio:device1/in_humidityrelative_input'
 const    INT_TEMP1_INPUT = I2C_DEV + '40/iio:device1/in_temp_input'
 
 // BMP085 pressure/temp sensor on Weather cape
-const INT_PRESSURE_INPUT = I2C_DEV + '77/iio:device2/in_pressure_input'
-const    INT_TEMP2_INPUT = I2C_DEV + '77/iio:device2/in_temp_input'
+const INT_PRESSURE_INPUT = I2C_DEV + '77/iio:device3/in_pressure_input'
+const    INT_TEMP2_INPUT = I2C_DEV + '77/iio:device3/in_temp_input'
 
 // BME280 external sensors: temp/pressure/humidity
 const EXT_HUMIDITY_INPUT = I2C_DEV + '76/iio:device2/in_humidityrelative_input'
@@ -200,7 +210,7 @@ function readPressure(internal = 1)
 
 function readTemperature(internal = 1)
 {
-	var v;
+	var v
 	if (internal) {
 		v = readSensorValue(EXT_TEMP_INPUT)
 	} else {

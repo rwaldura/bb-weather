@@ -1,5 +1,5 @@
 -- main table for wind, and other environmental parameters 
-CREATE TABLE weather(
+CREATE TABLE wind(
 	tstamp TIMESTAMP NOT NULL, 	-- seconds since epoch
 	period INTEGER NOT NULL, 	-- minutes
 	direction INTEGER,			-- degrees
@@ -12,7 +12,7 @@ CREATE TABLE weather(
 	ext_pressure INTEGER,		-- millibars
 	ext_temperature INTEGER		-- millidegrees Celsius
 );
-CREATE UNIQUE INDEX weather_tstamp_period ON weather(tstamp, period);
+CREATE UNIQUE INDEX wind_tstamp_period ON wind(tstamp, period);
 
 -- Particulate Matter data
 CREATE TABLE particles(
@@ -33,7 +33,7 @@ CREATE TABLE particles(
 CREATE UNIQUE INDEX pm_tstamp_period ON particles(tstamp, period);
 
 -- convenient views
-CREATE VIEW weather_hourly AS 
+CREATE VIEW wind_hourly AS 
 	SELECT 
 		strftime('%Y-%m-%d %H:00', tstamp, 'unixepoch', 'localtime') AS date, 
 		ROUND(9 * SUM(revolutions) / (4 * 60 * 60.0), 1) AS wind_mph, 
@@ -45,7 +45,7 @@ CREATE VIEW weather_hourly AS
 		ROUND(AVG(ext_humidity)) AS ext_humidity,
 		ROUND(AVG(ext_pressure)) AS ext_pressure,
 		ROUND(AVG(ext_temperature) / 1000, 1) AS ext_temperature	
-	FROM weather 
+	FROM wind 
 		WHERE period = 1
 	GROUP BY 1;
 
@@ -60,3 +60,4 @@ CREATE VIEW particles_hourly AS
 	WHERE 
 		period = 2 
 	GROUP BY 1;
+
