@@ -114,7 +114,7 @@ function printWeatherData()
 	// output the lot
 	const values = [ts, dir, P, 
 		readIlluminance(), readHumidity(), readPressure(), readTemperature(),	// internal values
-		readHumidity(0), readPressure(0), readTemperature(0)]	// external values
+		readHumidity(true), readPressure(true), readTemperature(true)]	// external values
 	const s = formatValues(values)
 	process.stdout.write(s + "\n")
 	
@@ -196,22 +196,22 @@ function readIlluminance()
 	return readSensorValue(ILLUMINANCE_INPUT)
 }
 
-function readHumidity(internal = 1)
+function readHumidity(external)
 {
-	const v = readSensorValue(internal ? INT_HUMIDITY_INPUT : EXT_HUMIDITY_INPUT)
+	const v = readSensorValue(external ? EXT_HUMIDITY_INPUT : INT_HUMIDITY_INPUT)
 	return Math.round(v / 1000) // to percent
 }
 
-function readPressure(internal = 1)
+function readPressure(external)
 {
-	const v = readSensorValue(internal ? INT_PRESSURE_INPUT : EXT_PRESSURE_INPUT)
+	const v = readSensorValue(external ? EXT_PRESSURE_INPUT : INT_PRESSURE_INPUT)
 	return Math.round(v * 10) // to millibars
 }
 
-function readTemperature(internal = 1)
+function readTemperature(external)
 {
 	var v
-	if (internal) {
+	if (external) {
 		v = readSensorValue(EXT_TEMP_INPUT)
 	} else {
 		// not clear which sensor I should use, so average both
