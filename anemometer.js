@@ -199,13 +199,15 @@ function readIlluminance()
 function readHumidity(external)
 {
 	const v = readSensorValue(external ? EXT_HUMIDITY_INPUT : INT_HUMIDITY_INPUT)
-	return Math.round(v / 1000) // to percent
+	return Math.round(v / 1000) // to whole percent
+	// sensor accuracy is ±3pp, so no point in keeping fractional percent 
 }
 
 function readPressure(external)
 {
 	const v = readSensorValue(external ? EXT_PRESSURE_INPUT : INT_PRESSURE_INPUT)
 	return Math.round(v * 10) // to millibars
+	// see https://www.raspberrypi.org/forums/viewtopic.php?t=274234
 }
 
 function readTemperature(external)
@@ -227,7 +229,7 @@ function readTemperature(external)
  */
 function readSensorValue(file)
 {
-	var result;
+	var result
 
 	try {
 		const fs = require('fs')
@@ -241,6 +243,6 @@ function readSensorValue(file)
 		if (DEBUG) process.exit(1)
 	}
 
-	return result;
+	return result
 }
 
