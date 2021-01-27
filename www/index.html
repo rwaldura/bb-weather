@@ -109,7 +109,7 @@ function drawWindChart(chart, wind, solar, opts, timeRange, timePeriod)
 
 /****************************************************************************/
 function drawWindRose(dt, elementID)
-{	
+{   	
 	// only draw the wind rose once: 
 	// 1- it doesn't change that much, and 
 	// 2- it seems to leak (crashes Chromecast after a few hours)
@@ -121,18 +121,21 @@ function drawWindRose(dt, elementID)
 	}
 	
 	const data1 = prepWindRoseData(dt);
-	// console.log("d1 = ", data1);
+	// console.log("rose data1 = ", data1);
 	
 	const data2 = JSC.nest() 
-      .key('speed') 
-      .key('angle') 
-      .rollup('percent') 
-      .series(data1) 
-	  .reverse();
-  	// console.log("d2 = ", data2);
+		.key('speed') 
+		.key('angle') 
+		.rollup('percent') 
+		.series(data1) 
+		.sort(function(a, b) {
+			// keys are defined in groupWindRoseData.quantizeSpeed(): "0 – 5", "5 – 10", etc.
+			// Order them by the first number
+			return b.name.substring(0, 2) - a.name.substring(0, 2);
+		});
+  	// console.log("rose data2 = ", data2);
 	
 	renderWindRose(data2, elementID);
-	
 	console.log("rendered wind rose");
 }
 
@@ -286,7 +289,7 @@ google.charts.setOnLoadCallback(function () {
 	chart_hour = new google.visualization.AreaChart(
 		document.getElementById('chart5_area'));
 
-	loadChartData("getDataTable.cgi");
+	loadChartData();
 });	
 	</script>
 	<link rel="stylesheet" href="styles.css">
