@@ -79,3 +79,12 @@ node | 10.19.0
 bonescript | 0.7.3
 
 
+## TODO
+
+Calculate and display wind gusts, defined as: 
+
+a sudden, brief increase in speed of the wind. According to U.S. weather observing practice, gusts are reported when the peak wind speed reaches at least 16 knots and the variation in wind speed between the peaks and lulls is at least 9 knots. The duration of a gust is usually less than 20 seconds. 
+
+per https://en.wikipedia.org/wiki/Wind_gust 
+
+
