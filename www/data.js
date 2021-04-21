@@ -245,11 +245,11 @@ function dataTable2JSChartArray(dt)
  */
 function groupWindRoseData(dt)
 {
-	const ANGLE_QUANTUM = 20;
+	const ANGLE_QUANTUM = 45;
 	
 	function quantizeDirection(dir)
 	{
-		// slot the angle "dir" into 20-degree buckets:
+		// slot the angle "dir" into 45-degree buckets:
 		return ANGLE_QUANTUM * Math.floor(dir / ANGLE_QUANTUM);
 	}
 
