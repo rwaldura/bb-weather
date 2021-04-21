@@ -53,7 +53,7 @@ Without a [BeagleBone Wireless](https://beagleboard.org/black-wireless), here's 
 
 1. Find a Wifi adapter that is compatible. After trying out 3 different USB adapters, I finally located and bought a WL1835MOD cape off eBay. 
 1. Edit `/boot/uEnv.txt` to load the overlay BB-BONE-WL1835MOD-00A0, plus associated random patches to get things to work right: see `sys/boot-uEnv.txt`. 
-1. Disable `wpa_supplicant` by editing `/lib/systemd/system/wpa_supplicant.service`. `systemctl disable` doesn't do it for me. 
+1. Kill `connman`: `systemctl stop connman ; apt remove connman`. I hate that over-engineered POS. 
 1. Edit `/etc/network/interfaces` and add:
 
 ```
