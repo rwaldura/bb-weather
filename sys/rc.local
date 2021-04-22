@@ -9,27 +9,28 @@ readonly LOG="logger --tag=weather-station --priority=local0"
 set_bt()
 {
 	# WL1835MOD cape: BlueTooth ENable pin, defined in BB-BONE-WL1835MOD-00A0.dts
-	readonly BT_EN=/sys/class/gpio/gpio44
+	readonly BT_EN=/sys/class/leds/wl18xx_bt_en
 
-	if ! test -w $BT_EN/value
+	if ! test -w $BT_EN/brightness
 	then
-		$LOG.warn "unable to control WL1835MOD Bluetooth: cannot write $BT_EN/value"
+		$LOG.warn "unable to control WL1835MOD Bluetooth: cannot write $BT_EN"
 	elif [ $# = 1 ]
 	then
-		echo out > $BT_EN/direction
-		echo $1 > $BT_EN/value
-		$LOG.info "set WL1835MOD Bluetooth to: $1"
+		echo $1 > $BT_EN/brightness
+		$LOG.debug "set WL1835MOD Bluetooth_Enabled to: $1"
 	fi
 }
 
 enable_bt()
 {
 	set_bt 1
+	$LOG.info "enabled WL1835MOD Bluetooth"
 }
 
 disable_bt()
 {
 	set_bt 0
+	$LOG.info "disabled WL1835MOD Bluetooth"
 }
 
 if [ "$1" = start ]
