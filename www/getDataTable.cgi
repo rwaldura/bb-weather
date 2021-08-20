@@ -12,12 +12,13 @@ readonly WEATHER_DB=/var/weather/weather.db
 db="${1:-$WEATHER_DB}"
 
 ##############################################################################
-ouput_json_rows()
+output_json_rows()
 {
-	now=$( date +%s )
+	start="$1" # unused
+	end="$2"
 	
-	sql="
-		-- per-minute wind data for the last day
+	# per-minute wind data, for the prior day
+	day_sql="
 		SELECT 
 			tstamp, 
 			period,
@@ -27,9 +28,10 @@ ouput_json_rows()
 			wind
 		WHERE
 			period = 1
-			AND tstamp >= ($now - 25 * 60 * 60) -- 1 day ago
-		UNION ALL
-		-- per-hour aggregated wind data, for the last month
+			AND tstamp >= ($end - 25 * 60 * 60)"
+
+	# per-hour aggregated wind data, for the prior month
+	month_sql="
 		SELECT 
 			tstamp, 
 			period,
@@ -39,10 +41,10 @@ ouput_json_rows()
 			wind
 		WHERE
 			period = 60
-			AND tstamp >= ($now - 32 * 24 * 60 * 60) -- 1 month ago"
+			AND tstamp >= ($end - 32 * 24 * 60 * 60)"
 
 	IFS="|" # SQLite column separator
-	sqlite3 "$db" "$sql" | while read ts per dir revs
+	sqlite3 "$db" "$day_sql UNION ALL $month_sql" | while read ts per dir revs
 	do
 		echo '
 			{ "c": [
@@ -57,11 +59,11 @@ ouput_json_rows()
 ##############################################################################
 output_datatable()
 {
-	start=$2
-	end=$4
+	start="$2"
+	end="$4"
 	now=$( date +%s )
 
-	ouput_json_rows ${start:-0} ${end:-$now}
+	output_json_rows "${start:-0}" "${end:-$now}"
 }
 
 ##############################################################################
@@ -103,7 +105,10 @@ echo 'Content-type: application/json; charset=UTF-8
 # better (but unsupported, alas) would be:
 #read start start end end <<< "$QUERY_STRING"
 
-ouput_json_rows
+# value of the last parameter on the query string
+end="${QUERY_STRING##*=}"
+
+output_datatable start "" end "$end"
 
 # conclude with an empty cell to avoid a dangling comma
 echo '
