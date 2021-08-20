@@ -179,7 +179,8 @@ function renderWindRose(data, elementID)
 			'#80cbc4', 
 			'#bbdefb' ], 
 		defaultPoint: { 
-			tooltip: '<b>%seriesName MPH</b> %xValue° %yValue%' } }); 
+			tooltip: '<b>%seriesName MPH</b> %xValue° %yValue%' } });
+			// @todo FIXME - yValue should be rounded; currently shows 3 decimal digits
 } 
 
 /****************************************************************************/
