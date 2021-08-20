@@ -4,8 +4,10 @@
 # Format defined at
 # https://developers.google.com/chart/interactive/docs/reference#DataTable_toJSON
 #
-# This program takes no parameters; we always return the last day's worth of 
-# wind data, aggregated by minute, AND the last month's, by hour. 
+# This program takes exactly one parameter: the upper time boundary of the
+# dataset returned, in Unix time. 
+# The dataset always includes the prior day's worth of wind
+# data, aggregated by minute, and the prior month's, by hour. 
 #
 
 readonly WEATHER_DB=/var/weather/weather.db
