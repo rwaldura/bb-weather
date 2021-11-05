@@ -61,3 +61,14 @@ CREATE VIEW particles_hourly AS
 		period = 2 
 	GROUP BY 1;
 
+CREATE VIEW wind_monthly AS 
+	SELECT 
+		strftime('%Y-%m', tstamp, 'unixepoch', 'localtime') as date, 
+		round(9 * sum(revolutions) / (4.0 * 60 * 60 * 24 * 30), 1) as wind_mph,
+		ROUND(AVG(direction)) AS wind_dir
+	FROM
+		wind 
+	WHERE 
+		period=1
+	group by 1;
+
